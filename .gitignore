@@ -109,6 +109,9 @@ Thumbs.db
 # Zenn CLI
 .zenn
 
+# Legacy directory (to be manually removed)
+contents/
+
 # Claude Code
 .claude/
 
