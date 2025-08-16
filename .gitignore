@@ -111,3 +111,11 @@ Thumbs.db
 
 # Claude Code
 .claude/
+
+# Sample projects build artifacts
+samples/**/bin/
+samples/**/obj/
+samples/**/*.user
+samples/**/*.suo
+samples/**/*.userosscache
+samples/**/*.sln.docstates
