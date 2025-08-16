@@ -1,4 +1,5 @@
 # Claude Code - Zenn Content Project
+回答は必ず日本語で行ってください。
 
 ## プロジェクト概要
 Zennで公開する記事と本を管理するリポジトリです。
