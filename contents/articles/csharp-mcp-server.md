@@ -2,8 +2,8 @@
 title: "C#でMCPサーバーを作ってみよう"
 emoji: "🔧"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: [csharp, MCP, "ModelContextProtocol", "ClaudeCode"]
-published: false
+topics: ["csharp", "mcp", "claudecode"]
+published: true
 ---
 
 # C#でMCPサーバーを作ってみよう
