@@ -466,9 +466,6 @@ run ShowDoubleBooking {
 次のステップで「ダブルブッキングを防止する制約」を追加していきます。
 :::
 
-```alloy
-```
-
 #### 検証結果: 問題の発見
 
 ```alloy
@@ -639,6 +636,14 @@ pred invalidTransition {
         some other: Reservation | other.table = r.table and other.status = COMPLETED
     }
 }
+
+// 実行コマンド: 状態遷移モデルの動作確認
+run {} for 4
+
+// 実行コマンド: 不正な状態遷移の具体例を探索
+run ShowInvalidTransition {
+    invalidTransition
+} for 4
 ```
 
 #### 複雑な論理矛盾の検出
@@ -845,6 +850,19 @@ pred complexLayoutIssue {
         }
     }
 }
+
+// 実行コマンド: 席組み合わせモデルの動作確認
+run {} for 4
+
+// 実行コマンド: 席組み合わせ競合の具体例を探索
+run ShowTableCombinationConflict {
+    tableCombinationConflict
+} for 4
+
+// 実行コマンド: 非効率な席割り当ての例を表示
+run ShowInefficientAllocation {
+    inefficientAllocation
+} for 4
 ```
 
 #### 検証結果
@@ -913,6 +931,14 @@ check BasicSystemVerification {
     // パーティサイズの正当性  
     all r: Reservation | r.partySize > 0
 } for 5
+
+// 実行コマンド: 統合検証の動作確認
+run {} for 6
+
+// 実行コマンド: 複合的欠陥パターンの具体例を探索
+run ShowCombinedDefects {
+    combinedDefectPattern
+} for 6
 ```
 
 ### 段階的な検証プロセス
@@ -928,6 +954,11 @@ pred basicSystemConstraints {
     // 予約人数の妥当性
     all r: Reservation | r.partySize > 0
 }
+
+// 実行コマンド: 基本制約の確認
+run ShowBasicConstraints {
+    basicSystemConstraints
+} for 3
 ```
 
 **フェーズ2: 業務ルールの検証**
@@ -939,6 +970,11 @@ pred businessRuleCompliance {
     // 適切な席割り当て
     not inefficientAllocation
 }
+
+// 実行コマンド: 業務ルール遵守の確認
+check BusinessRuleCompliance {
+    businessRuleCompliance
+} for 4
 ```
 
 **フェーズ3: 例外シナリオの検証**
@@ -950,6 +986,11 @@ pred edgeCaseHandling {
         no other: Reservation | other.table = r.table and other.status = SEATED
     }
 }
+
+// 実行コマンド: エッジケース処理の確認
+check EdgeCaseHandling {
+    edgeCaseHandling
+} for 5
 ```
 
 ## Alloy導入のベストプラクティス
@@ -1013,6 +1054,15 @@ sig ComplexOrder extends SimpleOrder {
     priority: Priority,
     deliveryDate: Int
 }
+
+// 実行コマンド: 段階的モデリングの動作確認
+run {} for 3
+
+// 実行コマンド: シンプルオーダーのみの例を表示
+run ShowSimpleOrder {
+    some SimpleOrder
+    no ComplexOrder
+} for 3
 ```
 
 
