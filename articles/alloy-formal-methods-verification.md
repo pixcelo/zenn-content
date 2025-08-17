@@ -578,6 +578,18 @@ class Reservation {
 abstract sig ReservationStatus {}
 one sig PENDING, CONFIRMED, SEATED, COMPLETED, CANCELLED extends ReservationStatus {}
 
+// 時間スロットの定義
+sig TimeSlot {
+    startTime: Int,
+    endTime: Int
+}
+
+// テーブルの定義
+sig Table {
+    id: Int,
+    seats: Int
+}
+
 // 決済状態の定義
 abstract sig PaymentStatus {}
 one sig UNPAID, PAID, REFUNDED extends PaymentStatus {}
@@ -595,6 +607,21 @@ sig Reservation {
     timeSlot: TimeSlot,
     status: ReservationStatus,
     partySize: Int
+}
+
+// 時間重複の判定述語
+pred timeSlotOverlap[ts1, ts2: TimeSlot] {
+    ts1.startTime < ts2.endTime and ts2.startTime < ts1.endTime
+}
+
+// 基本制約
+fact BasicConstraints {
+    // 時間の妥当性
+    all ts: TimeSlot | ts.startTime < ts.endTime
+    // テーブル席数は正の値
+    all t: Table | t.seats > 0
+    // パーティサイズは正の値
+    all r: Reservation | r.partySize > 0
 }
 
 // 論理的に不可能な状態組み合わせを禁止
