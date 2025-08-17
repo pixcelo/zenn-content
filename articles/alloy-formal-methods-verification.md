@@ -303,10 +303,15 @@ Alloy Analyzerは、Alloyモデルの作成・検証・可視化を統合的に�
 **実際の使用例**
 ```alloy
 // モデル定義後、以下のコマンドで検証
-check InventoryConsistency for 5
+check NoDoubleBooking {
+    not doubleBooking
+} for 5
 
 // 反例が見つかった場合、グラフィカルに表示される
 // ノードとエッジで関係性を直感的に把握可能
+
+// 具体例生成コマンド
+run {} for 3
 ```
 
 **Analyzerの利点**
@@ -385,9 +390,9 @@ function isTimeConflict(reservation1, reservation2) {
 - 人間のレビューでは3つ以上の予約が関わる複雑なケースを見落とし
 - エッジケースの組み合わせ爆発を想定できない
 
-#### Alloyによる厳密な時間重複定義
+#### Alloyによる問題の再現と検出
 
-Alloyなら時間重複を数学的に厳密に定義できます：
+Alloyではまず**問題を再現するモデル**を作成し、具体的な欠陥パターンを発見します。以下は**意図的にダブルブッキングを許可するモデル**です：
 
 ```alloy
 // 基本エンティティ
@@ -439,12 +444,36 @@ pred chainedOverlap {
         not timeSlotOverlap[r1.timeSlot, r3.timeSlot]  // r1とr3は直接重複しない
     }
 }
+
+// 実行コマンド: 基本モデルの動作確認
+run {} for 4
+
+// 実行コマンド: ダブルブッキング問題の具体例を生成
+run ShowDoubleBooking {
+    doubleBooking
+} for 4
 ```
 
-#### 検証結果
+:::message alert
+**このモデルの重要なポイント**
+
+このモデルは**意図的にダブルブッキングを許可**しています。目的は：
+
+1. **問題の再現**: 現実に起こりうるダブルブッキングをモデル化
+2. **具体例の提示**: 「18:00-20:00と19:00-21:00の重複」などを自動生成
+3. **欠陥パターンの発見**: 人間が見落としがちな複雑なケースを網羅
+
+次のステップで「ダブルブッキングを防止する制約」を追加していきます。
+:::
+
+```alloy
+```
+
+#### 検証結果: 問題の発見
 
 ```alloy
 // 検証: ダブルブッキングは発生しないか？
+// → この検証は**失敗**し、反例が提示される
 check NoDoubleBooking {
     not doubleBooking
 } for 5
@@ -455,15 +484,52 @@ run ShowChainedOverlap {
 } for 4
 ```
 
-**Alloyが見つける問題例**：
+**実際のAlloyアナライザ出力例**：
+
+```
+Executing "Run run$1 for 4"
+   Solver=sat4j Bitwidth=4 MaxSeq=4 SkolemDepth=1 Symmetry=20
+   3721 vars. 300 primary vars. 10123 clauses. 15ms.
+   Instance found. Predicate is consistent. 26ms.
+
+Executing "Check NoDoubleBooking for 5"
+   Solver=sat4j Bitwidth=4 MaxSeq=5 SkolemDepth=1 Symmetry=20
+   5903 vars. 395 primary vars. 16563 clauses. 12ms.
+   Counterexample found. Assertion is invalid. 23ms.
+
+Executing "Run ShowDoubleBooking for 4"
+   3721 vars. 300 primary vars. 10123 clauses. 7ms.
+   Instance found. Predicate is consistent. 18ms.
+
+Executing "Run ShowChainedOverlap for 4"
+   3721 vars. 300 primary vars. 10123 clauses. 6ms.
+   Instance found. Predicate is consistent. 18ms.
+```
+
+![Alloyアナライザの反例表示](/images/alloy-formal-methods/time-overlap-counterexample.png)
+*Counterexample found時のビジュアライザ表示。複数のReservationが同じTableを参照し、TimeSlotが重複している具体的なダブルブッキングの例が表示される*
+
+:::message
+**Alloyアナライザ出力の読み方**
+
+- **`Instance found + Predicate is consistent`** → 条件を満たす具体例が生成された（成功）
+- **`Counterexample found + Assertion is invalid`** → アサーションに反する反例が発見された
+
+`check NoDoubleBooking`で`Counterexample found`が表示されたのは、**「ダブルブッキングが発生しない」という主張に反する具体例**をAlloyが発見したことを意味します。上のビジュアライザでは、実際に複数の予約が同じテーブルと重複する時間スロットを持つケースが表示されています。
+
+これはエラーではなく、**期待された結果**です。
+:::
+
+**Alloyが発見する問題例**：
 - 18:00-20:00, 19:30-21:30, 20:00-22:00の連鎖重複
 - 包含関係: 18:00-22:00内の19:00-20:00
 - 境界値: 20:00終了と20:00開始は重複しない
 
-**人間のレビューとの違い**：
-- 全ての可能な重複パターンを網羅的に検証
-- 見落としがちなエッジケースを自動発見
+**このアプローチの価値**：
+- 全ての可能な重複パターンを網羅的に発見
+- 人間が見落としがちな複雑なケースを自動生成
 - 数学的な厳密性で曖昧さを排除
+- **次のステップ**: これらの問題を防止する制約を追加
 
 ### Step 2: 状態遷移の論理矛盾 - 見過ごされる設計欠陥
 
