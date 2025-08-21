@@ -52,6 +52,20 @@ npx zenn list:books
 3. プレビュー: `npx zenn preview`
 4. コミット & プッシュで自動公開
 
+### 予約投稿（日時指定公開）
+記事のフロントマターで公開日時を指定可能：
+```yaml
+---
+title: "記事タイトル"
+published: true
+published_at: 2025-09-11 10:00  # YYYY-MM-DD hh:mm形式（JST）
+---
+```
+**注意**: 
+- 日付のみ指定の場合は00:00に公開
+- 一度設定した公開時刻は変更不可
+- GitHubプッシュ後、指定日時に自動公開
+
 ### 本の作成から公開まで
 1. 本作成: `npx zenn new:book --slug my-awesome-book --title "本のタイトル"`
 2. 設定編集: `books/my-awesome-book/config.yaml`
