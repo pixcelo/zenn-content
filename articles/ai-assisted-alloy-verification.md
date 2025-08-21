@@ -3,7 +3,8 @@ title: "AI支援によるAlloy形式検証で設計段階のバグを早期発�
 emoji: "🔍"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["ai", "alloy", "形式手法", "mcp", "品質"]
-published: false
+published: true
+published_at: 2025-09-11 10:00
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
