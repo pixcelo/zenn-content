@@ -3,7 +3,8 @@ title: "AIエージェント設計の3つのアプローチ：プレイブック
 emoji: "🤖"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["ai", "architecture", "mcp", "aiエージェント", "llm"]
-published: false
+published: true
+published_at: 2025-09-16 10:00
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
