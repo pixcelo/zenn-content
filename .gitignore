@@ -122,3 +122,6 @@ samples/**/*.user
 samples/**/*.suo
 samples/**/*.userosscache
 samples/**/*.sln.docstates
+
+# Others
+zenn-content.sln
