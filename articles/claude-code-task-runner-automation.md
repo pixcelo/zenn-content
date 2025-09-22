@@ -3,7 +3,7 @@ title: "Claude Codeを最大限に活用するタスクランナーを作った"
 emoji: "🤖"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["claude", "ai", "claudecode", "zennfes2025ai"]
-published: false
+published: true
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
