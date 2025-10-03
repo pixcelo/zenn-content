@@ -2,7 +2,7 @@
 title: "C#でMCPサーバーを作ってみよう"
 emoji: "🔧"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["csharp", "mcp", "claudecode"]
+topics: ["csharp", "mcp", "claudecode", "ai"]
 published: true
 ---
 
