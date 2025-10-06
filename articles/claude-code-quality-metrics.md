@@ -3,7 +3,8 @@ title: "Claude Codeで始めるコード品質の見える化"
 emoji: "📊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["csharp", "claude", "claudecode", "静的解析", "品質管理"]
-published: false
+published: true
+published_at: 2025-10-14 10:00
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
