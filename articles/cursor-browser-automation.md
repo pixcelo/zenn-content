@@ -3,7 +3,7 @@ title: "CursorのAIエージェントにブラウザ操作させる方法"
 emoji: "🤖"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["cursor", "ai", "agent"]
-published: false
+published: true
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
