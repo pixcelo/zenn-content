@@ -359,7 +359,7 @@ http://localhost:5158/test-form にアクセして、
 
 ![実行許可の確認画面](/images/playwright-mcp-blazor-test/claude-code-execution-approval.png)
 
-この確認をスキップしたい場合、Claude Codeの設定で事前承認することも可能です。ただし、**ブラウザ操作は重要な操作を伴う可能性があるため**、セキュリティ上、初回は確認することを推奨します。
+この確認をスキップしたい場合、Claude Codeの設定で事前承認することも可能です。ただし、ブラウザ操作は重要な操作を伴う可能性があるため、セキュリティ上、初回は確認することを推奨します。
 
 特に以下のような操作を行う場合は注意が必要です：
 - フォーム送信（データの登録・更新・削除）
@@ -415,7 +415,7 @@ Playwright MCPで、ブラウザテストのやり方が変わりつつありま
 
 従来：
 - テスト自動化 = プログラマーの仕事
-- JavaScriptコード書く
+- JavaScriptコード書く（※TypeScript、Python、Java、C#など多言語でも書けます）
 - セレクター細かく指定
 
 Playwright MCP：
