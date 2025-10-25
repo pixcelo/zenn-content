@@ -23,7 +23,7 @@ PdMやデザイナーからこんな依頼を受けたとき、どうしてま�
 
 この指示をAIエージェントに渡すだけで、ブラウザ操作が実行されて結果が返ってきます。コードもセレクター指定も要りません。
 
-この記事では、Blazor ServerとRadzen Componentsで作った検証環境を使って、**Playwright MCPで実際に何ができるのか**を検証します。
+この記事では、Blazor ServerとRadzen Componentsで作った検証環境を使って、「Playwright MCPで実際に何ができるのか」を検証します。
 
 ## Playwright MCPで何ができるのか
 
@@ -412,7 +412,7 @@ Playwright MCP：
 
 ## 参考リンク
 
-- [サンプルコード（GitHub）](https://github.com/kawakami-tech/zenn-content/tree/main/samples/blazor-playwright-test) ※要更新
+- [サンプルコード（GitHub）](https://github.com/pixcelo/zenn-content/tree/main/samples/blazor-playwright-test)
 - [Playwright MCP Server](https://github.com/microsoft/playwright-mcp)
 - [Playwright公式ドキュメント](https://playwright.dev/)
 - [Radzen Blazor Components](https://blazor.radzen.com/)
