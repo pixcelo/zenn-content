@@ -186,6 +186,8 @@ mcp__playwright__browser_take_screenshot
 ✅ 送信後、緑色の成功アラートが表示された
 ✅ アラートに入力したNameとEmailが含まれていた
 
+![フォーム送信成功画面](/images/playwright-mcp-blazor-test/blazor-form-submission-success.png)
+
 自然言語の指示だけで、AIが適切なセレクターを見つけて操作を完了しました。
 
 :::
