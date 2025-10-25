@@ -4,6 +4,7 @@ emoji: "🎭"
 type: "tech"
 topics: ["blazor", "playwright", "mcp", "ai", "csharp"]
 published: false
+publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
 ## はじめに
@@ -73,13 +74,18 @@ PdMやデザイナーからこんな依頼を受けたとき、どうしてま�
 - 大量のテストケースの一括実行
 
 **細かいセレクター指定**：
-- 「3番目のボタン」は分かるが「data-testid="submit-btn"の要素」は指定できない
-- XPathやCSSセレクターを直接指定したい場合
+- XPathやCSSセレクターを直接的に細かく制御したい場合（AIの解釈に依存するため）
+- 複雑な条件式でのセレクター指定
 
 **認証・セッション管理**：
 - ログイン状態の保持（毎回ログインが必要）
 - Cookie/LocalStorageの直接操作
 - Basic認証のヘッダー設定
+
+**ファイル操作・iframe**：
+- ファイルのアップロード/ダウンロード（自然言語での指示が難しい）
+- iframe内の要素操作（コンテキスト切り替えが必要）
+- Shadow DOM内の要素アクセス
 
 ### 従来のPlaywrightとの比較
 
@@ -389,7 +395,7 @@ Playwright MCPは、AIエージェントとPlaywrightをつなぐ橋渡し役で
   (結果が戻ってくる)
 ```
 
-MCP（Model Context Protocol）は、AnthropicとOpenAIが進めている、AIエージェントが外部ツールと連携するための仕組みです。Playwright MCP Serverは、このプロトコルを使ってPlaywrightの機能をAIから使えるようにしています。
+MCP（Model Context Protocol）は、Anthropicが開発した、AIエージェントが外部ツールと連携するための標準プロトコルです。Playwright MCP Serverは、このプロトコルを使ってPlaywrightの機能をAIから使えるようにしています。
 
 ## 使い分けの基準
 
