@@ -1,0 +1,215 @@
+@page "/data-grid"
+@rendermode InteractiveServer
+
+<PageTitle>Data Grid - Radzen Components</PageTitle>
+
+<h1>AI Agent Test Data Grid</h1>
+
+<p>This page demonstrates Radzen DataGrid with various features for testing with Playwright MCP.</p>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <RadzenAlert AlertStyle="AlertStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" class="mb-3">
+        <strong>Success!</strong> @message
+    </RadzenAlert>
+}
+
+<RadzenCard class="mb-3">
+    <h3>Sample Actions</h3>
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+        <RadzenButton Text="Add Sample Data" Click="@AddSampleData" ButtonStyle="ButtonStyle.Primary" />
+        <RadzenButton Text="Clear All" Click="@ClearData" ButtonStyle="ButtonStyle.Danger" />
+        <RadzenButton Text="Export to CSV" Click="@ExportToCsv" ButtonStyle="ButtonStyle.Success" Disabled="@(products.Count == 0)" />
+    </RadzenStack>
+</RadzenCard>
+
+<RadzenCard>
+    <RadzenDataGrid @ref="grid"
+                    Data="@products"
+                    TItem="Product"
+                    AllowFiltering="true"
+                    AllowSorting="true"
+                    AllowPaging="true"
+                    PageSize="10"
+                    AllowColumnResize="true"
+                    SelectionMode="DataGridSelectionMode.Single"
+                    @bind-Value="@selectedProducts">
+        <Columns>
+            <RadzenDataGridColumn TItem="Product" Property="Id" Title="ID" Width="80px" />
+            <RadzenDataGridColumn TItem="Product" Property="Name" Title="Product Name" Width="200px" />
+            <RadzenDataGridColumn TItem="Product" Property="Category" Title="Category" Width="150px" />
+            <RadzenDataGridColumn TItem="Product" Property="Price" Title="Price" Width="120px">
+                <Template Context="product">
+                    @product.Price.ToString("C2")
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Product" Property="Stock" Title="Stock" Width="100px">
+                <Template Context="product">
+                    <RadzenBadge BadgeStyle="@GetStockBadgeStyle(product.Stock)" Text="@product.Stock.ToString()" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Product" Property="IsActive" Title="Active" Width="100px">
+                <Template Context="product">
+                    <RadzenCheckBox @bind-Value="@product.IsActive" Disabled="true" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Product" Title="Actions" Width="150px" Sortable="false" Filterable="false">
+                <Template Context="product">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
+                                      Click="@(() => EditProduct(product))" />
+                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                      Click="@(() => DeleteProduct(product))" />
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
+
+@if (editingProduct != null)
+{
+    <RadzenCard class="mt-3">
+        <h3>Edit Product: @editingProduct.Name</h3>
+        <RadzenStack Gap="1rem">
+            <RadzenFormField Text="Product Name" Variant="Variant.Outlined">
+                <RadzenTextBox @bind-Value="@editingProduct.Name" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Category" Variant="Variant.Outlined">
+                <RadzenTextBox @bind-Value="@editingProduct.Category" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Price" Variant="Variant.Outlined">
+                <RadzenNumeric @bind-Value="@editingProduct.Price" Min="0" Format="c2" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Stock" Variant="Variant.Outlined">
+                <RadzenNumeric @bind-Value="@editingProduct.Stock" Min="0" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Active" Variant="Variant.Outlined">
+                <RadzenCheckBox @bind-Value="@editingProduct.IsActive" />
+            </RadzenFormField>
+
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                <RadzenButton Text="Save" Click="@SaveProduct" ButtonStyle="ButtonStyle.Success" />
+                <RadzenButton Text="Cancel" Click="@CancelEdit" ButtonStyle="ButtonStyle.Light" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenCard>
+}
+
+@code {
+    RadzenDataGrid<Product> grid;
+    List<Product> products = new List<Product>();
+    IList<Product> selectedProducts;
+    Product editingProduct = null;
+    string message = "";
+
+    protected override void OnInitialized()
+    {
+        AddSampleData();
+    }
+
+    void AddSampleData()
+    {
+        if (products.Count > 0)
+        {
+            message = "Sample data already exists. Clear first if you want to reset.";
+            return;
+        }
+
+        products = new List<Product>
+        {
+            new Product { Id = 1, Name = "Laptop", Category = "Electronics", Price = 1299.99m, Stock = 15, IsActive = true },
+            new Product { Id = 2, Name = "Mouse", Category = "Electronics", Price = 29.99m, Stock = 150, IsActive = true },
+            new Product { Id = 3, Name = "Keyboard", Category = "Electronics", Price = 79.99m, Stock = 85, IsActive = true },
+            new Product { Id = 4, Name = "Monitor", Category = "Electronics", Price = 399.99m, Stock = 5, IsActive = true },
+            new Product { Id = 5, Name = "Desk Chair", Category = "Furniture", Price = 249.99m, Stock = 0, IsActive = false },
+            new Product { Id = 6, Name = "Desk", Category = "Furniture", Price = 499.99m, Stock = 12, IsActive = true },
+            new Product { Id = 7, Name = "USB Cable", Category = "Accessories", Price = 9.99m, Stock = 200, IsActive = true },
+            new Product { Id = 8, Name = "Headphones", Category = "Electronics", Price = 149.99m, Stock = 45, IsActive = true },
+            new Product { Id = 9, Name = "Webcam", Category = "Electronics", Price = 89.99m, Stock = 3, IsActive = true },
+            new Product { Id = 10, Name = "Microphone", Category = "Electronics", Price = 129.99m, Stock = 25, IsActive = true },
+            new Product { Id = 11, Name = "Notebook", Category = "Stationery", Price = 4.99m, Stock = 300, IsActive = true },
+            new Product { Id = 12, Name = "Pen Set", Category = "Stationery", Price = 12.99m, Stock = 180, IsActive = true }
+        };
+
+        message = $"{products.Count} sample products added successfully!";
+    }
+
+    void ClearData()
+    {
+        products.Clear();
+        editingProduct = null;
+        message = "All data cleared.";
+        grid?.Reload();
+    }
+
+    void EditProduct(Product product)
+    {
+        editingProduct = new Product
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Category = product.Category,
+            Price = product.Price,
+            Stock = product.Stock,
+            IsActive = product.IsActive
+        };
+        message = "";
+    }
+
+    void SaveProduct()
+    {
+        var product = products.FirstOrDefault(p => p.Id == editingProduct.Id);
+        if (product != null)
+        {
+            product.Name = editingProduct.Name;
+            product.Category = editingProduct.Category;
+            product.Price = editingProduct.Price;
+            product.Stock = editingProduct.Stock;
+            product.IsActive = editingProduct.IsActive;
+
+            message = $"Product '{product.Name}' updated successfully!";
+            editingProduct = null;
+            grid?.Reload();
+        }
+    }
+
+    void CancelEdit()
+    {
+        editingProduct = null;
+        message = "Edit cancelled.";
+    }
+
+    void DeleteProduct(Product product)
+    {
+        products.Remove(product);
+        message = $"Product '{product.Name}' deleted successfully!";
+        grid?.Reload();
+    }
+
+    void ExportToCsv()
+    {
+        message = "CSV export feature would be implemented here. For testing purposes, consider this as successful export.";
+    }
+
+    BadgeStyle GetStockBadgeStyle(int stock)
+    {
+        if (stock == 0) return BadgeStyle.Danger;
+        if (stock < 10) return BadgeStyle.Warning;
+        return BadgeStyle.Success;
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Category { get; set; } = "";
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
+        public bool IsActive { get; set; }
+    }
+}

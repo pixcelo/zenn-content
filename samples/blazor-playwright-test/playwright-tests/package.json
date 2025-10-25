@@ -1,0 +1,15 @@
+{
+  "name": "blazor-playwright-test",
+  "version": "1.0.0",
+  "description": "Playwright tests for Blazor Radzen App",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^20.0.0"
+  }
+}

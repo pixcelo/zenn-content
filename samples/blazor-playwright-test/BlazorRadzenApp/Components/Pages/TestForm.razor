@@ -1,0 +1,81 @@
+@page "/test-form"
+@rendermode InteractiveServer
+
+<PageTitle>Test Form - Radzen Components</PageTitle>
+
+<h1>AI Agent Test Form</h1>
+
+<p>This is a sample form using Radzen Blazor components for testing with Playwright MCP.</p>
+
+@if (!string.IsNullOrEmpty(submittedMessage))
+{
+    <RadzenAlert AlertStyle="AlertStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" class="mb-3">
+        <strong>Success!</strong> @submittedMessage
+    </RadzenAlert>
+}
+
+<RadzenCard>
+    <h3>User Information</h3>
+    <RadzenTemplateForm TItem="UserModel" Data="@model" Submit="@OnSubmit">
+        <RadzenStack Gap="1rem">
+            <RadzenFormField Text="Name" Variant="Variant.Outlined">
+                <RadzenTextBox @bind-Value="@model.Name" Name="Name" Placeholder="Enter your name" />
+                <RadzenRequiredValidator Component="Name" Text="Name is required" Style="color: red; font-weight: bold;" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Email" Variant="Variant.Outlined">
+                <RadzenTextBox @bind-Value="@model.Email" Name="Email" Placeholder="Enter your email" />
+                <RadzenRequiredValidator Component="Email" Text="Email is required" Style="color: red; font-weight: bold;" />
+                <RadzenEmailValidator Component="Email" Text="Invalid email format" Style="color: red; font-weight: bold;" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Age" Variant="Variant.Outlined">
+                <RadzenNumeric @bind-Value="@model.Age" Name="Age" Min="0" Max="120" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Country" Variant="Variant.Outlined">
+                <RadzenDropDown @bind-Value="@model.Country" Data="@countries" Name="Country" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Subscribe to newsletter" Variant="Variant.Outlined">
+                <RadzenCheckBox @bind-Value="@model.Subscribe" Name="Subscribe" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Comments" Variant="Variant.Outlined">
+                <RadzenTextArea @bind-Value="@model.Comments" Name="Comments" Rows="3" />
+            </RadzenFormField>
+
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Submit" />
+                <RadzenButton ButtonType="ButtonType.Button" Text="Clear" Click="@OnClear" ButtonStyle="ButtonStyle.Light" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenCard>
+
+@code {
+    private UserModel model = new UserModel();
+    private string submittedMessage = "";
+    private List<string> countries = new List<string> { "USA", "Japan", "UK", "Germany", "France", "Canada" };
+
+    private void OnSubmit(UserModel submittedModel)
+    {
+        submittedMessage = $"Form submitted successfully! Name: {submittedModel.Name}, Email: {submittedModel.Email}";
+    }
+
+    private void OnClear()
+    {
+        model = new UserModel();
+        submittedMessage = "";
+    }
+
+    public class UserModel
+    {
+        public string Name { get; set; } = "";
+        public string Email { get; set; } = "";
+        public int Age { get; set; } = 0;
+        public string Country { get; set; } = "Japan";
+        public bool Subscribe { get; set; } = false;
+        public string Comments { get; set; } = "";
+    }
+}

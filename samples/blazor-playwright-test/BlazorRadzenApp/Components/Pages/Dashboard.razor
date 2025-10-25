@@ -1,0 +1,357 @@
+@page "/dashboard"
+@rendermode InteractiveServer
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<PageTitle>Dashboard - Radzen Components</PageTitle>
+
+<h1>Business Application Dashboard</h1>
+
+<p>This page demonstrates various Radzen components commonly used in business applications.</p>
+
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="Overview">
+            <RadzenRow Gap="1rem" class="mt-3">
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                    <RadzenCard>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <RadzenIcon Icon="shopping_cart" Style="font-size: 2rem; color: var(--rz-primary);" />
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Total Sales</RadzenText>
+                                <RadzenText TextStyle="TextStyle.H5" class="rz-m-0">$12,345</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-success">+15% from last month</RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                    <RadzenCard>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <RadzenIcon Icon="people" Style="font-size: 2rem; color: var(--rz-success);" />
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Active Users</RadzenText>
+                                <RadzenText TextStyle="TextStyle.H5" class="rz-m-0">1,234</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-success">+5% from last week</RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                    <RadzenCard>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <RadzenIcon Icon="assignment" Style="font-size: 2rem; color: var(--rz-warning);" />
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Pending Tasks</RadzenText>
+                                <RadzenText TextStyle="TextStyle.H5" class="rz-m-0">23</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-warning">3 urgent</RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                    <RadzenCard>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <RadzenIcon Icon="trending_up" Style="font-size: 2rem; color: var(--rz-info);" />
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Revenue</RadzenText>
+                                <RadzenText TextStyle="TextStyle.H5" class="rz-m-0">$45.2K</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-success">+23% YoY</RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow Gap="1rem" class="mt-3">
+                <RadzenColumn Size="12" SizeLG="8">
+                    <RadzenCard>
+                        <RadzenText TextStyle="TextStyle.H6">Monthly Sales Chart</RadzenText>
+                        <RadzenChart>
+                            <RadzenColumnSeries Data="@monthlyData" CategoryProperty="Month" ValueProperty="Sales" Title="Sales">
+                                <RadzenSeriesDataLabels Visible="true" />
+                            </RadzenColumnSeries>
+                            <RadzenCategoryAxis>
+                                <RadzenAxisTitle Text="Month" />
+                            </RadzenCategoryAxis>
+                            <RadzenValueAxis>
+                                <RadzenAxisTitle Text="Sales ($)" />
+                            </RadzenValueAxis>
+                        </RadzenChart>
+                    </RadzenCard>
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeLG="4">
+                    <RadzenCard>
+                        <RadzenText TextStyle="TextStyle.H6">Category Distribution</RadzenText>
+                        <RadzenChart>
+                            <RadzenPieSeries Data="@categoryData" CategoryProperty="Category" ValueProperty="Value">
+                                <RadzenSeriesDataLabels Visible="true" />
+                            </RadzenPieSeries>
+                        </RadzenChart>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Progress Tracking">
+            <RadzenCard class="mt-3">
+                <RadzenText TextStyle="TextStyle.H6">Project Progress</RadzenText>
+
+                <RadzenStack Gap="1rem" class="mt-3">
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenText>Project Alpha</RadzenText>
+                            <RadzenText>75%</RadzenText>
+                        </RadzenStack>
+                        <RadzenProgressBar Value="75" ShowValue="false" />
+                    </RadzenStack>
+
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenText>Project Beta</RadzenText>
+                            <RadzenText>45%</RadzenText>
+                        </RadzenStack>
+                        <RadzenProgressBar Value="45" ShowValue="false" ProgressBarStyle="ProgressBarStyle.Warning" />
+                    </RadzenStack>
+
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenText>Project Gamma</RadzenText>
+                            <RadzenText>100%</RadzenText>
+                        </RadzenStack>
+                        <RadzenProgressBar Value="100" ShowValue="false" ProgressBarStyle="ProgressBarStyle.Success" />
+                    </RadzenStack>
+
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenText>Project Delta</RadzenText>
+                            <RadzenText>15%</RadzenText>
+                        </RadzenStack>
+                        <RadzenProgressBar Value="15" ShowValue="false" ProgressBarStyle="ProgressBarStyle.Danger" />
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+
+            <RadzenCard class="mt-3">
+                <RadzenText TextStyle="TextStyle.H6">File Upload Test</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2" class="mt-2 rz-color-secondary">
+                    Note: This is a UI demonstration. Actual file upload functionality would be implemented here.
+                </RadzenText>
+                <RadzenButton Text="Choose Files" Icon="upload_file" class="mt-2" Click="@SimulateFileUpload" />
+                @if (uploadedFileNames.Any())
+                {
+                    <RadzenText TextStyle="TextStyle.Body2" class="mt-2">
+                        Simulated uploads: @string.Join(", ", uploadedFileNames)
+                    </RadzenText>
+                }
+            </RadzenCard>
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Organization">
+            <RadzenCard class="mt-3">
+                <RadzenText TextStyle="TextStyle.H6">Department Structure</RadzenText>
+                <RadzenTree Data="@departments" class="mt-3">
+                    <RadzenTreeLevel TextProperty="Name" ChildrenProperty="Children" HasChildren="@((dept) => ((Department)dept).Children.Any())" />
+                </RadzenTree>
+            </RadzenCard>
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Notifications">
+            <RadzenCard class="mt-3">
+                <RadzenText TextStyle="TextStyle.H6">Notification Test</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" class="mt-3">
+                    <RadzenButton Text="Success Notification" ButtonStyle="ButtonStyle.Success" Click="@ShowSuccessNotification" />
+                    <RadzenButton Text="Info Notification" ButtonStyle="ButtonStyle.Info" Click="@ShowInfoNotification" />
+                    <RadzenButton Text="Warning Notification" ButtonStyle="ButtonStyle.Warning" Click="@ShowWarningNotification" />
+                    <RadzenButton Text="Error Notification" ButtonStyle="ButtonStyle.Danger" Click="@ShowErrorNotification" />
+                </RadzenStack>
+
+                <RadzenText TextStyle="TextStyle.H6" class="mt-4">Dialog Test</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" class="mt-3">
+                    <RadzenButton Text="Open Dialog" Click="@OpenDialog" />
+                    <RadzenButton Text="Confirm Dialog" Click="@OpenConfirmDialog" ButtonStyle="ButtonStyle.Warning" />
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    List<MonthlyData> monthlyData = new();
+    List<CategoryData> categoryData = new();
+    List<Department> departments = new();
+    List<string> uploadedFileNames = new();
+
+    protected override void OnInitialized()
+    {
+        // Monthly sales data
+        monthlyData = new List<MonthlyData>
+        {
+            new MonthlyData { Month = "Jan", Sales = 12500 },
+            new MonthlyData { Month = "Feb", Sales = 14800 },
+            new MonthlyData { Month = "Mar", Sales = 13200 },
+            new MonthlyData { Month = "Apr", Sales = 16700 },
+            new MonthlyData { Month = "May", Sales = 18500 },
+            new MonthlyData { Month = "Jun", Sales = 20100 }
+        };
+
+        // Category distribution data
+        categoryData = new List<CategoryData>
+        {
+            new CategoryData { Category = "Electronics", Value = 45 },
+            new CategoryData { Category = "Furniture", Value = 25 },
+            new CategoryData { Category = "Accessories", Value = 15 },
+            new CategoryData { Category = "Stationery", Value = 15 }
+        };
+
+        // Department tree structure
+        departments = new List<Department>
+        {
+            new Department
+            {
+                Name = "Corporate",
+                Children = new List<Department>
+                {
+                    new Department
+                    {
+                        Name = "IT Department",
+                        Children = new List<Department>
+                        {
+                            new Department { Name = "Development Team" },
+                            new Department { Name = "Infrastructure Team" },
+                            new Department { Name = "Support Team" }
+                        }
+                    },
+                    new Department
+                    {
+                        Name = "Sales Department",
+                        Children = new List<Department>
+                        {
+                            new Department { Name = "North Region" },
+                            new Department { Name = "South Region" },
+                            new Department { Name = "International" }
+                        }
+                    },
+                    new Department
+                    {
+                        Name = "HR Department",
+                        Children = new List<Department>
+                        {
+                            new Department { Name = "Recruitment" },
+                            new Department { Name = "Training" }
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    void SimulateFileUpload()
+    {
+        uploadedFileNames = new List<string> { "document.pdf", "image.jpg", "data.xlsx" };
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Success,
+            Summary = "Files Selected",
+            Detail = "3 files selected for upload (simulated)",
+            Duration = 3000
+        });
+    }
+
+    void ShowSuccessNotification()
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Success,
+            Summary = "Success",
+            Detail = "Operation completed successfully!",
+            Duration = 4000
+        });
+    }
+
+    void ShowInfoNotification()
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Info,
+            Summary = "Information",
+            Detail = "This is an informational message.",
+            Duration = 4000
+        });
+    }
+
+    void ShowWarningNotification()
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Warning,
+            Summary = "Warning",
+            Detail = "Please review this warning message.",
+            Duration = 4000
+        });
+    }
+
+    void ShowErrorNotification()
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = "Error",
+            Detail = "An error has occurred. Please try again.",
+            Duration = 4000
+        });
+    }
+
+    async Task OpenDialog()
+    {
+        await DialogService.OpenAsync("Sample Dialog", ds =>
+            @<div>
+                <p>This is a sample dialog content.</p>
+                <p>You can put any Blazor components here.</p>
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" class="mt-3">
+                    <RadzenButton Text="OK" Click="() => ds.Close(true)" />
+                    <RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+                </RadzenStack>
+            </div>
+        );
+    }
+
+    async Task OpenConfirmDialog()
+    {
+        bool? result = await DialogService.Confirm("Are you sure you want to proceed?", "Confirmation",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (result == true)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Confirmed",
+                Detail = "You clicked Yes",
+                Duration = 3000
+            });
+        }
+    }
+
+    public class MonthlyData
+    {
+        public string Month { get; set; } = "";
+        public double Sales { get; set; }
+    }
+
+    public class CategoryData
+    {
+        public string Category { get; set; } = "";
+        public double Value { get; set; }
+    }
+
+    public class Department
+    {
+        public string Name { get; set; } = "";
+        public List<Department> Children { get; set; } = new();
+    }
+}
