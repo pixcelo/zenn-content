@@ -2,7 +2,7 @@
 title: "Playwright MCPでBlazor UIをテストする - コード不要のE2E検証"
 emoji: "🎭"
 type: "tech"
-topics: ["blazor", "playwright", "mcp", "ai", "csharp"]
+topics: ["blazor", "playwright", "mcp", "claudecode", "csharp"]
 published: false
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
