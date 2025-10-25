@@ -312,6 +312,8 @@ http://localhost:5158/data-grid にアクセスして、以下を実行してく
 
 ## Playwright MCPのセットアップ
 
+:::details セットアップ手順を見る
+
 実際に試したい人向けに、セットアップ手順を簡単に。
 
 詳細は [Playwright MCP公式リポジトリ](https://github.com/microsoft/playwright-mcp) を参照してください。
@@ -358,6 +360,8 @@ Claude Codeで以下のように指示するだけ：
 http://localhost:5158/test-form にアクセして、
 名前の欄に "Test User" って入力して、Submitボタンを押してください
 ```
+
+:::
 
 ### 実行許可の確認について
 
