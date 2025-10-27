@@ -17,7 +17,7 @@ PdMやデザイナーからこんな依頼を受けたとき、どうしてま�
 
 でも、Playwright MCPを使えば話が変わります。
 
-```
+```text
 「商品一覧のページで、一番上の商品を削除して、
 削除完了って出るか確認して」
 ```
@@ -118,7 +118,7 @@ Blazor ServerとRadzen Componentsで検証環境を作って、実際にPlaywrig
 ### テストシナリオ1：フォームの基本入力
 
 AIへの指示：
-```
+```text
 http://localhost:5158/test-form にアクセスして、以下の操作を実行してください：
 
 1. 名前の欄に "John Doe" って入力
@@ -140,7 +140,7 @@ http://localhost:5158/test-form にアクセスして、以下の操作を実行
 :::details 実際のPlaywright MCPセッション例を見る
 
 **AIへの指示**：
-```
+```text
 http://localhost:5158/test-form にアクセスして、以下の操作を実行してください：
 
 1. 名前の欄に "John Doe" って入力
@@ -155,13 +155,13 @@ http://localhost:5158/test-form にアクセスして、以下の操作を実行
 **AIの実行内容**：
 
 1. ページにアクセス
-```
+```js
 mcp__playwright__browser_navigate
 → await page.goto('http://localhost:5158/test-form');
 ```
 
 2. フォームフィールドに入力
-```
+```js
 mcp__playwright__browser_fill_form
 → await page.locator('#Name').fill('John Doe');
 → await page.locator('#Email').fill('john@example.com');
@@ -169,25 +169,25 @@ mcp__playwright__browser_fill_form
 ```
 
 3. ドロップダウンを展開して「USA」を選択
-```
+```js
 mcp__playwright__browser_click (ドロップダウンクリック)
 mcp__playwright__browser_click (USAオプション選択)
 → await page.getByRole('option', { name: 'USA' }).click();
 ```
 
 4. Submitボタンをクリック
-```
+```js
 mcp__playwright__browser_click
 → await page.getByRole('button', { name: 'Submit' }).click();
 ```
 
 5. 成功メッセージを確認
-```
+```text
 Success! Form submitted successfully! Name: John Doe, Email: john@example.com
 ```
 
 6. スクリーンショット保存
-```
+```js
 mcp__playwright__browser_take_screenshot
 → await page.screenshot({ fullPage: true });
 ```
@@ -203,7 +203,7 @@ mcp__playwright__browser_take_screenshot
 
 :::
 
-:::details 参考：従来のPlaywright（TypeScript）でのコード例
+:::details 参考：従来のPlaywrightでのコード例
 
 同じ操作を従来のPlaywrightでコードで書くとこうなります：
 
@@ -244,7 +244,7 @@ test('フォーム入力から送信までの一連の操作', async ({ page }) 
 ```
 
 **実行結果**：
-```
+```bash
 > playwright test --headed
 
 Running 1 test using 1 worker
@@ -267,7 +267,7 @@ To open last HTML report run:
 
 **違い**：
 - Playwright MCP：自然言語で指示するだけ（約7行）
-- 従来のPlaywright：TypeScriptコードを書く必要がある（約30行）
+- 従来のPlaywright：コードを書く必要がある（約30行）
 
 どちらも同じ操作を実行しますが、**Playwright MCPならプログラミング知識不要**です。
 
@@ -276,7 +276,7 @@ To open last HTML report run:
 ### テストシナリオ2：バリデーションテスト
 
 AIへの指示：
-```
+```text
 http://localhost:5158/test-form にアクセスして、以下を確認してください：
 
 1. 何も入力しないでSubmitボタンを押す
@@ -297,7 +297,7 @@ http://localhost:5158/test-form にアクセスして、以下を確認してく
 ### テストシナリオ3：DataGridの編集・削除
 
 AIへの指示：
-```
+```text
 http://localhost:5158/data-grid にアクセスして、以下を実行してください：
 
 1. 一番上の商品（Laptop）の編集ボタンを押す
@@ -331,8 +331,6 @@ http://localhost:5158/data-grid にアクセスして、以下を実行してく
 
 ### MCPサーバーの設定
 
-`playwright-config.json` を作成：
-
 ```json
 {
   "mcpServers": {
@@ -361,7 +359,7 @@ dotnet run  # または npm start 等
 
 Claude Codeで以下のように指示するだけ：
 
-```
+```text
 http://localhost:5158/test-form にアクセして、
 名前の欄に "Test User" って入力して、Submitボタンを押してください
 ```
@@ -388,17 +386,17 @@ http://localhost:5158/test-form にアクセして、
 Playwright MCPは、AIエージェントとPlaywrightをつなぐ橋渡し役です。
 
 **従来のPlaywright**：
-```
+```text
 人間 → JavaScriptコード → Playwright → ブラウザ
 ```
 
 **Playwright MCP**：
-```
+```text
 人間 → 自然言語 → AI → MCP → Playwright → ブラウザ
 ```
 
 データの流れ：
-```
+```text
 人間 → AIエージェント → MCP Server → Playwright → ブラウザ
    ←      ←           ←         ←       ←
   (結果が戻ってくる)
@@ -434,7 +432,7 @@ test('フォーム送信テスト', async ({ page }) => {
 
 Playwright MCPでテストした場合、プルリクエストのコメントやテスト報告に以下を貼り付けるだけ：
 
-```markdown
+```text
 ## 動作確認結果
 
 ### テスト内容
@@ -465,7 +463,7 @@ http://localhost:5158/test-form にアクセスして、以下の操作を実行
 #### ケース1：新機能の受け入れテスト
 
 **開発者がPRに記載**：
-```markdown
+```text
 ## 実装内容
 商品削除機能を追加しました。
 
@@ -498,7 +496,7 @@ http://localhost:5158/data-grid にアクセスして、
 #### ケース2：バグ修正の再現確認
 
 **QA担当者がissueに記載**：
-```markdown
+```text
 ## 不具合内容
 メールアドレスに不正な値を入れてもエラーが出ない
 
@@ -514,7 +512,7 @@ http://localhost:5158/data-grid にアクセスして、
 ```
 
 **開発者がPRで修正報告**：
-```markdown
+```text
 ## 修正内容
 メールアドレスのバリデーションを追加
 
@@ -542,7 +540,7 @@ http://localhost:5158/data-grid にアクセスして、
 
 ### チーム全体での情報共有の流れ
 
-```
+```text
 開発者 → Playwright MCPで動作確認
        ↓
      PRに自然言語のテスト結果を貼り付け
@@ -560,22 +558,22 @@ Playwright MCPは、**テスト自動化ツール**であると同時に、**チ
 
 開発の流れを整理すると：
 
-```
+```text
 1. 仕様書・要件定義
    「フォームにメールアドレスを入力する機能を追加」
    「不正な形式の場合はエラーメッセージを表示」
-   
+
 2. 実装
    開発者がコードを書く
-   
+
 3. テスト（← ここでPlaywright MCPが活躍）
    開発者：「メールアドレスの欄に "invalid-email" って入力して、
            Submitボタンを押して、エラーメッセージが出るか確認」
-   
+
 4. テスト結果をPRに記録
    「✅ Invalid email formatエラーが表示された」
    「📸 スクリーンショット添付」
-   
+
 5. レビュー
    レビュワー：「仕様通りに実装されてるな。テスト内容も記録に残ってる。OK！」
 ```
@@ -594,7 +592,7 @@ await expect(page.getByText('Invalid email format')).toBeVisible();
 → 「テストしたことは分かるけど、意図や背景は読み取りにくい」
 
 Playwright MCPだと：
-```
+```text
 メールアドレスの欄に "invalid-email" って入力（わざと変な形式で）して、
 Submitボタンを押して、"Invalid email format" ってエラーが出るか確認
 
