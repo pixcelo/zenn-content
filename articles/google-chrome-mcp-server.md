@@ -11,11 +11,6 @@ publication_name: "nexta_"
 
 Claude Codeでブラウザテストするとき、Chrome MCPとPlaywright MCPのどちらを使うべきか迷っていませんか？
 
-両方とも**アクセシビリティツリー**を使ってページ構造を取得しますが、**要素の識別方法**が違います：
-
-- **Chrome MCP**: UID（一意識別子）で確実に指定
-- **Playwright MCP**: AIが自動でセレクターを生成
-
 この記事では、同じBlazorアプリで両方を実際に使い、選び方の基準を示します。
 
 ## 結論を先に：選び方の基準
