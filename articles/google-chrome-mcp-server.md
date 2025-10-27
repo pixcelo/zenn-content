@@ -90,7 +90,7 @@ Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitす�
 ### 2. フォーム入力
 
 **Chrome MCP**：
-```
+```text
 ❌ 事前にスナップショットでUIDを確認する必要がある
 
 mcp__chrome-devtools__take_snapshot()
@@ -104,7 +104,7 @@ mcp__chrome-devtools__fill_form([
 ```
 
 **Playwright MCP**：
-```
+```text
 ✅ AIが自動でセレクターを推測
 
 mcp__playwright__browser_fill_form
@@ -117,7 +117,7 @@ mcp__playwright__browser_fill_form
 ### 3. ドロップダウン操作
 
 **Chrome MCP**：
-```
+```text
 ❌ 3ステップ必要
 
 mcp__chrome-devtools__click(uid="3_30")  // コンテナクリック
@@ -126,7 +126,7 @@ mcp__chrome-devtools__click(uid="5_135")  // 目的のオプションをクリ�
 ```
 
 **Playwright MCP**：
-```
+```text
 ✅ 2ステップで完了（AIが自動で要素を推測）
 
 mcp__playwright__browser_click  // ドロップダウン展開
@@ -138,7 +138,7 @@ mcp__playwright__browser_click  // USAオプション選択
 ### 4. スナップショット（ページ構造の確認）
 
 **Chrome MCP**：
-```
+```text
 uid=1_0 RootWebArea "Test Form"
   uid=1_22 textbox "  "
   uid=1_23 StaticText "Name"
@@ -150,7 +150,7 @@ uid=1_0 RootWebArea "Test Form"
 → **UIDが明確、デバッグしやすい**
 
 **Playwright MCP**：
-```
+```text
 textbox "Name"
 textbox "Email"
 textbox "Age" [value=0]
@@ -228,7 +228,7 @@ Blazor Server（`https://localhost:7286/test-form`）で実際に検証した結
 
 ### パフォーマンストレース結果
 
-```bash
+```text
 mcp__chrome-devtools__performance_start_trace({
   reload: true,
   autoStop: true
@@ -254,7 +254,7 @@ Googleが定めたWebページの品質を測る3つの重要指標です：
   - ブラウザがサーバーから最初のデータを受け取るまでの時間
 :::
 
-```
+```text
 LCP: 138 ms ✅ 良好（2.5秒以内）
   - TTFB: 25 ms ✅ 優秀（800ms以内）
   - Render delay: 114 ms（描画遅延）
@@ -279,12 +279,12 @@ Playwright MCPではこれらのパフォーマンス指標は取得できませ
 
 ### コンソールログ取得結果
 
-```bash
+```text
 mcp__chrome-devtools__list_console_messages()
 ```
 
 **取得できたBlazor特有のログ**：
-```
+```bash
 [info] Normalizing '_blazor' to 'https://localhost:7286/_blazor'
 [info] WebSocket connected to wss://localhost:7286/_blazor
 [debug] CSS Hot Reload ignoring bootstrap.min.css (7000+ rules)
@@ -295,14 +295,14 @@ mcp__chrome-devtools__list_console_messages()
 
 ### ネットワークリクエスト取得結果
 
-```bash
+```text
 mcp__chrome-devtools__list_network_requests({
   resourceTypes: ["document", "script", "xhr", "fetch"]
 })
 ```
 
 **取得できたBlazor初期化リクエスト（10件）**：
-```
+```text
 GET /test-form [200]
 GET /_framework/blazor.web.js [304]
 GET /_content/Radzen.Blazor/Radzen.Blazor.js [200]
