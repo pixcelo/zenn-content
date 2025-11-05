@@ -1,5 +1,5 @@
 ---
-title: "Chrome MCP vs Playwright MCP - どちらを選ぶべき？実測で比較"
+title: "Chrome DevTools MCP vs Playwright MCP - どちらを選ぶべき？実測で比較"
 emoji: "🔍"
 type: "tech"
 topics: ["mcp", "chrome", "playwright", "claudecode", "blazor"]
@@ -9,7 +9,7 @@ publication_name: "nexta_"
 
 ## はじめに
 
-Claude Codeでブラウザテストするとき、Chrome MCPとPlaywright MCPのどちらを使うべきか迷っていませんか？
+Claude Codeでブラウザテストするとき、Chrome DevTools MCPとPlaywright MCPのどちらを使うべきか迷っていませんか？
 
 この記事では、同じBlazorアプリで両方を実際に使い、選び方の基準を示します。
 
@@ -17,8 +17,8 @@ Claude Codeでブラウザテストするとき、Chrome MCPとPlaywright MCPの
 
 | 用途 | おすすめ | 理由 |
 |------|---------|------|
-| デバッグ・要素特定 | **Chrome MCP** | UIDで要素を確実に指定 |
-| パフォーマンス分析 | **Chrome MCP** | Core Web Vitals測定可能 |
+| デバッグ・要素特定 | **Chrome DevTools MCP** | UIDで要素を確実に指定 |
+| パフォーマンス分析 | **Chrome DevTools MCP** | Core Web Vitals測定可能 |
 | 標準的なフォーム操作 | **Playwright MCP** | AIが自動で要素を検出 |
 | 探索的テスト | **Playwright MCP** | 操作手順がシンプル |
 | CI/CD自動テスト | **どちらも不向き** | 従来のPlaywright/Selenium推奨 |
@@ -49,7 +49,7 @@ Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitす�
 - ドロップダウンも2ステップで完了
 - ✅ **手軽だが、AIの推測に依存**
 
-### Chrome MCP：UID指定で確実
+### Chrome DevTools MCP：UID指定で確実
 
 **指示**（同じ内容）：
 > フォームに John Doe、john@example.com、30、USA を入力して送信
@@ -60,7 +60,7 @@ Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitす�
 - ドロップダウンは3ステップ（展開 → スナップショット → 選択）
 - ✅ **確実だが、ステップ数が多い**
 
-![Chrome MCPでのフォーム送信成功](/images/google-chrome-mcp/chrome-mcp-form-success.png)
+![Chrome DevTools MCPでのフォーム送信成功](/images/google-chrome-mcp/chrome-mcp-form-success.png)
 
 ## 詳細比較：6つの観点
 
@@ -72,7 +72,7 @@ Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitす�
 
 **本質的な違いは「要素の識別方法」**：
 
-**Chrome MCP**：
+**Chrome DevTools MCP**：
 - `take_snapshot` でアクセシビリティツリーを取得し、UID（一意識別子）を付与
 - 操作時にはUIDで要素を明示的に指定
 - 例: `{"uid": "1_22", "value": "John Doe"}`
@@ -84,7 +84,7 @@ Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitす�
 
 ### 2. フォーム入力
 
-**Chrome MCP**：
+**Chrome DevTools MCP**：
 ```text
 ❌ 事前にスナップショットでUIDを確認する必要がある
 
@@ -111,7 +111,7 @@ mcp__playwright__browser_fill_form
 
 ### 3. ドロップダウン操作
 
-**Chrome MCP**：
+**Chrome DevTools MCP**：
 ```text
 ❌ 3ステップ必要
 
@@ -132,7 +132,7 @@ mcp__playwright__browser_click  // USAオプション選択
 
 ### 4. スナップショット（ページ構造の確認）
 
-**Chrome MCP**：
+**Chrome DevTools MCP**：
 ```text
 uid=1_0 RootWebArea "Test Form"
   uid=1_22 textbox "  "
@@ -155,7 +155,7 @@ combobox "Country"
 
 ### 5. 使いやすさ
 
-**Chrome MCP**：
+**Chrome DevTools MCP**：
 - ✅ 細かい制御が可能
 - ✅ デバッグしやすい（UIDが明確）
 - ✅ 要素の特定が確実
@@ -176,7 +176,7 @@ combobox "Country"
 - ✅ 内部的に**アクセシビリティツリー**を使用
 - ✅ 基本的なブラウザ操作（ドラッグ&ドロップ、キーボード操作、ホバー、ファイルアップロード）は**同等に実行可能**
 
-| 操作 | Chrome MCP | Playwright MCP |
+| 操作 | Chrome DevTools MCP | Playwright MCP |
 |-----|-----------|---------------|
 | ドラッグ&ドロップ | ✅ `drag` | ✅ `browser_drag` |
 | キーボード操作 | ✅ `press_key` | ✅ `browser_press_key` |
@@ -184,14 +184,14 @@ combobox "Country"
 | ファイルアップロード | ✅ `upload_file` | ✅ `browser_file_upload` |
 
 **本質的な違い**は「要素の識別方法」：
-- **Chrome MCP**: アクセシビリティツリーにUID（一意識別子）を付与し、UIDで要素を明示的に指定
+- **Chrome DevTools MCP**: アクセシビリティツリーにUID（一意識別子）を付与し、UIDで要素を明示的に指定
 - **Playwright MCP**: アクセシビリティツリーからAIがセレクターを自動生成して要素を特定
 
-どちらを選ぶかは、「確実性を取るか（Chrome MCP）」「手軽さを取るか（Playwright MCP）」の判断になります。
+どちらを選ぶかは、「確実性を取るか（Chrome DevTools MCP）」「手軽さを取るか（Playwright MCP）」の判断になります。
 
 ## Claude Codeでのセットアップ
 
-### Chrome MCPのセットアップ
+### Chrome DevTools MCPのセットアップ
 
 ```bash
 # MCPサーバーを追加
@@ -215,9 +215,9 @@ claude mcp
 **補足**: `claude mcp add`コマンドは、Claude Codeの設定ファイルに自動でMCPサーバー情報を追加します。手動で設定ファイルを編集する必要はありません。
 :::
 
-## Chrome MCP特有の機能：パフォーマンス分析
+## Chrome DevTools MCP特有の機能：パフォーマンス分析
 
-Chrome MCPの最大の特徴は、Playwright MCPにない**パフォーマンス分析機能**です。
+Chrome DevTools MCPの最大の特徴は、Playwright MCPにない**パフォーマンス分析機能**です。
 
 Blazor Server（`https://localhost:7286/test-form`）で実際に検証した結果：
 
@@ -258,7 +258,7 @@ CLS: 0.00 ✅ 完璧（0.1以下）
 
 **Chrome MCPが自動生成したパフォーマンス改善提案（6種類）**：
 
-パフォーマンストレースを実行すると、Chrome MCPが測定結果を分析し、具体的な改善アクションを**自動的に提案**してくれます：
+パフォーマンストレースを実行すると、Chrome DevTools MCPが測定結果を分析し、具体的な改善アクションを**自動的に提案**してくれます：
 
 1. **LCPBreakdown**: LCP最適化の提案
 2. **CLSCulprits**: レイアウトシフト防止策
@@ -269,7 +269,7 @@ CLS: 0.00 ✅ 完璧（0.1以下）
 
 :::message
 **Playwright MCPとの違い**：
-Playwright MCPではこれらのパフォーマンス指標は取得できません。Chrome DevToolsの機能を使った詳細な分析はChrome MCPだけの機能です。
+Playwright MCPではこれらのパフォーマンス指標は取得できません。Chrome DevToolsの機能を使った詳細な分析はChrome DevTools MCPだけの機能です。
 :::
 
 ### コンソールログ取得結果
@@ -315,13 +315,13 @@ POST /_blazor/negotiate [200]
 - ⚠️ **Render delayがやや長い**（114ms / 138ms = 82%）
   - 改善提案：レンダリングブロックリソースの削減
 
-Chrome MCPを使えば、このような具体的な改善ポイントが自動で提示されます。
+Chrome DevTools MCPを使えば、このような具体的な改善ポイントが自動で提示されます。
 
 ## まとめ
 
-Chrome MCPとPlaywright MCPは、どちらもアクセシビリティツリーを使いますが、**要素の識別方法**が異なります：
+Chrome DevTools MCPとPlaywright MCPは、どちらもアクセシビリティツリーを使いますが、**要素の識別方法**が異なります：
 
-- **Chrome MCP**: UID指定で確実。パフォーマンス分析も可能
+- **Chrome DevTools MCP**: UID指定で確実。パフォーマンス分析も可能
 - **Playwright MCP**: AIが推測して手軽。標準UIに強い
 
 用途に応じて使い分けることで、効率的なブラウザテストが実現できます。
