@@ -3,7 +3,7 @@ title: "Chrome DevTools MCP vs Playwright MCP - どちらを選ぶべき？実�
 emoji: "🔍"
 type: "tech"
 topics: ["mcp", "chrome", "playwright", "claudecode", "blazor"]
-published: false
+published: true
 publication_name: "nexta_"
 ---
 
