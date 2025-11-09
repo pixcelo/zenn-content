@@ -7,6 +7,34 @@ published: true
 publication_name: "nexta_"
 ---
 
+## 訂正とお詫び（2025/11/09追記）
+
+記事公開後、Playwright MCPコントリビューターの[ogadra](https://zenn.dev/ogady)様より、技術的な誤りをご指摘いただきました。深くお詫び申し上げます。
+
+### 誤った記述
+**「Playwright MCPはAIがセレクターを自動生成する」**
+
+### 正しい動作
+Playwright MCPも**Chrome DevTools MCPと同様に、スナップショットに含まれる識別子（ref）を使用**して要素を特定します。
+
+- LLMはセレクターを生成していません
+- `mcp__playwright__browser_fill_form`などの関数呼び出し時、引数として`ref`（Chrome DevTools MCPの`uid`に相当）が渡されます
+- 両MCPの**要素識別方法に本質的な違いはありません**
+
+### 実際の違い
+主な違いは以下の2点です：
+
+1. **操作の実行方法**
+   - Chrome DevTools MCP: CDP（Chrome DevTools Protocol）で直接操作
+   - Playwright MCP: 内部でPlaywrightライブラリを使って操作を実行後、同等の処理を行うPlaywrightコード例をレスポンスに含める（説明用）
+
+2. **アクセシビリティツリーの情報量の差**
+   - 取得できる要素情報の詳細度が異なる
+
+以下、修正済みの内容となります。貴重なご指摘をいただいたogadra様に改めて感謝申し上げます。
+
+---
+
 ## はじめに
 
 Claude Codeでブラウザテストするとき、Chrome DevTools MCPとPlaywright MCPのどちらを使うべきか迷っていませんか？
@@ -19,7 +47,7 @@ Claude Codeでブラウザテストするとき、Chrome DevTools MCPとPlaywrig
 |------|---------|------|
 | デバッグ・要素特定 | **Chrome DevTools MCP** | UIDで要素を確実に指定 |
 | パフォーマンス分析 | **Chrome DevTools MCP** | Core Web Vitals測定可能 |
-| 標準的なフォーム操作 | **Playwright MCP** | AIが自動で要素を検出 |
+| 標準的なフォーム操作 | **Playwright MCP** | Playwrightコード形式で操作 |
 | 探索的テスト | **Playwright MCP** | 操作手順がシンプル |
 | CI/CD自動テスト | **どちらも不向き** | 従来のPlaywright/Selenium推奨 |
 
@@ -39,15 +67,16 @@ Blazor ServerとRadzen Componentsで作成したTest Formページを使用：
 
 Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitするテストで比較しました。
 
-### Playwright MCP：AIにお任せ
+### Playwright MCP：Playwrightコード形式で操作
 
 **指示**（自然言語）：
 > フォームに John Doe、john@example.com、30、USA を入力して送信
 
 **実行内容**：
-- AIが自動でセレクターを生成（`#Name`、`#Email`等）
+- スナップショットから要素の`ref`を取得
+- `ref`を使ってPlaywrightコード形式で操作
 - ドロップダウンも2ステップで完了
-- ✅ **手軽だが、AIの推測に依存**
+- ✅ **手軽で操作手順がシンプル**
 
 ### Chrome DevTools MCP：UID指定で確実
 
@@ -70,17 +99,19 @@ Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitす�
 **共通点**: 両MCPとも、内部的には**アクセシビリティツリー**を使ってページ構造を取得しています。
 :::
 
-**本質的な違いは「要素の識別方法」**：
+**本質的な違いは「操作コードの形式」**：
 
 **Chrome DevTools MCP**：
 - `take_snapshot` でアクセシビリティツリーを取得し、UID（一意識別子）を付与
 - 操作時にはUIDで要素を明示的に指定
+- CDP（Chrome DevTools Protocol）で直接操作
 - 例: `{"uid": "1_22", "value": "John Doe"}`
 
 **Playwright MCP**：
-- アクセシビリティツリーからAIがセレクターを自動生成
-- 操作時にはAIが適切なセレクター（name、role、text）を選択
-- 例: `await page.locator('#Name').fill('John Doe')`
+- アクセシビリティツリーから要素の`ref`（識別子）を取得
+- 操作時には`ref`を使ってPlaywrightライブラリで実際の操作を実行
+- 実行後、MCPのレスポンスに同等の処理を行うPlaywrightコード例が含まれる（説明用）
+- 例: 内部で操作実行後、`await page.locator('#Name').fill('John Doe')`という相当するコードをレスポンスに含める
 
 ### 2. フォーム入力
 
@@ -100,10 +131,15 @@ mcp__chrome-devtools__fill_form([
 
 **Playwright MCP**：
 ```text
-✅ AIが自動でセレクターを推測
+✅ スナップショットから要素のrefを取得して入力
 
-mcp__playwright__browser_fill_form
-→ 実行されるPlaywrightコード:
+mcp__playwright__browser_fill_form({
+  name: "Name input",
+  type: "textbox",
+  ref: "xxxxx",  // スナップショットで取得した識別子
+  value: "John Doe"
+})
+→ 実行後、レスポンスに含まれるPlaywrightコード例（説明用）:
   await page.locator('#Name').fill('John Doe');
   await page.locator('#Email').fill('john@example.com');
   await page.locator('#Age').fill('30');
@@ -122,11 +158,15 @@ mcp__chrome-devtools__click(uid="5_135")  // 目的のオプションをクリ�
 
 **Playwright MCP**：
 ```text
-✅ 2ステップで完了（AIが自動で要素を推測）
+✅ 2ステップで完了（スナップショットから要素のrefを取得）
 
-mcp__playwright__browser_click  // ドロップダウン展開
-mcp__playwright__browser_click  // USAオプション選択
-→ 実行されるPlaywrightコード:
+mcp__playwright__browser_click({
+  ref: "xxxxx"  // ドロップダウンのref
+})
+mcp__playwright__browser_click({
+  ref: "yyyyy"  // USAオプションのref
+})
+→ 実行後、レスポンスに含まれるPlaywrightコード例（説明用）:
   await page.getByRole('option', { name: 'USA' }).click();
 ```
 
@@ -164,11 +204,10 @@ combobox "Country"
 
 **Playwright MCP**：
 - ✅ 操作手順がシンプル
-- ✅ AIによる要素検出が便利
+- ✅ Playwrightコード形式で実行内容が分かりやすい
 - ✅ 標準的なUI要素に強い
-- ❌ AIの推測に依存（誤った要素を選ぶ可能性）
-- ❌ デバッグが難しい（どのセレクターを使ったか不明瞭）
-- ❌ 繰り返し実行の精度にばらつき
+- ❌ 実行コードの詳細はMCPレスポンスに依存
+- ❌ デバッグ時はPlaywrightコードを確認する必要がある
 
 ### 6. 共通機能と本質的な違い
 
@@ -183,11 +222,13 @@ combobox "Country"
 | ホバー | ✅ `hover` | ✅ `browser_hover` |
 | ファイルアップロード | ✅ `upload_file` | ✅ `browser_file_upload` |
 
-**本質的な違い**は「要素の識別方法」：
-- **Chrome DevTools MCP**: アクセシビリティツリーにUID（一意識別子）を付与し、UIDで要素を明示的に指定
-- **Playwright MCP**: アクセシビリティツリーからAIがセレクターを自動生成して要素を特定
+**本質的な違い**は「操作の実行方法とレスポンス形式」：
+- **Chrome DevTools MCP**: アクセシビリティツリーにUID（一意識別子）を付与し、CDP（Chrome DevTools Protocol）で直接操作
+- **Playwright MCP**: アクセシビリティツリーから要素の`ref`（識別子）を取得し、Playwrightライブラリで操作を実行。実行後、同等の処理を行うPlaywrightコード例をレスポンスに含める
 
-どちらを選ぶかは、「確実性を取るか（Chrome DevTools MCP）」「手軽さを取るか（Playwright MCP）」の判断になります。
+**要素の識別方法に本質的な違いはありません**。どちらもスナップショットに含まれる識別子を使用します。
+
+どちらを選ぶかは、「CDP直接操作（Chrome DevTools MCP）」「Playwrightライブラリ実行+コード例提供（Playwright MCP）」の判断になります。
 
 ## Claude Codeでのセットアップ
 
@@ -319,10 +360,10 @@ Chrome DevTools MCPを使えば、このような具体的な改善ポイント�
 
 ## まとめ
 
-Chrome DevTools MCPとPlaywright MCPは、どちらもアクセシビリティツリーを使いますが、**要素の識別方法**が異なります：
+Chrome DevTools MCPとPlaywright MCPは、どちらもアクセシビリティツリーを使い、**要素の識別方法に本質的な違いはありません**。主な違いは**操作の実行方法とレスポンス形式**です：
 
-- **Chrome DevTools MCP**: UID指定で確実。パフォーマンス分析も可能
-- **Playwright MCP**: AIが推測して手軽。標準UIに強い
+- **Chrome DevTools MCP**: UID指定でCDP直接操作。パフォーマンス分析も可能
+- **Playwright MCP**: `ref`を使ってPlaywrightライブラリで操作を実行。実行後、同等の処理を行うPlaywrightコード例をレスポンスに含める（説明用）
 
 用途に応じて使い分けることで、効率的なブラウザテストが実現できます。
 
