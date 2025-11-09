@@ -433,8 +433,6 @@ mcp__playwright__browser_click({
   await page.getByRole('option', { name: 'USA' }).click();
 ```
 
-**注目ポイント**：`getByRole('option')`はPlaywrightの推奨パターン。アクセシビリティを意識した要素選択方法を自然に学べます。
-
 ### 4. スナップショット（ページ構造の確認）
 
 **Chrome DevTools MCP**：
