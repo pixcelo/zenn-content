@@ -63,6 +63,112 @@ Blazor ServerとRadzen Componentsで作成したTest Formページを使用：
 この検証環境の詳細セットアップ手順は、別記事「[Playwright MCPでBlazor UIをテストする](https://zenn.dev/nexta_/articles/playwright-mcp-blazor-test)」を参照してください。本記事では、両MCPの比較に焦点を当てます。
 :::
 
+## 実際の検証例：Playwright MCPでBlazorフォーム操作
+
+上記のBlazor Radzenアプリで、実際にPlaywright MCPを使ってフォーム操作を検証しました。
+
+### 検証シナリオ
+Name、Email、Age、Countryフィールドにデータを入力してSubmitするまでの一連の操作を実行。
+
+:::details 実際に実行したMCPツールとレスポンス
+
+**1. ページに移動**
+
+MCPツール呼び出し：
+```js
+mcp__playwright__browser_navigate({ url: "http://localhost:5158/test-form" })
+```
+
+レスポンス（Ran Playwright code）：
+```js
+await page.goto('http://localhost:5158/test-form');
+```
+
+---
+
+**2. フォーム入力（Name、Email、Age）**
+
+MCPツール呼び出し：
+```js
+mcp__playwright__browser_fill_form({
+  fields: [
+    { name: "Name", type: "textbox", ref: "e104", value: "John Doe" },
+    { name: "Email", type: "textbox", ref: "e107", value: "john@example.com" },
+    { name: "Age", type: "textbox", ref: "e111", value: "30" }
+  ]
+})
+```
+
+レスポンス（Ran Playwright code）：
+```js
+await page.locator('#Name').fill('John Doe');
+await page.locator('#Email').fill('john@example.com');
+await page.locator('#Age').fill('30');
+```
+
+---
+
+**3. Countryドロップダウンを開く**
+
+MCPツール呼び出し：
+```js
+mcp__playwright__browser_click({ element: "Country dropdown", ref: "e114" })
+```
+
+レスポンス（Ran Playwright code）：
+```js
+await page.getByText('Japan USAJapanUKGermanyFranceCanada').click();
+```
+
+---
+
+**4. USAを選択**
+
+MCPツール呼び出し：
+```js
+mcp__playwright__browser_click({ element: "USA option", ref: "e135" })
+```
+
+レスポンス（Ran Playwright code）：
+```js
+await page.getByRole('option', { name: 'USA' }).click();
+```
+
+---
+
+**5. Submitボタンをクリック**
+
+MCPツール呼び出し：
+```js
+mcp__playwright__browser_click({ element: "Submit button", ref: "e126" })
+```
+
+レスポンス（Ran Playwright code）：
+```js
+await page.getByRole('button', { name: 'Submit' }).click();
+```
+
+結果：
+```
+Success! Form submitted successfully! Name: John Doe, Email: john@example.com
+```
+
+:::
+
+### 検証から得られた知見
+
+1. **MCPツール使用後、すぐにPlaywrightコードが確認できる**
+   - `await page.locator('#Name').fill('John Doe')` など、そのまま使えるコード
+   - テストコード作成の参考になる
+
+2. **`getByRole()`など、Playwrightのベストプラクティスが使われる**
+   - アクセシビリティを意識したセレクター
+   - メンテナンスしやすいテストコードの書き方を学べる
+
+3. **MCPで動作確認→コードをテストスイートに追加、という流れが効率的**
+   - 手動検証とテスト自動化を同時に進められる
+   - レスポンスのコードをコピペするだけ
+
 ## 実際の使用感：同じテストでの比較
 
 Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitするテストで比較しました。
@@ -145,6 +251,18 @@ mcp__playwright__browser_fill_form({
   await page.locator('#Age').fill('30');
 ```
 
+:::message
+**Playwright MCPのメリット：コード学習**
+
+Playwright MCPは操作後に**実際のPlaywrightコード例**をレスポンスに含めます。
+
+**このコードの活用方法**：
+- ✅ **そのままテストコードとして使える**：コピペして自分のテストスイートに追加
+- ✅ **デバッグが簡単**：何が実行されたか一目瞭然
+
+MCPツールで動作確認→レスポンスのコードを自動テストに追加、という流れで効率的にテスト開発ができます。
+:::
+
 ### 3. ドロップダウン操作
 
 **Chrome DevTools MCP**：
@@ -167,8 +285,13 @@ mcp__playwright__browser_click({
   ref: "yyyyy"  // USAオプションのref
 })
 → 実行後、レスポンスに含まれるPlaywrightコード例（説明用）:
+  // ドロップダウンを開く
+  await page.getByText('Japan USAJapanUKGermanyFranceCanada').click();
+  // USAオプションを選択
   await page.getByRole('option', { name: 'USA' }).click();
 ```
+
+**注目ポイント**：`getByRole('option')`はPlaywrightの推奨パターン。アクセシビリティを意識した要素選択方法を自然に学べます。
 
 ### 4. スナップショット（ページ構造の確認）
 
