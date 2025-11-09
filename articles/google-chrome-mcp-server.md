@@ -337,35 +337,9 @@ uid=8_24 StaticText "Form submitted successfully! Name: John Doe, Email: john@ex
    - コード例は含まれない
    - 操作結果とページ状態のみ表示
 
-## 実際の使用感：同じテストでの比較
-
-Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitするテストで比較しました。
-
-### Playwright MCP：Playwrightコード形式で操作
-
-**指示**（自然言語）：
-> フォームに John Doe、john@example.com、30、USA を入力して送信
-
-**実行内容**：
-- スナップショットから要素の`ref`を取得
-- `ref`を使ってPlaywrightコード形式で操作
-- ドロップダウンも2ステップで完了
-- ✅ **手軽で操作手順がシンプル**
-
-### Chrome DevTools MCP：UID指定で確実
-
-**指示**（同じ内容）：
-> フォームに John Doe、john@example.com、30、USA を入力して送信
-
-**実行内容**：
-- スナップショット取得 → UID確認（`uid=1_22 (Name)`等）
-- UIDでフォーム入力
-- ドロップダウンは3ステップ（展開 → スナップショット → 選択）
-- ✅ **確実だが、ステップ数が多い**
-
-![Chrome DevTools MCPでのフォーム送信成功](/images/google-chrome-mcp/chrome-mcp-form-success.png)
-
 ## 詳細比較：6つの観点
+
+上記の検証を踏まえて、両MCPの違いを6つの観点から詳しく比較します。
 
 ### 1. 操作方法の違い
 
