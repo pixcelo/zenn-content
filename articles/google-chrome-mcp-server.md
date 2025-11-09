@@ -169,6 +169,174 @@ Success! Form submitted successfully! Name: John Doe, Email: john@example.com
    - 手動検証とテスト自動化を同時に進められる
    - レスポンスのコードをコピペするだけ
 
+## 実際の検証例：Chrome DevTools MCPでBlazorフォーム操作
+
+同じBlazor Radzenアプリで、Chrome DevTools MCPを使ってフォーム操作を検証しました。
+
+### 検証シナリオ
+Playwright MCPと同じく、Name、Email、Age、Countryフィールドにデータを入力してSubmitするまでの一連の操作を実行。
+
+:::details 実際に実行したMCPツールとレスポンス
+
+**1. ページに移動**
+
+MCPツール呼び出し：
+```js
+mcp__chrome-devtools__navigate_page({ 
+  type: "url", 
+  url: "http://localhost:5158/test-form" 
+})
+```
+
+レスポンス：
+```
+Successfully navigated to http://localhost:5158/test-form.
+## Pages
+0: http://localhost:5158/test-form [selected]
+```
+
+---
+
+**2. スナップショット取得（UID確認）**
+
+MCPツール呼び出し：
+```js
+mcp__chrome-devtools__take_snapshot()
+```
+
+レスポンス（一部抜粋）：
+```
+uid=1_22 textbox "  "
+uid=1_23 StaticText "Name"
+uid=1_24 textbox "  "
+uid=1_25 StaticText "Email"
+uid=1_26 textbox "  " value="0"
+uid=1_27 StaticText "Age"
+uid=1_28 generic
+  uid=1_29 textbox "Japan" haspopup="listbox" readonly value="Japan"
+uid=1_32 StaticText "Country"
+uid=1_38 button "SUBMIT"
+```
+
+---
+
+**3. フォーム入力（Name、Email、Age）**
+
+MCPツール呼び出し：
+```js
+mcp__chrome-devtools__fill_form({
+  elements: [
+    { uid: "1_22", value: "John Doe" },
+    { uid: "1_24", value: "john@example.com" },
+    { uid: "1_26", value: "30" }
+  ]
+})
+```
+
+レスポンス：
+```
+Successfully filled out the form
+## Page content
+uid=2_22 textbox "  " value="John Doe"
+uid=2_24 textbox "  " value="john@example.com"
+uid=2_26 textbox "  " value="30"
+```
+
+---
+
+**4. Countryドロップダウンを開く**
+
+MCPツール呼び出し：
+```js
+mcp__chrome-devtools__click({ 
+  element: "Country dropdown container", 
+  uid: "3_30" 
+})
+```
+
+レスポンス：
+```
+Successfully clicked on the element
+## Page content
+uid=4_28 generic "Japan Japan arrow_drop_down" focusable focused
+uid=4_40 listbox orientation="vertical"
+```
+
+---
+
+**5. 詳細スナップショットでUSAのUIDを確認**
+
+MCPツール呼び出し：
+```js
+mcp__chrome-devtools__take_snapshot({ verbose: true })
+```
+
+レスポンス（一部抜粋）：
+```
+uid=6_134 listbox orientation="vertical"
+  uid=6_135 option "USA" value="USA"
+  uid=6_138 option "Japan" value="Japan"
+  uid=6_141 option "UK" value="UK"
+  ...
+```
+
+---
+
+**6. USAを選択**
+
+MCPツール呼び出し：
+```js
+mcp__chrome-devtools__click({ 
+  element: "USA option", 
+  uid: "6_135" 
+})
+```
+
+レスポンス：
+```
+Successfully clicked on the element
+## Page content
+uid=7_28 generic "USA USA arrow_drop_down" focusable focused
+uid=7_29 textbox "USA" haspopup="listbox" readonly value="USA"
+```
+
+---
+
+**7. Submitボタンをクリック**
+
+MCPツール呼び出し：
+```js
+mcp__chrome-devtools__click({ 
+  element: "SUBMIT button", 
+  uid: "7_38" 
+})
+```
+
+レスポンス：
+```
+Successfully clicked on the element
+## Page content
+uid=8_21 StaticText "check_circle"
+uid=8_22 StaticText "Success!"
+uid=8_24 StaticText "Form submitted successfully! Name: John Doe, Email: john@example.com"
+```
+
+:::
+
+### 検証から得られた知見
+
+1. **UID指定による確実な操作**
+   - スナップショットで要素のUIDを明示的に確認
+   - 誤操作のリスクが低い
+
+2. **ドロップダウン操作に複数ステップが必要**
+   - 開く → verbose スナップショット → 選択の3ステップ
+   - Playwright MCPは2ステップで完了
+
+3. **レスポンスは簡潔**
+   - コード例は含まれない
+   - 操作結果とページ状態のみ表示
+
 ## 実際の使用感：同じテストでの比較
 
 Blazorのフォーム（Name、Email、Age、Country）に入力してSubmitするテストで比較しました。
