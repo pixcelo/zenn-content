@@ -489,7 +489,7 @@ Visual StudioでEditorConfig設定を適用する方法：
 4. ↓ボタンで「含まれる修正ツール」に移動
 5. 「保存時にコードクリーンアッププロファイルを実行」にチェック
 
-![コードクリーンアップの構成ダイアログ](images/editorconfig-csharp-visualstudio/vs-code-cleanup-config.png)
+![コードクリーンアップの構成ダイアログ](/images/editorconfig-csharp-visualstudio/vs-code-cleanup-config.png)
 
 **ポイント:**
 - `suggestion`レベルは「警告とエラーを修正」の対象外（自動修正されない）
