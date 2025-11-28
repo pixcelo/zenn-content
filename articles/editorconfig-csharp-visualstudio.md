@@ -54,6 +54,16 @@ EditorConfigは、C#専用ではなく業界標準の設定フォーマットで
 Visual Studio 2017以降、`.editorconfig`がネイティブサポートされています。特にC#では、Roslynアナライザーと連携することで強力な機能を発揮します。
 
 :::message
+**バージョン要件の詳細**
+
+- **基本機能（インデント、改行等）**: Visual Studio 2017以降
+- **ルールの有効化と重大度設定**: Visual Studio 2019 version 16.3以降
+- **ビルド時のコードスタイル強制**: Visual Studio 2019 version 16.8以降（.NET 5.0 RC2 SDK含む）
+
+本記事で解説する「ビルドエラー化」機能は、Visual Studio 2019 version 16.8以降で利用可能です。
+:::
+
+:::message
 **Visual StudioとVS Codeの違い**
 
 - **Visual Studio**: Roslyn連携によるビルドエラー化が可能（本記事の対象）
@@ -238,6 +248,20 @@ dotnet_diagnostic.IDE0005.severity = warning
 
 `.editorconfig`の設定は、`dotnet build`コマンドで自動的にチェックされます。
 
+:::message
+**ビルド時のコードスタイル強制について**
+
+ビルド時にコードスタイル違反を警告・エラーとして報告するには、Visual Studio 2019 version 16.8以降（.NET 5.0 RC2 SDK含む）が必要です。この機能により、CI/CD環境でコードスタイルを厳格にチェックできます。
+
+プロジェクトファイル（.csproj）に以下を追加することで、ビルド時のコードスタイル強制を有効化できます：
+
+```xml
+<PropertyGroup>
+  <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+</PropertyGroup>
+```
+:::
+
 重要なポイント：
 
 - `severity = warning`の設定は、デフォルトではビルド成功
@@ -408,7 +432,7 @@ Error IDE1006: Naming rule violation: These words must begin with upper case cha
 
 #### 方法2: AGENTS.md（クロスツール標準）
 
-2025年に登場した**AGENTS.md**は、AIコーディングエージェント向けの標準規格です。EditorConfigと同様に、クロスツール互換性を目指しています。
+**AGENTS.md**は、AIコーディングエージェント向けの標準規格として提案されています。EditorConfigと同様に、クロスツール互換性を目指しています。
 
 ```markdown
 # AGENTS.md
@@ -573,6 +597,18 @@ Visual Studioの現在のコードスタイル設定を`.editorconfig`として�
 #### よく使う設定の抜粋版
 
 プロジェクトでよく使われる設定を抜粋した実用的なテンプレートです。この設定から始めて、必要に応じて追加・調整してください。
+
+:::message
+**注意: .NET 8以前のバージョンでの構文**
+
+.NET 8以前のバージョンでは、オプション形式での重大度設定（例: `csharp_style_var_when_type_is_apparent = true:suggestion`）がビルド時に考慮されない場合があります。その場合は、`dotnet_diagnostic.IDE*.severity` 形式を使用してください。
+
+例：
+```ini
+# .NET 8以前の場合
+dotnet_diagnostic.IDE0001.severity = suggestion
+```
+:::
 
 ```ini
 # トップレベル .editorconfig
