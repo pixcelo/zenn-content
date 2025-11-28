@@ -134,15 +134,18 @@ dotnet_diagnostic.IDE0055.severity = silent
 :::message
 **重要: silentレベルの制限**
 
-検証結果によると、`silent`（Refactoring Only）レベルのルールはコードクリーンアップに参加しません。
+`silent`（Refactoring Only）レベルのルールは、コードクリーンアップに参加しません。
 
+**動作:**
 - 保存時の自動適用には含まれない
 - コードクリーンアップ（Ctrl+K, Ctrl+E）では適用されない
-- 個別にクイックアクションから適用する必要がある
+- 個別にクイックアクション（電球アイコン）から適用する必要がある
 
-**注意**: コードスタイルの設定（例: `csharp_style_implicit_object_creation_when_type_is_apparent`）は、重大度レベルに関わらず、保存時やコードクリーンアップで自動修正されない場合があります。電球アイコンから手動で適用するか、コードクリーンアッププロファイルで明示的に有効にする必要があります。
+**注意:**
+コードスタイルの設定は、重大度レベルに関わらず、保存時やコードクリーンアップで自動修正されない場合があります。その場合は、電球アイコンから手動で適用するか、コードクリーンアッププロファイルで明示的に有効にしてください。
 
-一方で、Visual Studioのコード生成機能（コード補完、スニペット展開等）は、`silent`を含むすべての重大度レベル（`none`を除く）において、`.editorconfig`のスタイル設定に従います。これは、AI生成コードではなく、IDE側の自動整形やコード補完機能の動作です。
+**補足:**
+Visual Studioのコード生成機能（コード補完、スニペット展開等）は、`silent`を含むすべての重大度レベル（`none`を除く）において、`.editorconfig`のスタイル設定に従います。これは、AI生成コードではなく、IDE側の自動整形やコード補完機能の動作です。
 :::
 
 ### Level 2: 推奨（suggestion）
@@ -502,6 +505,7 @@ Visual StudioでEditorConfig設定を適用する方法：
 5. 「保存時にコードクリーンアッププロファイルを実行」にチェック
 
 ![コードクリーンアップの構成ダイアログ](/images/editorconfig-csharp-visualstudio/vs-code-cleanup-config.png)
+*Visual Studioのコードクリーンアップ構成画面*
 
 **ポイント:**
 - `suggestion`レベルは「警告とエラーを修正」の対象外（自動修正されない）
@@ -614,14 +618,17 @@ Visual Studioの現在のコードスタイル設定を`.editorconfig`として�
 **コードスタイル設定画面:**
 
 ![Visual Studioコードスタイル設定](/images/editorconfig-csharp-visualstudio/vs-code-style-settings.png)
+*Visual Studioのコードスタイル設定画面*
 
 **命名規則スタイル設定画面:**
 
 ![Visual Studio命名規則設定](/images/editorconfig-csharp-visualstudio/vs-naming-conventions.png)
+*Visual Studioの命名規則設定画面*
 
 **アナライザー設定画面:**
 
 ![Visual Studioアナライザー設定](/images/editorconfig-csharp-visualstudio/vs-analyzer-settings.png)
+*Visual Studioのアナライザー設定画面*
 
 ### 推奨設定テンプレート（C#特化版）
 
