@@ -494,7 +494,7 @@ Visual StudioでEditorConfig設定を適用する方法：
 **ポイント:**
 - `suggestion`レベルは「警告とエラーを修正」の対象外（自動修正されない）
 - `warning`/`error`レベルは、この設定により保存時やコードクリーンアップ時に自動修正される
-- 検証用サンプルプロジェクト: [samples/EditorConfigTest](../samples/EditorConfigTest/)
+- 検証用サンプルプロジェクト: [samples/EditorConfigTest](https://github.com/tetsurok/zenn-content/tree/main/samples/EditorConfigTest)
 
 ### AI駆動開発での動作フロー
 
