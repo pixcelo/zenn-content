@@ -1,0 +1,15 @@
+# suggestionレベルでの検証用設定
+
+root = true
+
+[*.cs]
+
+# ターゲット型new演算子（suggestion）
+csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion
+
+# 中括弧の追加（suggestion）
+csharp_prefer_braces = true:suggestion
+
+# usingの配置（suggestion）
+csharp_using_directive_placement = outside_namespace:suggestion
+

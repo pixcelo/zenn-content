@@ -1,0 +1,15 @@
+# warningレベルでの検証用設定
+
+root = true
+
+[*.cs]
+
+# ターゲット型new演算子（warning）
+csharp_style_implicit_object_creation_when_type_is_apparent = true:warning
+
+# 中括弧の追加（warning）
+csharp_prefer_braces = true:warning
+
+# usingの配置（warning）
+csharp_using_directive_placement = outside_namespace:warning
+

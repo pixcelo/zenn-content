@@ -1,0 +1,15 @@
+# errorレベルでの検証用設定
+
+root = true
+
+[*.cs]
+
+# ターゲット型new演算子（error）
+csharp_style_implicit_object_creation_when_type_is_apparent = true:error
+
+# 中括弧の追加（error）
+csharp_prefer_braces = true:error
+
+# usingの配置（error）
+csharp_using_directive_placement = outside_namespace:error
+
