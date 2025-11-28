@@ -17,6 +17,14 @@ GitHub CopilotやClaude Codeなど、AI支援ツールがC#開発に浸透して
 
 これらを毎回手動で修正するのは非効率です。`.editorconfig`を使えば、AI生成後のコードをIDE（Visual Studio）が自動整形し、プロジェクトの規約に従わせることができます。
 
+### この記事を読むメリット
+
+- AI生成コードのスタイル不統一を自動解決できるようになる
+- コードレビュー時間を削減し、本質的なレビューに集中できる
+- チーム全体で統一されたコーディング規約を実現できる
+- 既存プロジェクトへの段階的導入方法を学べる
+- 実用的な設定テンプレートをすぐに使える
+
 ### この記事で分かること
 
 - `.editorconfig`とは何か、Visual Studioでどのように使うか
@@ -530,7 +538,7 @@ sequenceDiagram
 
 この図から分かるように、`.editorconfig`の効果は「AI → IDE → 整形」という流れで発揮されます。
 
-### まとめ: AIエージェントとEditorConfigの役割分担
+### AIエージェントとEditorConfigの役割分担
 
 | 主体 | 役割 | EditorConfig参照 | 備考 |
 |------|------|-----------------|------|
@@ -1043,23 +1051,17 @@ solution/
 
 ## まとめ
 
-`.editorconfig`は、AI時代のC#開発における有用なツールです。
+`.editorconfig`は、AI時代のC#開発における有用なツールです。本記事で解説した要点：
 
-本記事で解説した内容をまとめると：
+- AI生成コードをプロジェクト規約に従わせる（コードクリーンアッププロファイル設定により自動修正可能）
+- コードレビューの効率化（スタイル指摘がゼロになる）
+- チーム全体のスタイル統一（新メンバーも規約に従える）
+- ビルドエラー化で品質担保（Visual StudioのRoslyn連携による強制力）
 
-- **AI生成コードをプロジェクト規約に従わせる**（コードクリーンアッププロファイル設定により自動修正可能）
-- **コードレビューの効率化**（スタイル指摘がゼロになる）
-- **チーム全体のスタイル統一**（新メンバーも規約に従える）
-- **ビルドエラー化で品質担保**（Visual StudioのRoslyn連携による強制力）
-
-導入のポイントは、段階的に導入し、チーム合意を得て、既存コードは焦らずに進めることです。詳細は「どんなメリットがあるのか？」と「既存C#プロジェクトへの導入戦略」セクションを参照してください。
+AI駆動開発において、`.editorconfig`はコード品質を自動的に担保するツールです。新規プロジェクトでは推奨設定テンプレートから始め、既存プロジェクトでは段階的導入戦略に従って、チーム合意を得ながら導入していきましょう。
 
 ### 参考リンク
 
 - [.NET のコード スタイル規則オプション | Microsoft Learn](https://learn.microsoft.com/ja-jp/dotnet/fundamentals/code-analysis/code-style-rule-options)
 - [EditorConfig.org](https://editorconfig.org/)
 - [Visual Studio での EditorConfig | Microsoft Learn](https://learn.microsoft.com/ja-jp/visualstudio/ide/create-portable-custom-editor-options)
-
----
-
-AI駆動開発において、`.editorconfig`はコード品質を自動的に担保するツールです。ぜひプロジェクトに導入して、より生産的な開発体験を手に入れてください。
