@@ -1,0 +1,39 @@
+# EditorConfig for zenn-content repository
+# チーム用の最小構成 - C#開発向け
+root = true
+
+# 全ファイル共通設定
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# C#ファイル
+[*.cs]
+#### コアEditorConfig オプション ####
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+
+#### C# コーディング規則 ####
+# if文の中括弧を必須化
+csharp_prefer_braces = true:warning
+
+# 不要なusingを自動削除
+dotnet_diagnostic.IDE0005.severity = warning
+
+# usingの整理
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+#### 命名規則 ####
+# privateフィールドは _camelCase を強制
+dotnet_naming_rule.private_fields_with_underscore.severity = warning
+dotnet_naming_rule.private_fields_with_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_with_underscore.style = prefix_underscore
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.prefix_underscore.required_prefix = _
+dotnet_naming_style.prefix_underscore.capitalization = camel_case

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>DB Schema Documentation</title>
+  <style>    
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 280px;
+      height: 100vh;
+      background: #2c3e50;
+      color: white;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar-header {
+      padding: 20px;
+      background: #1a252f;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .sidebar-header h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+    #search {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .table-list {
+      padding: 10px;
+    }
+    .table-link {
+      padding: 10px 15px;
+      margin: 5px 0;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+      font-size: 14px;
+      word-break: break-word;
+    }
+    .table-link:hover {
+      background: #34495e;
+    }
+    .table-link.active {
+      background: #3498db;
+    }
+    .content {
+      margin-left: 280px;
+      padding: 30px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      min-height: calc(100vh - 100px);
+    }
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #7f8c8d;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .load-more {
+      padding: 10px;
+      text-align: center;
+      background: #34495e;
+      margin: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .load-more:hover {
+      background: #3498db;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', monospace;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    #content a {
+      color: #3498db;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #content a:hover {
+      text-decoration: underline;
+    }
+    #content img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      background: white;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>テーブル一覧</h2>
+      <input type="text" id="search" placeholder="テーブル名で検索...">
+    </div>
+    <div class="table-list" id="table-list">
+      <div class="loading">
+        <div class="spinner"></div>
+        ファイル一覧を読み込み中...<br>
+        <small id="load-status">初期化中...</small>
+      </div>
+    </div>
+  </div>
+  
+  <div class="content">
+    <div class="container">
+      <div id="content">
+        <div class="loading">
+          <p>左側のリストからテーブルを選択してください</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allFiles = [];
+    let fileIdMap = {};
+    let currentFileId = null;
+    let isLoading = false;
+
+    // ファイル一覧を読み込む（タイムアウト対策）
+    function loadFileList() {
+      if (isLoading) return;
+      isLoading = true;
+      
+      document.getElementById('load-status').textContent = 'ファイル一覧を取得中...';
+      
+      // タイムアウトを設定（60秒）
+      const timeout = setTimeout(function() {
+        document.getElementById('table-list').innerHTML = 
+          '<div style="padding: 20px; color: #e74c3c;">' +
+          'タイムアウトしました。<br>' +
+          'ファイル数が多すぎる可能性があります。<br>' +
+          '<button onclick="loadFileList()" style="margin-top: 10px; padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">再試行</button>' +
+          '</div>';
+        isLoading = false;
+      }, 60000);
+      
+      google.script.run
+        .withSuccessHandler(function(files) {
+          clearTimeout(timeout);
+          isLoading = false;
+          
+          if (!files || files.length === 0) {
+            document.getElementById('table-list').innerHTML = 
+              '<div style="padding: 20px;">ファイルが見つかりません</div>';
+            return;
+          }
+          
+          document.getElementById('load-status').textContent = 
+            files.length + '件のファイルを読み込みました';
+          
+          allFiles = files;
+          
+          // ファイル名とIDのマッピングを作成
+          files.forEach(function(file) {
+            fileIdMap[file.name] = file.id;
+          });
+          
+          // .mdファイルのみをサイドバーに表示
+          const mdFiles = files.filter(f => f.name.endsWith('.md'));
+          displayFileList(mdFiles);
+        })
+        .withFailureHandler(function(error) {
+          clearTimeout(timeout);
+          isLoading = false;
+          
+          document.getElementById('table-list').innerHTML = 
+            '<div style="padding: 20px; color: #e74c3c;">' +
+            'エラー: ' + error.message + '<br><br>' +
+            '<button onclick="loadFileList()" style="padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">再試行</button>' +
+            '</div>';
+        })
+        .getFileList();
+    }
+
+    // ファイル一覧を表示
+    function displayFileList(files) {
+      const listDiv = document.getElementById('table-list');
+      listDiv.innerHTML = '';
+      
+      if (files.length === 0) {
+        listDiv.innerHTML = '<div style="padding: 20px;">ファイルが見つかりません</div>';
+        return;
+      }
+
+      files.forEach(function(file) {
+        const div = document.createElement('div');
+        div.className = 'table-link';
+        div.textContent = file.name.replace('.md', '');
+        div.onclick = function() {
+          loadMarkdownFile(file.id, file.name, div);
+        };
+        listDiv.appendChild(div);
+      });
+    }
+
+    // マークダウンファイルを読み込んで表示
+    function loadMarkdownFile(fileId, fileName, element) {
+      document.querySelectorAll('.table-link').forEach(el => el.classList.remove('active'));
+      if (element) {
+        element.classList.add('active');
+      }
+      
+      document.getElementById('content').innerHTML = 
+        '<div class="loading"><div class="spinner"></div>読み込み中...</div>';
+      
+      currentFileId = fileId;
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success && result.type === 'markdown') {
+            displayMarkdown(result.content);
+          } else {
+            document.getElementById('content').innerHTML = 
+              '<div style="color: #e74c3c;">エラー: ' + (result.error || '不明なエラー') + '</div>';
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('content').innerHTML = 
+            '<div style="color: #e74c3c;">読み込みエラー: ' + error.message + '</div>';
+        })
+        .getFileContent(fileId);
+    }
+
+    // マークダウンを表示してリンクを処理
+    function displayMarkdown(markdown) {
+      let html = marked.parse(markdown);
+      document.getElementById('content').innerHTML = html;
+      processLinks();
+      processSvgImages();
+    }
+
+    // リンクを処理
+    function processLinks() {
+      const contentDiv = document.getElementById('content');
+      const links = contentDiv.querySelectorAll('a');
+      
+      links.forEach(function(link) {
+        const href = link.getAttribute('href');
+        
+        if (href && href.endsWith('.md')) {
+          link.onclick = function(e) {
+            e.preventDefault();
+            const targetFileName = href;
+            
+            if (fileIdMap[targetFileName]) {
+              loadMarkdownFile(fileIdMap[targetFileName], targetFileName, null);
+            } else {
+              alert('ファイル "' + targetFileName + '" が見つかりません');
+            }
+            
+            return false;
+          };
+        }
+      });
+    }
+
+    // SVG画像を処理
+    function processSvgImages() {
+      const contentDiv = document.getElementById('content');
+      const images = contentDiv.querySelectorAll('img');
+      
+      images.forEach(function(img) {
+        const src = img.getAttribute('src');
+        
+        if (src && src.endsWith('.svg')) {
+          const svgFileName = src;
+          
+          if (fileIdMap[svgFileName]) {
+            loadAndDisplaySvg(img, fileIdMap[svgFileName]);
+          } else {
+            img.alt = 'SVGファイル "' + svgFileName + '" が見つかりません';
+          }
+        }
+      });
+    }
+
+    // SVGファイルを読み込んで表示
+    function loadAndDisplaySvg(imgElement, fileId) {
+      imgElement.alt = '読み込み中...';
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success && result.type === 'svg') {
+            const base64 = btoa(unescape(encodeURIComponent(result.content)));
+            imgElement.src = 'data:image/svg+xml;base64,' + base64;
+          } else {
+            imgElement.alt = 'SVG読み込みエラー';
+          }
+        })
+        .withFailureHandler(function(error) {
+          imgElement.alt = 'SVG読み込み失敗: ' + error.message;
+        })
+        .getFileContent(fileId);
+    }
+
+    // 検索機能
+    document.getElementById('search').addEventListener('input', function(e) {
+      const keyword = e.target.value.toLowerCase();
+      const filtered = allFiles
+        .filter(f => f.name.endsWith('.md'))
+        .filter(file => file.name.toLowerCase().includes(keyword));
+      displayFileList(filtered);
+    });
+
+    // 初期読み込み
+    window.onload = function() {
+      loadFileList();
+    };
+  </script>
+</body>
+</html>

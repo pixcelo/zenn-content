@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <style>
+      .table-box { fill: #e8f4f8; stroke: #2980b9; stroke-width: 2; }
+      .table-name { font: bold 14px sans-serif; fill: #2c3e50; }
+      .column-text { font: 12px monospace; fill: #34495e; }
+      .relation-line { stroke: #95a5a6; stroke-width: 1.5; fill: none; }
+    </style>
+  </defs>
+
+  <!-- users table -->
+  <rect x="110" y="100" width="180" height="120" class="table-box"/>
+  <text x="200" y="125" text-anchor="middle" class="table-name">users</text>
+  <text x="120" y="145" class="column-text">user_id (PK)</text>
+  <text x="120" y="165" class="column-text">email</text>
+  <text x="120" y="185" class="column-text">username</text>
+  <text x="120" y="205" class="column-text">full_name</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <style>
+      .table-box { fill: #e8f4f8; stroke: #2980b9; stroke-width: 2; }
+      .table-name { font: bold 14px sans-serif; fill: #2c3e50; }
+      .column-text { font: 12px monospace; fill: #34495e; }
+      .relation-line { stroke: #95a5a6; stroke-width: 1.5; fill: none; }
+    </style>
+  </defs>
+
+  <!-- users table -->
+  <rect x="50" y="50" width="180" height="100" class="table-box"/>
+  <text x="140" y="75" text-anchor="middle" class="table-name">users</text>
+  <text x="60" y="95" class="column-text">user_id (PK)</text>
+  <text x="60" y="115" class="column-text">email</text>
+  <text x="60" y="135" class="column-text">username</text>
+
+  <!-- categories table -->
+  <rect x="50" y="250" width="180" height="100" class="table-box"/>
+  <text x="140" y="275" text-anchor="middle" class="table-name">categories</text>
+  <text x="60" y="295" class="column-text">category_id (PK)</text>
+  <text x="60" y="315" class="column-text">category_name</text>
+  <text x="60" y="335" class="column-text">parent_category_id (FK)</text>
+
+  <!-- products table -->
+  <rect x="310" y="150" width="180" height="120" class="table-box"/>
+  <text x="400" y="175" text-anchor="middle" class="table-name">products</text>
+  <text x="320" y="195" class="column-text">product_id (PK)</text>
+  <text x="320" y="215" class="column-text">category_id (FK)</text>
+  <text x="320" y="235" class="column-text">product_name</text>
+  <text x="320" y="255" class="column-text">price</text>
+
+  <!-- orders table -->
+  <rect x="310" y="50" width="180" height="80" class="table-box"/>
+  <text x="400" y="75" text-anchor="middle" class="table-name">orders</text>
+  <text x="320" y="95" class="column-text">order_id (PK)</text>
+  <text x="320" y="115" class="column-text">user_id (FK)</text>
+
+  <!-- order_details table -->
+  <rect x="570" y="150" width="180" height="100" class="table-box"/>
+  <text x="660" y="175" text-anchor="middle" class="table-name">order_details</text>
+  <text x="580" y="195" class="column-text">detail_id (PK)</text>
+  <text x="580" y="215" class="column-text">order_id (FK)</text>
+  <text x="580" y="235" class="column-text">product_id (FK)</text>
+
+  <!-- Relations -->
+  <path d="M 230 100 L 310 100" class="relation-line" marker-end="url(#arrowhead)"/>
+  <path d="M 230 290 L 310 230" class="relation-line" marker-end="url(#arrowhead)"/>
+  <path d="M 490 210 L 570 200" class="relation-line" marker-end="url(#arrowhead)"/>
+  <path d="M 490 100 L 570 180" class="relation-line" marker-end="url(#arrowhead)"/>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#95a5a6"/>
+    </marker>
+  </defs>
+</svg>
