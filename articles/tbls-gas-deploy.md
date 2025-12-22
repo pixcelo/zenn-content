@@ -3,7 +3,8 @@ title: "tblsのDBスキーマをGASで社内公開 - GitHub不要&無料"
 emoji: "📊"
 type: "tech"
 topics: ["tbls", "gas", "googleappsscript", "markdown", "スキーマ管理"]
-published: false
+published: true
+published_at: 2025-12-23 16:00
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
