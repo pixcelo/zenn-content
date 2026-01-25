@@ -3,7 +3,7 @@ title: "C#開発者向け .editorconfigでAI生成コードを整形 - Visual St
 emoji: "🛠️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["editorconfig", "csharp", "visualstudio", "ai"]
-published: false
+published: true
 published_at: 2025-12-08 16:00
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
