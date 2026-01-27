@@ -8,7 +8,7 @@ published_at: 2025-12-08 16:00
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
-## はじめに - AI時代のC#コード品質管理
+## はじめに
 
 GitHub CopilotやClaude Codeなど、AI支援ツールがC#開発に浸透してきました。しかし、AI生成コードには「スタイルの不統一」という課題があります。
 
@@ -104,6 +104,9 @@ csharp_prefer_braces = true:warning
 - ビルドは成功する
 - CI/CDで `/warnaserror` を使うとエラー化可能
 
+![エディタ上での警告表示](/images/editorconfig-csharp-visualstudio/vs-editor-warning-underline.png)
+*コードエディタでの警告表示例（緑の波線）*
+
 ### Level 4: エラー（error）
 
 ```ini
@@ -131,6 +134,9 @@ namespace MyApp
 {
 }
 ```
+
+![エラー一覧での警告表示](/images/editorconfig-csharp-visualstudio/vs-error-list-warning.png)
+*コードエディタでのエラー表示例（赤の波線）*
 
 `severity = error`に設定することで、usingの配置ミスがビルドエラーになり、規約違反のコードをコミット前に検出できます。
 
@@ -200,6 +206,9 @@ Visual StudioでEditorConfig設定を適用する方法：
 - **コードのクリーンアップ**: `Ctrl + K, Ctrl + E`
 - **ドキュメントのフォーマット**: `Ctrl + K, Ctrl + D`
 
+![コードクリーンアップのツールチップ](/images/editorconfig-csharp-visualstudio/vs-error-list-with-cleanup-tooltip.png)
+*エラー一覧ウィンドウで上部にある「ほうきアイコン」をクリックでクリーンアップが実行できる*
+
 コードクリーンアッププロファイルの設定（重要）
 
 `warning`や`error`レベルの設定を自動修正するには、以下の設定が必要です：
@@ -210,6 +219,9 @@ Visual StudioでEditorConfig設定を適用する方法：
 
 ![コードクリーンアップの構成ダイアログ](/images/editorconfig-csharp-visualstudio/vs-code-cleanup-config.png)
 *Visual Studioのコードクリーンアップ構成画面*
+
+![保存時にコードクリーンアップを実行する設定](/images/editorconfig-csharp-visualstudio/vs-code-cleanup-on-save-option.png)
+*「保存時にコードクリーンアッププロファイルを実行する」を有効化することで、ファイル保存時に自動的にEditorConfig設定が適用される*
 
 ### AIエージェントとEditorConfigの役割分担
 
