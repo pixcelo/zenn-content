@@ -1,0 +1,52 @@
+@page "/"
+@using blazor_barcode_scanner.Components
+
+<PageTitle>バーコードスキャナー</PageTitle>
+
+<h1>BlazorBarcodeScanner.ZXing.JS サンプル</h1>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>バーコード/QRコードスキャナー</h5>
+                </div>
+                <div class="card-body text-center">
+                    <button class="btn btn-primary btn-lg" @onclick="OpenScanner">
+                        <i class="bi bi-camera"></i> スキャン開始
+                    </button>
+
+                    @if (!string.IsNullOrEmpty(lastResult))
+                    {
+                        <div class="alert alert-success mt-4">
+                            <h6>最新のスキャン結果:</h6>
+                            <p class="mb-0"><strong>@lastResult</strong></p>
+                            <small class="text-muted">@lastScannedTime</small>
+                        </div>
+                    }
+
+                    @if (scanHistory.Any())
+                    {
+                        <hr />
+                        <h6>スキャン履歴:</h6>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in scanHistory.Take(10))
+                            {
+                                <li class="list-group-item">
+                                    <small>@item</small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<BarcodeScannerComponent IsOpen="showModal"
+                         OnScanCompleted="HandleScanResult"
+                         OnCancelled="CloseScanner" />
+
+

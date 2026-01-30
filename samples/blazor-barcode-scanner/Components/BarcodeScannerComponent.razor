@@ -1,0 +1,38 @@
+@using BlazorBarcodeScanner.ZXing.JS
+
+@if (IsOpen)
+{
+    <div class="modal-overlay" @onclick="HandleCancel">
+        <div class="modal-scanner" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h5 class="modal-title">QRコード読み取り</h5>
+                <button type="button" class="btn-close" @onclick="HandleCancel" aria-label="Close">
+                    ×
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="scanner-container">
+                    <BlazorBarcodeScanner.ZXing.JS.BarcodeReader Title=""
+                                                                 StartCameraAutomatically="true"
+                                                                 ShowStart="false"
+                                                                 ShowStop="false"
+                                                                 ShowReset="false"
+                                                                 ShowToggleTorch="false"
+                                                                 ShowVideoDeviceList="false"
+                                                                 ShowResult="false"
+                                                                 VideoWidth="640"
+                                                                 VideoHeight="480"
+                                                                 OnBarcodeReceived="HandleBarcodeDetected"
+                                                                 OnErrorReceived="HandleError" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" @onclick="HandleCancel">
+                    キャンセル
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+
