@@ -1,0 +1,56 @@
+@using Radzen
+@using Radzen.Blazor
+
+@* Radzen DataGridを使用したデモ *@
+
+<div class="radzen-datagrid-demo">
+    <h3>Radzen DataGrid デモ</h3>
+
+    <RadzenDataGrid Data="@Products"
+                    TItem="Product"
+                    AllowFiltering="true"
+                    AllowSorting="true"
+                    AllowPaging="true"
+                    PageSize="5">
+        <Columns>
+            <RadzenDataGridColumn TItem="Product" Property="Id" Title="ID" Width="80px" />
+            <RadzenDataGridColumn TItem="Product" Property="Name" Title="商品名" />
+            <RadzenDataGridColumn TItem="Product" Property="Price" Title="価格">
+                <Template Context="product">
+                    ¥@product.Price.ToString("N0")
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Product" Property="InStock" Title="在庫">
+                <Template Context="product">
+                    @(product.InStock ? "あり" : "なし")
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</div>
+
+@code {
+    private List<Product> Products { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        Products = new List<Product>
+        {
+            new Product { Id = 1, Name = "ノートPC", Price = 120000, InStock = true },
+            new Product { Id = 2, Name = "マウス", Price = 2500, InStock = true },
+            new Product { Id = 3, Name = "キーボード", Price = 8000, InStock = false },
+            new Product { Id = 4, Name = "モニター", Price = 35000, InStock = true },
+            new Product { Id = 5, Name = "Webカメラ", Price = 6500, InStock = true },
+            new Product { Id = 6, Name = "スピーカー", Price = 12000, InStock = false },
+            new Product { Id = 7, Name = "ヘッドセット", Price = 15000, InStock = true },
+        };
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public bool InStock { get; set; }
+    }
+}

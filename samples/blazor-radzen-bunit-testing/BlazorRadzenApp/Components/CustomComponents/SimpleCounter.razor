@@ -1,0 +1,38 @@
+@* HTMLベースのシンプルなカウンターコンポーネント *@
+
+<div class="simple-counter">
+    <h3>@Title</h3>
+    <p>現在のカウント: <strong>@CurrentCount</strong></p>
+    <button class="btn btn-primary" @onclick="IncrementCount">カウントアップ</button>
+    <button class="btn btn-secondary" @onclick="Reset">リセット</button>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "カウンター";
+
+    [Parameter]
+    public int InitialValue { get; set; } = 0;
+
+    [Parameter]
+    public EventCallback<int> OnCountChanged { get; set; }
+
+    private int CurrentCount { get; set; }
+
+    protected override void OnInitialized()
+    {
+        CurrentCount = InitialValue;
+    }
+
+    private async Task IncrementCount()
+    {
+        CurrentCount++;
+        await OnCountChanged.InvokeAsync(CurrentCount);
+    }
+
+    private async Task Reset()
+    {
+        CurrentCount = InitialValue;
+        await OnCountChanged.InvokeAsync(CurrentCount);
+    }
+}

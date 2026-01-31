@@ -1,0 +1,55 @@
+@using Radzen
+@using Radzen.Blazor
+@inject DialogService DialogService
+
+@* Radzen Dialogを使用したデモ *@
+
+<div class="radzen-dialog-demo">
+    <h3>Radzen Dialog デモ</h3>
+
+    <div class="mb-3">
+        <RadzenButton Text="ダイアログを開く"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Click="@OpenDialog" />
+    </div>
+
+    <div class="mb-3">
+        <RadzenButton Text="確認ダイアログ"
+                      ButtonStyle="ButtonStyle.Warning"
+                      Click="@OpenConfirmDialog" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(DialogResult))
+    {
+        <div class="alert alert-success">
+            結果: @DialogResult
+        </div>
+    }
+</div>
+
+@code {
+    private string DialogResult { get; set; } = string.Empty;
+
+    private async Task OpenDialog()
+    {
+        var result = await DialogService.OpenAsync("情報", ds =>
+            @<div>
+                <p>これはRadzenダイアログのデモです。</p>
+                <RadzenButton Text="閉じる" Click="() => ds.Close(true)" />
+            </div>
+        );
+
+        DialogResult = result != null ? "ダイアログが閉じられました" : "キャンセルされました";
+    }
+
+    private async Task OpenConfirmDialog()
+    {
+        var confirmed = await DialogService.Confirm(
+            "この操作を実行してもよろしいですか?",
+            "確認",
+            new ConfirmOptions { OkButtonText = "はい", CancelButtonText = "いいえ" }
+        );
+
+        DialogResult = confirmed == true ? "確認されました" : "キャンセルされました";
+    }
+}

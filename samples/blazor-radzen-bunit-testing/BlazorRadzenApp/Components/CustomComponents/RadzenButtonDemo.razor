@@ -1,0 +1,54 @@
+@using Radzen
+@using Radzen.Blazor
+
+@* Radzenコンポーネントを使用したデモ *@
+
+<div class="radzen-button-demo">
+    <h3>Radzen ボタンデモ</h3>
+
+    <div class="mb-3">
+        <RadzenButton Text="クリックしてください"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Click="@OnButtonClick" />
+    </div>
+
+    <div class="mb-3">
+        <RadzenButton Text="成功ボタン"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="check_circle"
+                      Click="@(() => HandleButtonClick("Success"))" />
+
+        <RadzenButton Text="警告ボタン"
+                      ButtonStyle="ButtonStyle.Warning"
+                      Icon="warning"
+                      Click="@(() => HandleButtonClick("Warning"))" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(ClickMessage))
+    {
+        <div class="alert alert-info">
+            @ClickMessage
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnClick { get; set; }
+
+    private string ClickMessage { get; set; } = string.Empty;
+    private int ClickCount { get; set; }
+
+    private async Task OnButtonClick()
+    {
+        ClickCount++;
+        ClickMessage = $"ボタンがクリックされました (合計: {ClickCount}回)";
+        await OnClick.InvokeAsync(ClickMessage);
+    }
+
+    private async Task HandleButtonClick(string buttonType)
+    {
+        ClickMessage = $"{buttonType}ボタンがクリックされました";
+        await OnClick.InvokeAsync(buttonType);
+    }
+}

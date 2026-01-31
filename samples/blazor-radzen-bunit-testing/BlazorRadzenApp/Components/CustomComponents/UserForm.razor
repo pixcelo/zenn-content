@@ -1,0 +1,80 @@
+@* HTMLベースのフォームコンポーネント *@
+
+<div class="user-form">
+    <h3>ユーザー情報入力</h3>
+
+    <div class="form-group mb-3">
+        <label for="username">ユーザー名:</label>
+        <input type="text"
+               id="username"
+               class="form-control"
+               @bind="Username"
+               placeholder="ユーザー名を入力" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="email">メールアドレス:</label>
+        <input type="email"
+               id="email"
+               class="form-control"
+               @bind="Email"
+               placeholder="email@example.com" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label>
+            <input type="checkbox" @bind="AcceptTerms" />
+            利用規約に同意する
+        </label>
+    </div>
+
+    <button class="btn btn-success"
+            @onclick="HandleSubmit"
+            disabled="@(!IsValid)">
+        送信
+    </button>
+
+    @if (IsSubmitted)
+    {
+        <div class="alert alert-success mt-3">
+            送信完了: @Username (@Email)
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<UserFormData> OnSubmit { get; set; }
+
+    private string Username { get; set; } = string.Empty;
+    private string Email { get; set; } = string.Empty;
+    private bool AcceptTerms { get; set; }
+    private bool IsSubmitted { get; set; }
+
+    private bool IsValid => !string.IsNullOrWhiteSpace(Username)
+                            && !string.IsNullOrWhiteSpace(Email)
+                            && AcceptTerms;
+
+    private async Task HandleSubmit()
+    {
+        if (IsValid)
+        {
+            var formData = new UserFormData
+            {
+                Username = Username,
+                Email = Email,
+                AcceptedTerms = AcceptTerms
+            };
+
+            await OnSubmit.InvokeAsync(formData);
+            IsSubmitted = true;
+        }
+    }
+
+    public class UserFormData
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public bool AcceptedTerms { get; set; }
+    }
+}
