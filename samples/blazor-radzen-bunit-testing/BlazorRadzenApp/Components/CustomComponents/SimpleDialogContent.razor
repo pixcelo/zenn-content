@@ -1,0 +1,16 @@
+@using Radzen
+@inject DialogService DialogService
+
+<div>
+    <p>これはRadzenダイアログのデモです。</p>
+    <div class="mt-3">
+        <RadzenButton Text="閉じる" Click="@Close" ButtonStyle="ButtonStyle.Primary" />
+    </div>
+</div>
+
+@code {
+    private void Close()
+    {
+        DialogService.Close(true);
+    }
+}

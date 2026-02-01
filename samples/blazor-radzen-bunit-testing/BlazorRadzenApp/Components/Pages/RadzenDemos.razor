@@ -1,0 +1,78 @@
+@page "/radzen-demos"
+@using BlazorRadzenApp.Components.CustomComponents
+
+<PageTitle>Radzen Demos</PageTitle>
+
+<h1>Radzen Blazor コンポーネントデモ</h1>
+
+<p>このページでは、Radzen Blazorコンポーネントを使用したデモと、HTMLベースのコンポーネントを表示します。</p>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>HTMLベースのコンポーネント</h4>
+            </div>
+            <div class="card-body">
+                <h5>SimpleCounter</h5>
+                <SimpleCounter Title="デモカウンター" InitialValue="0" />
+
+                <hr class="my-4" />
+
+                <h5>UserForm</h5>
+                <UserForm OnSubmit="HandleFormSubmit" />
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Radzen コンポーネント</h4>
+            </div>
+            <div class="card-body">
+                <h5>RadzenButton Demo</h5>
+                <RadzenButtonDemo OnClick="HandleButtonClick" />
+
+                <hr class="my-4" />
+
+                <h5>RadzenDialog Demo</h5>
+                <RadzenDialogDemo />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>RadzenDataGrid Demo</h4>
+            </div>
+            <div class="card-body">
+                <RadzenDataGridDemo />
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(statusMessage))
+{
+    <div class="alert alert-info mt-3">
+        <strong>イベント:</strong> @statusMessage
+    </div>
+}
+
+@code {
+    private string statusMessage = string.Empty;
+
+    private void HandleFormSubmit(UserForm.UserFormData data)
+    {
+        statusMessage = $"フォーム送信: {data.Username} ({data.Email})";
+    }
+
+    private void HandleButtonClick(string message)
+    {
+        statusMessage = $"ボタンクリック: {message}";
+    }
+}

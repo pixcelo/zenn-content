@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+@using Radzen.Blazor
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -15,6 +17,11 @@
 
 <body>
     <Routes />
+    <RadzenDialog @rendermode="InteractiveServer" />
+    <RadzenNotification @rendermode="InteractiveServer" />
+    <RadzenContextMenu @rendermode="InteractiveServer" />
+    <RadzenTooltip @rendermode="InteractiveServer" />
+
     <script src="_framework/blazor.web.js"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
 
