@@ -1,0 +1,14 @@
+# Node
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Playwright artifacts
+/artifacts/
