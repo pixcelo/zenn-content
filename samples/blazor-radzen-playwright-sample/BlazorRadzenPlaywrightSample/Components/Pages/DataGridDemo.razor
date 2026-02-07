@@ -67,6 +67,13 @@
 
             <RadzenDataGridColumn TItem="GridItem" Property="Total" Title="合計" Width="120px" FormatString="{0:N0}円" />
 
+            @* 状態列（新規追加） *@
+            <RadzenDataGridColumn TItem="GridItem" Property="StatusText" Title="状態" Width="100px">
+                <Template Context="item">
+                    <span data-status="@item.Status">@item.StatusText</span>
+                </Template>
+            </RadzenDataGridColumn>
+
             <RadzenDataGridColumn TItem="GridItem" Title="操作" Width="100px" Sortable="false" Filterable="false">
                 <Template Context="item">
                     <RadzenButton ButtonStyle="ButtonStyle.Danger"

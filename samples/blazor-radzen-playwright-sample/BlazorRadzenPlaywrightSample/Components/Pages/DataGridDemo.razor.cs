@@ -4,6 +4,27 @@ using Radzen.Blazor;
 namespace BlazorRadzenPlaywrightSample.Components.Pages;
 
 /// <summary>
+/// 商品の状態
+/// </summary>
+public enum ItemStatus
+{
+    /// <summary>
+    /// 未着手
+    /// </summary>
+    NotStarted = 0,
+
+    /// <summary>
+    /// 進行中
+    /// </summary>
+    InProgress = 1,
+
+    /// <summary>
+    /// 完了
+    /// </summary>
+    Completed = 2
+}
+
+/// <summary>
 /// Radzen DataGrid コンポーネントのデモページ
 /// </summary>
 public partial class DataGridDemo : ComponentBase
@@ -58,9 +79,32 @@ public partial class DataGridDemo : ComponentBase
     protected override void OnInitialized()
     {
         // 初期データを追加
-        Items.Add(new GridItem { Id = _nextId++, Name = "サンプル商品1", Price = 1000, Quantity = 10 });
-        Items.Add(new GridItem { Id = _nextId++, Name = "サンプル商品2", Price = 2000, Quantity = 5 });
-        Items.Add(new GridItem { Id = _nextId++, Name = "サンプル商品3", Price = 1500, Quantity = 8 });
+        Items.Add(new GridItem
+        {
+            Id = _nextId++,
+            Name = "サンプル商品1",
+            Price = 1000,
+            Quantity = 10,
+            Status = ItemStatus.NotStarted  // 未着手
+        });
+
+        Items.Add(new GridItem
+        {
+            Id = _nextId++,
+            Name = "サンプル商品2",
+            Price = 2000,
+            Quantity = 5,
+            Status = ItemStatus.InProgress  // 進行中
+        });
+
+        Items.Add(new GridItem
+        {
+            Id = _nextId++,
+            Name = "サンプル商品3",
+            Price = 1500,
+            Quantity = 8,
+            Status = ItemStatus.Completed  // 完了
+        });
     }
 
     /// <summary>
@@ -73,7 +117,8 @@ public partial class DataGridDemo : ComponentBase
             Id = _nextId++,
             Name = $"新規商品{_nextId - 1}",
             Price = 0,
-            Quantity = 0
+            Quantity = 0,
+            Status = ItemStatus.NotStarted  // デフォルトは未着手
         });
 
         // DataGrid を再読み込み
@@ -154,8 +199,24 @@ public partial class DataGridDemo : ComponentBase
         public int Quantity { get; set; }
 
         /// <summary>
+        /// 商品の状態
+        /// </summary>
+        public ItemStatus Status { get; set; } = ItemStatus.NotStarted;
+
+        /// <summary>
         /// 合計金額（計算プロパティ）
         /// </summary>
         public decimal Total => Price * Quantity;
+
+        /// <summary>
+        /// 状態の表示テキスト
+        /// </summary>
+        public string StatusText => Status switch
+        {
+            ItemStatus.NotStarted => "未着手",
+            ItemStatus.InProgress => "進行中",
+            ItemStatus.Completed => "完了",
+            _ => "不明"
+        };
     }
 }
