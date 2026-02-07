@@ -1,0 +1,195 @@
+@inject DialogService DialogService
+
+@* Radzen Tabsを使用したデモ *@
+
+<div class="radzen-tabs-demo">
+    <h3>Radzen Tabs デモ</h3>
+
+    <RadzenTabs @bind-SelectedIndex="@selectedTabIndex" Change="@OnTabChange">
+        <Tabs>
+            <RadzenTabsItem Text="商品一覧" Icon="inventory">
+                <div class="p-3">
+                    <h4>商品一覧</h4>
+                    <RadzenDataGrid Data="@products" TItem="Product">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="Product" Property="Name" Title="商品名" />
+                            <RadzenDataGridColumn TItem="Product" Property="Price" Title="価格">
+                                <Template Context="product">
+                                    ¥@product.Price.ToString("N0")
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Product" Property="InStock" Title="在庫">
+                                <Template Context="product">
+                                    @(product.InStock ? "あり" : "なし")
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </div>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="注文履歴" Icon="receipt">
+                <div class="p-3">
+                    <h4>注文履歴</h4>
+                    <ul>
+                        @foreach (var order in orders)
+                        {
+                            <li>@order.Date.ToShortDateString() - @order.ProductName (¥@order.Amount.ToString("N0"))</li>
+                        }
+                    </ul>
+                    @if (!orders.Any())
+                    {
+                        <p class="text-muted">注文履歴はありません。</p>
+                    }
+                </div>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="設定" Icon="settings">
+                <div class="p-3">
+                    <h4>アプリケーション設定</h4>
+                    <div class="mb-3">
+                        <RadzenCheckBox @bind-Value="@notificationsEnabled" Name="notifications" />
+                        <label for="notifications">メール通知を有効にする</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">言語: @selectedLanguage</label>
+                        <div>
+                            @foreach (var lang in languages)
+                            {
+                                <RadzenRadioButtonList @bind-Value="@selectedLanguage" TValue="string">
+                                    <Items>
+                                        @foreach (var language in languages)
+                                        {
+                                            <RadzenRadioButtonListItem Text="@language" Value="@language" />
+                                        }
+                                    </Items>
+                                </RadzenRadioButtonList>
+                                break;
+                            }
+                        </div>
+                    </div>
+                    <RadzenButton Text="設定を保存" Click="@SaveSettings" ButtonStyle="ButtonStyle.Primary" />
+                </div>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="統計情報" Icon="bar_chart">
+                <div class="p-3">
+                    <h4>統計情報</h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">総売上</h5>
+                                    <p class="card-text display-6">¥@totalSales.ToString("N0")</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">総注文数</h5>
+                                    <p class="card-text display-6">@orders.Count</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">在庫商品数</h5>
+                                    <p class="card-text display-6">@products.Count(p => p.InStock)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+    @if (!string.IsNullOrEmpty(tabChangeMessage))
+    {
+        <div class="alert alert-info mt-3">
+            <strong>タブ変更:</strong> @tabChangeMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(settingsSavedMessage))
+    {
+        <div class="alert alert-success mt-3">
+            @settingsSavedMessage
+        </div>
+    }
+</div>
+
+@code {
+    private int selectedTabIndex = 0;
+    private string tabChangeMessage = string.Empty;
+    private string settingsSavedMessage = string.Empty;
+
+    // 設定タブ
+    private bool notificationsEnabled = true;
+    private string selectedLanguage = "日本語";
+    private List<string> languages = new() { "日本語", "English", "中文" };
+
+    // 商品データ
+    private List<Product> products = new();
+
+    // 注文履歴データ
+    private List<Order> orders = new();
+
+    private decimal totalSales => orders.Sum(o => o.Amount);
+
+    protected override void OnInitialized()
+    {
+        // 商品データの初期化
+        products = new List<Product>
+        {
+            new Product { Id = 1, Name = "ノートPC", Price = 120000, InStock = true },
+            new Product { Id = 2, Name = "マウス", Price = 2500, InStock = true },
+            new Product { Id = 3, Name = "キーボード", Price = 8000, InStock = false },
+            new Product { Id = 4, Name = "モニター", Price = 35000, InStock = true },
+        };
+
+        // 注文履歴データの初期化
+        orders = new List<Order>
+        {
+            new Order { Id = 1, Date = DateTime.Now.AddDays(-5), ProductName = "ノートPC", Amount = 120000 },
+            new Order { Id = 2, Date = DateTime.Now.AddDays(-3), ProductName = "マウス", Amount = 2500 },
+            new Order { Id = 3, Date = DateTime.Now.AddDays(-1), ProductName = "モニター", Amount = 35000 },
+        };
+    }
+
+    private void OnTabChange(int index)
+    {
+        var tabNames = new[] { "商品一覧", "注文履歴", "設定", "統計情報" };
+        if (index >= 0 && index < tabNames.Length)
+        {
+            tabChangeMessage = $"{tabNames[index]}タブに切り替えました (インデックス: {index})";
+        }
+        settingsSavedMessage = string.Empty;
+    }
+
+    private async Task SaveSettings()
+    {
+        settingsSavedMessage = $"設定を保存しました (通知: {(notificationsEnabled ? "有効" : "無効")}, 言語: {selectedLanguage})";
+
+        // ダイアログで保存完了を通知
+        await DialogService.Alert("設定が正常に保存されました。", "保存完了", new AlertOptions() { OkButtonText = "OK" });
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public bool InStock { get; set; }
+    }
+
+    public class Order
+    {
+        public int Id { get; set; }
+        public DateTime Date { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+    }
+}

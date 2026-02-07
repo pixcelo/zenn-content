@@ -1,0 +1,201 @@
+@* Radzen Accordionを使用したデモ *@
+
+<div class="radzen-accordion-demo">
+    <h3>Radzen Accordion デモ</h3>
+
+    <RadzenAccordion Multiple="@allowMultiple">
+        <Items>
+            <RadzenAccordionItem Text="基本情報" Icon="person" Expanded="@item0Expanded" ExpandedChanged="@OnItem0ExpandedChanged">
+                <div class="p-3">
+                    <h4>ユーザー基本情報</h4>
+                    <div class="mb-3">
+                        <label class="form-label">ユーザー名</label>
+                        <RadzenTextBox @bind-Value="@userName" Class="w-100" Placeholder="名前を入力" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">メールアドレス</label>
+                        <RadzenTextBox @bind-Value="@userEmail" Class="w-100" Placeholder="メールアドレスを入力" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">電話番号</label>
+                        <RadzenTextBox @bind-Value="@userPhone" Class="w-100" Placeholder="電話番号を入力" />
+                    </div>
+                </div>
+            </RadzenAccordionItem>
+
+            <RadzenAccordionItem Text="商品情報" Icon="inventory" Expanded="@item1Expanded" ExpandedChanged="@OnItem1ExpandedChanged">
+                <div class="p-3">
+                    <h4>在庫商品一覧</h4>
+                    <RadzenDataGrid Data="@products" TItem="Product">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="Product" Property="Name" Title="商品名" Width="150px" />
+                            <RadzenDataGridColumn TItem="Product" Property="Price" Title="価格" Width="100px">
+                                <Template Context="product">
+                                    ¥@product.Price.ToString("N0")
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Product" Property="Stock" Title="在庫数" Width="80px" />
+                        </Columns>
+                    </RadzenDataGrid>
+                </div>
+            </RadzenAccordionItem>
+
+            <RadzenAccordionItem Text="統計情報" Icon="bar_chart" Expanded="@item2Expanded" ExpandedChanged="@OnItem2ExpandedChanged">
+                <div class="p-3">
+                    <h4>販売統計</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">総商品数</h5>
+                                    <p class="card-text display-6">@products.Count</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">総在庫数</h5>
+                                    <p class="card-text display-6">@products.Sum(p => p.Stock)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">総在庫金額</h5>
+                                    <p class="card-text display-6">¥@products.Sum(p => p.Price * p.Stock).ToString("N0")</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">平均単価</h5>
+                                    <p class="card-text display-6">¥@(products.Any() ? products.Average(p => p.Price).ToString("N0") : "0")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </RadzenAccordionItem>
+
+            <RadzenAccordionItem Text="設定" Icon="settings" Expanded="@item3Expanded" ExpandedChanged="@OnItem3ExpandedChanged">
+                <div class="p-3">
+                    <h4>アプリケーション設定</h4>
+                    <div class="mb-3">
+                        <RadzenCheckBox @bind-Value="@allowMultiple" Name="allowMultiple" />
+                        <label for="allowMultiple">複数のアイテムを同時に開く</label>
+                    </div>
+                    <div class="mb-3">
+                        <RadzenCheckBox @bind-Value="@darkMode" Name="darkMode" />
+                        <label for="darkMode">ダークモード</label>
+                    </div>
+                </div>
+            </RadzenAccordionItem>
+        </Items>
+    </RadzenAccordion>
+
+    <div class="mt-3">
+        <RadzenButton Text="すべて展開" Click="@ExpandAll" ButtonStyle="ButtonStyle.Primary" Class="me-2" />
+        <RadzenButton Text="すべて折りたたむ" Click="@CollapseAll" ButtonStyle="ButtonStyle.Secondary" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <div class="alert alert-info mt-3">
+            @statusMessage
+        </div>
+    }
+</div>
+
+@code {
+    private bool allowMultiple = false;
+    private bool darkMode = false;
+
+    private string userName = "山田太郎";
+    private string userEmail = "yamada@example.com";
+    private string userPhone = "03-1234-5678";
+
+    private string statusMessage = string.Empty;
+
+    private List<Product> products = new();
+
+    // 各アコーディオンアイテムの展開状態を個別に管理
+    private bool item0Expanded = false;
+    private bool item1Expanded = false;
+    private bool item2Expanded = false;
+    private bool item3Expanded = false;
+
+    protected override void OnInitialized()
+    {
+        products = new List<Product>
+        {
+            new Product { Id = 1, Name = "ノートPC", Price = 120000, Stock = 5 },
+            new Product { Id = 2, Name = "マウス", Price = 2500, Stock = 20 },
+            new Product { Id = 3, Name = "キーボード", Price = 8000, Stock = 15 },
+            new Product { Id = 4, Name = "モニター", Price = 35000, Stock = 8 },
+            new Product { Id = 5, Name = "Webカメラ", Price = 6500, Stock = 12 },
+        };
+    }
+
+    private void ExpandAll()
+    {
+        // 複数展開モードを有効化
+        allowMultiple = true;
+
+        // すべてのアイテムを展開
+        item0Expanded = true;
+        item1Expanded = true;
+        item2Expanded = true;
+        item3Expanded = true;
+
+        statusMessage = "すべてのアイテムを展開しました";
+    }
+
+    private void CollapseAll()
+    {
+        // すべてのアイテムを折りたたむ
+        item0Expanded = false;
+        item1Expanded = false;
+        item2Expanded = false;
+        item3Expanded = false;
+
+        statusMessage = "すべてのアイテムを折りたたみました";
+    }
+
+    // 各アイテムの展開状態変更イベントハンドラー
+    private Task OnItem0ExpandedChanged(bool expanded)
+    {
+        item0Expanded = expanded;
+        return Task.CompletedTask;
+    }
+
+    private Task OnItem1ExpandedChanged(bool expanded)
+    {
+        item1Expanded = expanded;
+        return Task.CompletedTask;
+    }
+
+    private Task OnItem2ExpandedChanged(bool expanded)
+    {
+        item2Expanded = expanded;
+        return Task.CompletedTask;
+    }
+
+    private Task OnItem3ExpandedChanged(bool expanded)
+    {
+        item3Expanded = expanded;
+        return Task.CompletedTask;
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
+    }
+}
