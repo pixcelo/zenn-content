@@ -18,10 +18,16 @@
         <RadzenText>現在の行数: @Items.Count</RadzenText>
     </RadzenStack>
 
+    @* 選択情報表示 *@
+    <RadzenAlert AlertStyle="AlertStyle.Info" Shade="Shade.Lighter" class="mb-3">
+        <RadzenText>@SelectedInfo</RadzenText>
+    </RadzenAlert>
+
     @* DataGrid *@
     <RadzenDataGrid @ref="_grid"
                     Data="@Items"
                     TItem="GridItem"
+                    RowClick="@(args => OnRowClick(args.Data))"
                     AllowFiltering="true"
                     AllowSorting="true"
                     AllowColumnResize="true"
@@ -29,6 +35,16 @@
                     Density="Density.Compact"
                     GridLines="DataGridGridLines.Both">
         <Columns>
+            @* チェックボックス列 *@
+            <RadzenDataGridColumn TItem="GridItem" Width="60px" Sortable="false" Filterable="false" Resizable="false">
+                <HeaderTemplate>
+                    <RadzenCheckBox TriState="false" TValue="bool" Value="@(_selectAll)" Change="@OnSelectAllChange" />
+                </HeaderTemplate>
+                <Template Context="item">
+                    <RadzenCheckBox TriState="false" TValue="bool" Value="@(SelectedItems.Contains(item))" Change="@(() => ToggleSelection(item))" />
+                </Template>
+            </RadzenDataGridColumn>
+
             <RadzenDataGridColumn TItem="GridItem" Property="Id" Title="ID" Width="80px" />
 
             <RadzenDataGridColumn TItem="GridItem" Property="Name" Title="商品名">

@@ -23,6 +23,38 @@ public partial class DataGridDemo : ComponentBase
     /// </summary>
     private int _nextId = 1;
 
+    /// <summary>
+    /// 選択された行のリスト
+    /// </summary>
+    private List<GridItem> SelectedItems { get; set; } = new();
+
+    /// <summary>
+    /// 全選択状態
+    /// </summary>
+    private bool _selectAll = false;
+
+    /// <summary>
+    /// 選択された行の情報
+    /// </summary>
+    private string SelectedInfo
+    {
+        get
+        {
+            if (!SelectedItems.Any())
+            {
+                return "行が選択されていません";
+            }
+
+            if (SelectedItems.Count == 1)
+            {
+                var item = SelectedItems.First();
+                return $"選択: {item.Name} (ID: {item.Id}, 合計: {item.Total:N0}円)";
+            }
+
+            return $"{SelectedItems.Count}行が選択されています";
+        }
+    }
+
     protected override void OnInitialized()
     {
         // 初期データを追加
@@ -63,6 +95,52 @@ public partial class DataGridDemo : ComponentBase
         {
             await _grid.Reload();
         }
+    }
+
+    /// <summary>
+    /// 行の選択/選択解除をトグル
+    /// </summary>
+    private void ToggleSelection(GridItem item)
+    {
+        if (SelectedItems.Contains(item))
+        {
+            SelectedItems.Remove(item);
+        }
+        else
+        {
+            SelectedItems.Add(item);
+        }
+
+        // 全選択状態を更新
+        _selectAll = Items.Count > 0 && SelectedItems.Count == Items.Count;
+    }
+
+    /// <summary>
+    /// 全選択/全解除
+    /// </summary>
+    private void OnSelectAllChange(bool value)
+    {
+        if (value)
+        {
+            // 全選択
+            SelectedItems = Items.ToList();
+        }
+        else
+        {
+            // 全解除
+            SelectedItems.Clear();
+        }
+
+        _selectAll = value;
+    }
+
+    /// <summary>
+    /// 行クリック時のイベントハンドラ
+    /// </summary>
+    private void OnRowClick(GridItem item)
+    {
+        // 行クリックで選択をトグル
+        ToggleSelection(item);
     }
 
     /// <summary>
