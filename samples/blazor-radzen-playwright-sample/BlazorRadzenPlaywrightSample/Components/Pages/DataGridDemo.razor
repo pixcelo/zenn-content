@@ -1,0 +1,69 @@
+@page "/datagrid-demo"
+@rendermode InteractiveServer
+@using Radzen
+@using Radzen.Blazor
+
+<PageTitle>DataGrid Demo</PageTitle>
+
+<h1>Radzen DataGrid Demo</h1>
+
+<p>このページでは、Radzen の DataGrid コンポーネントで動的に行を追加・削除する方法を確認します。</p>
+
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H3" class="mb-3">動的に行を追加・削除できる DataGrid</RadzenText>
+
+    @* ツールバー *@
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" class="mb-3">
+        <RadzenButton Text="行を追加" Click="@AddRow" ButtonStyle="ButtonStyle.Primary" Icon="add" />
+        <RadzenText>現在の行数: @Items.Count</RadzenText>
+    </RadzenStack>
+
+    @* DataGrid *@
+    <RadzenDataGrid @ref="_grid"
+                    Data="@Items"
+                    TItem="GridItem"
+                    AllowFiltering="true"
+                    AllowSorting="true"
+                    AllowColumnResize="true"
+                    FilterMode="FilterMode.Simple"
+                    Density="Density.Compact"
+                    GridLines="DataGridGridLines.Both">
+        <Columns>
+            <RadzenDataGridColumn TItem="GridItem" Property="Id" Title="ID" Width="80px" />
+
+            <RadzenDataGridColumn TItem="GridItem" Property="Name" Title="商品名">
+                <EditTemplate Context="item">
+                    <RadzenTextBox @bind-Value="@item.Name" Style="width:100%;" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="GridItem" Property="Price" Title="単価" Width="120px" FormatString="{0:N0}円">
+                <EditTemplate Context="item">
+                    <RadzenNumeric @bind-Value="@item.Price" Style="width:100%;" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="GridItem" Property="Quantity" Title="数量" Width="100px">
+                <EditTemplate Context="item">
+                    <RadzenNumeric @bind-Value="@item.Quantity" Style="width:100%;" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="GridItem" Property="Total" Title="合計" Width="120px" FormatString="{0:N0}円" />
+
+            <RadzenDataGridColumn TItem="GridItem" Title="操作" Width="100px" Sortable="false" Filterable="false">
+                <Template Context="item">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                  Icon="delete"
+                                  Size="ButtonSize.Small"
+                                  Click="@(() => DeleteRow(item))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+
+    @if (!Items.Any())
+    {
+        <RadzenText class="mt-3">データがありません。「行を追加」ボタンをクリックして追加してください。</RadzenText>
+    }
+</RadzenCard>
