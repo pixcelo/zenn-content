@@ -36,8 +36,16 @@ namespace WhisperNetSample
 
         // マイク録音用
         private WaveInEvent _waveIn;
+        private WasapiLoopbackCapture _wasapiCapture;  // PC音声録音用
+        private MediaFoundationResampler _resampler;  // リサンプラー（PCオーディオ用）
         private WaveFileWriter _waveFileWriter;
         private string _recordingFilePath;
+
+        // ミックス録音用
+        private BufferedWaveProvider _micBuffer;  // マイク用バッファ
+        private BufferedWaveProvider _pcAudioBuffer;  // PCオーディオ用バッファ
+        private MixingSampleProvider _mixer;  // ミキサー
+        private System.Threading.Timer _mixingTimer;  // ミックス処理用タイマー
 
         public Form1()
         {
@@ -354,32 +362,22 @@ namespace WhisperNetSample
         {
             try
             {
-                // マイクデバイスの存在確認
-                if (WaveInEvent.DeviceCount == 0)
-                {
-                    MessageBox.Show("マイクが見つかりません", "エラー",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
                 // 録音ファイルパスを生成
                 _recordingFilePath = Path.Combine(Path.GetTempPath(), $"recording_{Guid.NewGuid()}.wav");
 
-                // WaveInEventを初期化（16kHz Mono、Whisper推奨設定）
-                _waveIn = new WaveInEvent();
-                _waveIn.WaveFormat = new WaveFormat(16000, 16, 1);
-
-                // ファイルライターを初期化
-                _waveFileWriter = new WaveFileWriter(_recordingFilePath, _waveIn.WaveFormat);
-
-                // データ受信イベントハンドラ
-                _waveIn.DataAvailable += (s, args) =>
+                // 録音モードに応じて処理を分岐
+                if (radioMicOnly.Checked)
                 {
-                    _waveFileWriter.Write(args.Buffer, 0, args.BytesRecorded);
-                };
-
-                // 録音開始
-                _waveIn.StartRecording();
+                    StartMicRecording();
+                }
+                else if (radioPCOnly.Checked)
+                {
+                    StartPCAudioRecording();
+                }
+                else if (radioMix.Checked)
+                {
+                    StartMixRecording();
+                }
 
                 // UI状態更新
                 btnStartRecording.Enabled = false;
@@ -388,7 +386,6 @@ namespace WhisperNetSample
                 btnTranscribe.Enabled = false;
                 labelRecordingStatus.Text = "録音中...";
                 labelRecordingStatus.ForeColor = System.Drawing.Color.Red;
-                UpdateStatus("マイク録音中...", false);
             }
             catch (Exception ex)
             {
@@ -401,18 +398,231 @@ namespace WhisperNetSample
         }
 
         /// <summary>
+        /// マイクのみ録音開始
+        /// </summary>
+        private void StartMicRecording()
+        {
+            // マイクデバイスの存在確認
+            if (WaveInEvent.DeviceCount == 0)
+            {
+                MessageBox.Show("マイクが見つかりません", "エラー",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // WaveInEventを初期化（16kHz Mono、Whisper推奨設定）
+            _waveIn = new WaveInEvent();
+            _waveIn.WaveFormat = new WaveFormat(16000, 16, 1);
+
+            // ファイルライターを初期化
+            _waveFileWriter = new WaveFileWriter(_recordingFilePath, _waveIn.WaveFormat);
+
+            // データ受信イベントハンドラ
+            _waveIn.DataAvailable += (s, args) =>
+            {
+                _waveFileWriter.Write(args.Buffer, 0, args.BytesRecorded);
+            };
+
+            // 録音開始
+            _waveIn.StartRecording();
+            UpdateStatus("マイク録音中...", false);
+        }
+
+        /// <summary>
+        /// PCの音のみ録音開始
+        /// </summary>
+        private void StartPCAudioRecording()
+        {
+            // WasapiLoopbackCaptureを初期化
+            _wasapiCapture = new WasapiLoopbackCapture();
+
+            // システムオーディオは48kHz Stereoが多いため、16kHz Monoにリサンプリング
+            var targetFormat = new WaveFormat(16000, 16, 1);
+
+            // ファイルライターを初期化
+            _waveFileWriter = new WaveFileWriter(_recordingFilePath, targetFormat);
+
+            // BufferedWaveProviderを使用してデータを受け渡す
+            var bufferedProvider = new BufferedWaveProvider(_wasapiCapture.WaveFormat)
+            {
+                DiscardOnBufferOverflow = true
+            };
+
+            // リサンプラーを作成
+            _resampler = new MediaFoundationResampler(bufferedProvider, targetFormat);
+            _resampler.ResamplerQuality = 60; // 高品質
+
+            // データ受信イベントハンドラ
+            _wasapiCapture.DataAvailable += (s, args) =>
+            {
+                // バッファにデータを追加
+                bufferedProvider.AddSamples(args.Buffer, 0, args.BytesRecorded);
+
+                // リサンプリングして書き込み
+                var resampledBuffer = new byte[args.BytesRecorded];
+                int bytesRead = _resampler.Read(resampledBuffer, 0, resampledBuffer.Length);
+
+                if (bytesRead > 0)
+                {
+                    _waveFileWriter.Write(resampledBuffer, 0, bytesRead);
+                }
+            };
+
+            // 録音開始
+            _wasapiCapture.StartRecording();
+            UpdateStatus("PC音声録音中... (音が鳴っていない場合は録音されません)", false);
+        }
+
+        /// <summary>
+        /// ミックス録音開始（マイク + PCオーディオ）
+        /// </summary>
+        private void StartMixRecording()
+        {
+            // マイクデバイスの存在確認
+            if (WaveInEvent.DeviceCount == 0)
+            {
+                MessageBox.Show("マイクが見つかりません", "エラー",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 共通フォーマット: 16kHz Mono
+            var targetFormat = new WaveFormat(16000, 16, 1);
+
+            // ファイルライターを初期化
+            _waveFileWriter = new WaveFileWriter(_recordingFilePath, targetFormat);
+
+            // マイク録音の初期化
+            _waveIn = new WaveInEvent();
+            _waveIn.WaveFormat = targetFormat;  // 直接16kHz Monoで録音
+
+            // マイク用バッファ
+            _micBuffer = new BufferedWaveProvider(targetFormat)
+            {
+                DiscardOnBufferOverflow = true
+            };
+
+            // PCオーディオ録音の初期化
+            _wasapiCapture = new WasapiLoopbackCapture();
+
+            // PCオーディオ用バッファ（リサンプリング前の48kHz Stereo）
+            var pcAudioSourceBuffer = new BufferedWaveProvider(_wasapiCapture.WaveFormat)
+            {
+                DiscardOnBufferOverflow = true
+            };
+
+            // PCオーディオ用バッファ（リサンプリング後の16kHz Mono）
+            _pcAudioBuffer = new BufferedWaveProvider(targetFormat)
+            {
+                DiscardOnBufferOverflow = true
+            };
+
+            // リサンプラーを作成（48kHz Stereo → 16kHz Mono）
+            _resampler = new MediaFoundationResampler(pcAudioSourceBuffer, targetFormat);
+            _resampler.ResamplerQuality = 60;
+
+            // マイクデータ受信イベント
+            _waveIn.DataAvailable += (s, args) =>
+            {
+                _micBuffer.AddSamples(args.Buffer, 0, args.BytesRecorded);
+            };
+
+            // PCオーディオデータ受信イベント
+            _wasapiCapture.DataAvailable += (s, args) =>
+            {
+                // ソースバッファに追加
+                pcAudioSourceBuffer.AddSamples(args.Buffer, 0, args.BytesRecorded);
+
+                // リサンプリングして16kHz Monoバッファに追加
+                var resampledBuffer = new byte[args.BytesRecorded];
+                int bytesRead = _resampler.Read(resampledBuffer, 0, resampledBuffer.Length);
+                if (bytesRead > 0)
+                {
+                    _pcAudioBuffer.AddSamples(resampledBuffer, 0, bytesRead);
+                }
+            };
+
+            // ミキサーを作成
+            var micProvider = _micBuffer.ToSampleProvider();
+            var pcAudioProvider = _pcAudioBuffer.ToSampleProvider();
+
+            _mixer = new MixingSampleProvider(new[] { micProvider, pcAudioProvider });
+
+            // タイマーでミックスしたデータをファイルに書き込む（100msごと）
+            _mixingTimer = new System.Threading.Timer(_ =>
+            {
+                try
+                {
+                    // ミキサーから読み取り
+                    var sampleBuffer = new float[targetFormat.SampleRate / 10];  // 100ms分
+                    int samplesRead = _mixer.Read(sampleBuffer, 0, sampleBuffer.Length);
+
+                    if (samplesRead > 0)
+                    {
+                        // float[] → byte[] 変換
+                        var byteBuffer = new byte[samplesRead * 2];  // 16bit = 2bytes
+                        for (int i = 0; i < samplesRead; i++)
+                        {
+                            var sample16 = (short)(sampleBuffer[i] * 32767f);
+                            byteBuffer[i * 2] = (byte)(sample16 & 0xFF);
+                            byteBuffer[i * 2 + 1] = (byte)(sample16 >> 8);
+                        }
+
+                        _waveFileWriter.Write(byteBuffer, 0, byteBuffer.Length);
+                    }
+                }
+                catch
+                {
+                    // タイマー処理中のエラーは無視
+                }
+            }, null, 100, 100);  // 100ms後に開始、100msごとに実行
+
+            // 録音開始
+            _waveIn.StartRecording();
+            _wasapiCapture.StartRecording();
+            UpdateStatus("ミックス録音中（マイク + PC音声）...", false);
+        }
+
+        /// <summary>
         /// 録音停止ボタンクリック
         /// </summary>
         private void btnStopRecording_Click(object sender, EventArgs e)
         {
             try
             {
-                // 録音停止
+                // マイク録音停止
                 if (_waveIn != null)
                 {
                     _waveIn.StopRecording();
                     _waveIn.Dispose();
                     _waveIn = null;
+                }
+
+                // PC音声録音停止
+                if (_wasapiCapture != null)
+                {
+                    _wasapiCapture.StopRecording();
+                    _wasapiCapture.Dispose();
+                    _wasapiCapture = null;
+                }
+
+                // ミックス録音用タイマー停止
+                if (_mixingTimer != null)
+                {
+                    _mixingTimer.Dispose();
+                    _mixingTimer = null;
+                }
+
+                // ミキサー・バッファのクリーンアップ
+                _mixer = null;
+                _micBuffer = null;
+                _pcAudioBuffer = null;
+
+                // リサンプラーをクリーンアップ
+                if (_resampler != null)
+                {
+                    _resampler.Dispose();
+                    _resampler = null;
                 }
 
                 // ファイルライターをクローズ

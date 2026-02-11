@@ -15,6 +15,22 @@ namespace WhisperNetSample
                     _waveIn.Dispose();
                 }
 
+                if (_wasapiCapture != null)
+                {
+                    _wasapiCapture.StopRecording();
+                    _wasapiCapture.Dispose();
+                }
+
+                if (_mixingTimer != null)
+                {
+                    _mixingTimer.Dispose();
+                }
+
+                if (_resampler != null)
+                {
+                    _resampler.Dispose();
+                }
+
                 if (_waveFileWriter != null)
                 {
                     _waveFileWriter.Dispose();
@@ -43,6 +59,10 @@ namespace WhisperNetSample
             this.btnStartRecording = new System.Windows.Forms.Button();
             this.btnStopRecording = new System.Windows.Forms.Button();
             this.labelRecordingStatus = new System.Windows.Forms.Label();
+            this.labelRecordMode = new System.Windows.Forms.Label();
+            this.radioMicOnly = new System.Windows.Forms.RadioButton();
+            this.radioPCOnly = new System.Windows.Forms.RadioButton();
+            this.radioMix = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             //
@@ -72,10 +92,10 @@ namespace WhisperNetSample
             | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(12, 110);
+            this.dataGridView1.Location = new System.Drawing.Point(12, 130);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 21;
-            this.dataGridView1.Size = new System.Drawing.Size(760, 285);
+            this.dataGridView1.Size = new System.Drawing.Size(760, 265);
             this.dataGridView1.TabIndex = 1;
             //
             // statusLabel
@@ -147,12 +167,53 @@ namespace WhisperNetSample
             this.btnTranscribe.UseVisualStyleBackColor = true;
             this.btnTranscribe.Click += new System.EventHandler(this.btnTranscribe_Click);
             //
+            // labelRecordMode
+            //
+            this.labelRecordMode.AutoSize = true;
+            this.labelRecordMode.Location = new System.Drawing.Point(12, 77);
+            this.labelRecordMode.Name = "labelRecordMode";
+            this.labelRecordMode.Size = new System.Drawing.Size(65, 12);
+            this.labelRecordMode.TabIndex = 10;
+            this.labelRecordMode.Text = "録音モード:";
+            //
+            // radioMicOnly
+            //
+            this.radioMicOnly.AutoSize = true;
+            this.radioMicOnly.Checked = true;
+            this.radioMicOnly.Location = new System.Drawing.Point(85, 75);
+            this.radioMicOnly.Name = "radioMicOnly";
+            this.radioMicOnly.Size = new System.Drawing.Size(98, 16);
+            this.radioMicOnly.TabIndex = 11;
+            this.radioMicOnly.TabStop = true;
+            this.radioMicOnly.Text = "マイクのみ";
+            this.radioMicOnly.UseVisualStyleBackColor = true;
+            //
+            // radioPCOnly
+            //
+            this.radioPCOnly.AutoSize = true;
+            this.radioPCOnly.Location = new System.Drawing.Point(195, 75);
+            this.radioPCOnly.Name = "radioPCOnly";
+            this.radioPCOnly.Size = new System.Drawing.Size(98, 16);
+            this.radioPCOnly.TabIndex = 12;
+            this.radioPCOnly.Text = "PCの音のみ";
+            this.radioPCOnly.UseVisualStyleBackColor = true;
+            //
+            // radioMix
+            //
+            this.radioMix.AutoSize = true;
+            this.radioMix.Location = new System.Drawing.Point(305, 75);
+            this.radioMix.Name = "radioMix";
+            this.radioMix.Size = new System.Drawing.Size(47, 16);
+            this.radioMix.TabIndex = 13;
+            this.radioMix.Text = "両方";
+            this.radioMix.UseVisualStyleBackColor = true;
+            //
             // btnStartRecording
             //
-            this.btnStartRecording.Location = new System.Drawing.Point(12, 75);
+            this.btnStartRecording.Location = new System.Drawing.Point(12, 100);
             this.btnStartRecording.Name = "btnStartRecording";
             this.btnStartRecording.Size = new System.Drawing.Size(120, 23);
-            this.btnStartRecording.TabIndex = 10;
+            this.btnStartRecording.TabIndex = 14;
             this.btnStartRecording.Text = "🎤 録音開始";
             this.btnStartRecording.UseVisualStyleBackColor = true;
             this.btnStartRecording.Click += new System.EventHandler(this.btnStartRecording_Click);
@@ -160,10 +221,10 @@ namespace WhisperNetSample
             // btnStopRecording
             //
             this.btnStopRecording.Enabled = false;
-            this.btnStopRecording.Location = new System.Drawing.Point(145, 75);
+            this.btnStopRecording.Location = new System.Drawing.Point(145, 100);
             this.btnStopRecording.Name = "btnStopRecording";
             this.btnStopRecording.Size = new System.Drawing.Size(100, 23);
-            this.btnStopRecording.TabIndex = 11;
+            this.btnStopRecording.TabIndex = 15;
             this.btnStopRecording.Text = "⏹ 停止";
             this.btnStopRecording.UseVisualStyleBackColor = true;
             this.btnStopRecording.Click += new System.EventHandler(this.btnStopRecording_Click);
@@ -171,10 +232,10 @@ namespace WhisperNetSample
             // labelRecordingStatus
             //
             this.labelRecordingStatus.AutoSize = true;
-            this.labelRecordingStatus.Location = new System.Drawing.Point(260, 80);
+            this.labelRecordingStatus.Location = new System.Drawing.Point(260, 105);
             this.labelRecordingStatus.Name = "labelRecordingStatus";
             this.labelRecordingStatus.Size = new System.Drawing.Size(41, 12);
-            this.labelRecordingStatus.TabIndex = 12;
+            this.labelRecordingStatus.TabIndex = 16;
             this.labelRecordingStatus.Text = "待機中";
             //
             // Form1
@@ -185,6 +246,10 @@ namespace WhisperNetSample
             this.Controls.Add(this.labelRecordingStatus);
             this.Controls.Add(this.btnStopRecording);
             this.Controls.Add(this.btnStartRecording);
+            this.Controls.Add(this.radioMix);
+            this.Controls.Add(this.radioPCOnly);
+            this.Controls.Add(this.radioMicOnly);
+            this.Controls.Add(this.labelRecordMode);
             this.Controls.Add(this.btnTranscribe);
             this.Controls.Add(this.btnSelectAudioFile);
             this.Controls.Add(this.txtSelectedFile);
@@ -217,5 +282,9 @@ namespace WhisperNetSample
         private System.Windows.Forms.Button btnStartRecording;
         private System.Windows.Forms.Button btnStopRecording;
         private System.Windows.Forms.Label labelRecordingStatus;
+        private System.Windows.Forms.Label labelRecordMode;
+        private System.Windows.Forms.RadioButton radioMicOnly;
+        private System.Windows.Forms.RadioButton radioPCOnly;
+        private System.Windows.Forms.RadioButton radioMix;
     }
 }
