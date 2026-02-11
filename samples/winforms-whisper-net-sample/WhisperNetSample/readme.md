@@ -131,9 +131,52 @@ WhisperNetSample/
 ├── README.md                   # このファイル
 └── docs/                       # 技術ドキュメント
     ├── whisper-net.md          # Whisper.net使い方
-    ├── naudio.md               # NAudio使い方
-    └── csharp73-compat.md      # C# 7.3互換テクニック
+    └── naudio.md               # NAudio使い方
 ```
+
+## C# 7.3での注意点
+
+.NET Framework 4.8ではC# 8.0の`await foreach`や`using var`が使えません。
+
+### await foreach の代替
+
+```csharp
+// ❌ C# 8.0+（使えない）
+await foreach (var result in processor.ProcessAsync(fileStream))
+{
+    // 処理
+}
+
+// ✅ C# 7.3（このサンプルで使用）
+var enumerator = processor.ProcessAsync(fileStream).GetAsyncEnumerator();
+try
+{
+    while (await enumerator.MoveNextAsync())
+    {
+        var result = enumerator.Current;
+        // 処理
+    }
+}
+finally
+{
+    await enumerator.DisposeAsync();
+}
+```
+
+### using var の代替
+
+```csharp
+// ❌ C# 8.0+（使えない）
+using var stream = File.OpenRead("file.wav");
+
+// ✅ C# 7.3（このサンプルで使用）
+using (var stream = File.OpenRead("file.wav"))
+{
+    // 処理
+}
+```
+
+詳細は[Microsoft公式ドキュメント](https://learn.microsoft.com/ja-jp/dotnet/csharp/language-reference/configure-language-version)を参照してください。
 
 ## トラブルシューティング
 
