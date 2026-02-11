@@ -132,11 +132,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" />
+  <Import Project="..\packages\Whisper.net.Runtime.1.9.0\build\Whisper.net.Runtime.targets" Condition="Exists('..\packages\Whisper.net.Runtime.1.9.0\build\Whisper.net.Runtime.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets'))" />
+    <Error Condition="!Exists('..\packages\Whisper.net.Runtime.1.9.0\build\Whisper.net.Runtime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Whisper.net.Runtime.1.9.0\build\Whisper.net.Runtime.targets'))" />
     <Error Condition="!Exists('..\packages\Whisper.net.Runtime.Cuda.Linux.1.9.0\build\Whisper.net.Runtime.Cuda.Linux.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Whisper.net.Runtime.Cuda.Linux.1.9.0\build\Whisper.net.Runtime.Cuda.Linux.targets'))" />
   </Target>
   <Import Project="..\packages\Whisper.net.Runtime.Cuda.Linux.1.9.0\build\Whisper.net.Runtime.Cuda.Linux.targets" Condition="Exists('..\packages\Whisper.net.Runtime.Cuda.Linux.1.9.0\build\Whisper.net.Runtime.Cuda.Linux.targets')" />
