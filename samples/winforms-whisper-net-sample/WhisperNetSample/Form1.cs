@@ -3,6 +3,7 @@ using System.Data;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NAudio.Wave;
 using Whisper.net;
 using Whisper.net.Ggml;
 
@@ -25,13 +26,18 @@ namespace WhisperNetSample
         }
 
         // 選択中のモデルタイプ
-        private GgmlType selectedModelType = GgmlType.Base;
+        private GgmlType _selectedModelType = GgmlType.Base;
 
         // Whisper処理用ファクトリー
-        private WhisperFactory whisperFactory;
+        private WhisperFactory _whisperFactory;
 
         // 選択中の音声ファイルパス
-        private string selectedAudioFilePath;
+        private string _selectedAudioFilePath;
+
+        // マイク録音用
+        private WaveInEvent _waveIn;
+        private WaveFileWriter _waveFileWriter;
+        private string _recordingFilePath;
 
         public Form1()
         {
@@ -47,7 +53,7 @@ namespace WhisperNetSample
             InitializeModelTypeComboBox();
 
             // モデルの自動ダウンロードと初期化
-            await InitializeWhisperModelAsync(selectedModelType);
+            await InitializeWhisperModelAsync(_selectedModelType);
         }
 
         private void InitializeDataGridView()
@@ -112,8 +118,8 @@ namespace WhisperNetSample
         {
             if (modelTypeComboBox.SelectedItem is ModelInfo selectedModel)
             {
-                selectedModelType = selectedModel.Type;
-                await InitializeWhisperModelAsync(selectedModelType);
+                _selectedModelType = selectedModel.Type;
+                await InitializeWhisperModelAsync(_selectedModelType);
             }
         }
 
@@ -144,8 +150,8 @@ namespace WhisperNetSample
                 }
 
                 // WhisperFactoryを初期化
-                whisperFactory?.Dispose();
-                whisperFactory = WhisperFactory.FromPath(modelPath);
+                _whisperFactory?.Dispose();
+                _whisperFactory = WhisperFactory.FromPath(modelPath);
 
                 // ステータス表示を更新（成功）
                 var fileInfo = new FileInfo(modelPath);
@@ -185,22 +191,78 @@ namespace WhisperNetSample
         }
 
         /// <summary>
+        /// MP3ファイルをWAV形式に変換
+        /// </summary>
+        private string ConvertMp3ToWav(string mp3FilePath)
+        {
+            try
+            {
+                // 一時WAVファイルのパスを生成
+                var tempWavPath = Path.Combine(Path.GetTempPath(), $"whisper_{Guid.NewGuid()}.wav");
+
+                using (var reader = new Mp3FileReader(mp3FilePath))
+                {
+                    // Whisperは16kHz Monoを推奨
+                    WaveFormat targetFormat = new WaveFormat(16000, 16, 1);
+                    using (var resampler = new MediaFoundationResampler(reader, targetFormat))
+                    {
+                        WaveFileWriter.CreateWaveFile(tempWavPath, resampler);
+                    }
+                }
+
+                return tempWavPath;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"MP3からWAVへの変換に失敗しました。\n\n{ex.Message}",
+                    "エラー",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// 音声ファイル選択ボタンクリック
         /// </summary>
         private void btnSelectAudioFile_Click(object sender, EventArgs e)
         {
             using (var openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "WAV Files (*.wav)|*.wav|All Files (*.*)|*.*";
+                openFileDialog.Filter = "音声ファイル (*.wav;*.mp3)|*.wav;*.mp3|WAV Files (*.wav)|*.wav|MP3 Files (*.mp3)|*.mp3|All Files (*.*)|*.*";
                 openFileDialog.Title = "音声ファイルを選択";
                 openFileDialog.Multiselect = false;
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    selectedAudioFilePath = openFileDialog.FileName;
-                    txtSelectedFile.Text = selectedAudioFilePath;
-                    btnTranscribe.Enabled = true;
-                    UpdateStatus("音声ファイルを選択しました", true);
+                    var selectedFile = openFileDialog.FileName;
+                    var extension = Path.GetExtension(selectedFile).ToLower();
+
+                    // MP3の場合はWAVに変換
+                    if (extension == ".mp3")
+                    {
+                        UpdateStatus("MP3をWAVに変換中...", false);
+                        var convertedWav = ConvertMp3ToWav(selectedFile);
+                        if (convertedWav != null)
+                        {
+                            _selectedAudioFilePath = convertedWav;
+                            txtSelectedFile.Text = $"{selectedFile} (変換済み)";
+                            btnTranscribe.Enabled = true;
+                            UpdateStatus("MP3ファイルを選択しました（WAVに変換済み）", true);
+                        }
+                        else
+                        {
+                            UpdateStatus("MP3変換に失敗しました", false);
+                        }
+                    }
+                    else
+                    {
+                        _selectedAudioFilePath = selectedFile;
+                        txtSelectedFile.Text = selectedFile;
+                        btnTranscribe.Enabled = true;
+                        UpdateStatus("音声ファイルを選択しました", true);
+                    }
                 }
             }
         }
@@ -210,14 +272,14 @@ namespace WhisperNetSample
         /// </summary>
         private async void btnTranscribe_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(selectedAudioFilePath))
+            if (string.IsNullOrEmpty(_selectedAudioFilePath))
             {
                 MessageBox.Show("音声ファイルを選択してください", "エラー",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (whisperFactory == null)
+            if (_whisperFactory == null)
             {
                 MessageBox.Show("Whisperモデルが初期化されていません", "エラー",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -231,7 +293,7 @@ namespace WhisperNetSample
                 btnSelectAudioFile.Enabled = false;
 
                 // WhisperProcessorを作成
-                using (var processor = whisperFactory.CreateBuilder()
+                using (var processor = _whisperFactory.CreateBuilder()
                     .WithLanguage("auto")  // 自動言語検出（日本語対応）
                     .Build())
                 {
@@ -243,7 +305,7 @@ namespace WhisperNetSample
                     dt.Columns.Add("テキスト", typeof(string));
 
                     // 音声ファイルを処理
-                    using (var fileStream = File.OpenRead(selectedAudioFilePath))
+                    using (var fileStream = File.OpenRead(_selectedAudioFilePath))
                     {
                         var enumerator = processor.ProcessAsync(fileStream).GetAsyncEnumerator();
                         try
@@ -282,6 +344,104 @@ namespace WhisperNetSample
             {
                 btnTranscribe.Enabled = true;
                 btnSelectAudioFile.Enabled = true;
+            }
+        }
+
+        /// <summary>
+        /// 録音開始ボタンクリック
+        /// </summary>
+        private void btnStartRecording_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // マイクデバイスの存在確認
+                if (WaveInEvent.DeviceCount == 0)
+                {
+                    MessageBox.Show("マイクが見つかりません", "エラー",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // 録音ファイルパスを生成
+                _recordingFilePath = Path.Combine(Path.GetTempPath(), $"recording_{Guid.NewGuid()}.wav");
+
+                // WaveInEventを初期化（16kHz Mono、Whisper推奨設定）
+                _waveIn = new WaveInEvent();
+                _waveIn.WaveFormat = new WaveFormat(16000, 16, 1);
+
+                // ファイルライターを初期化
+                _waveFileWriter = new WaveFileWriter(_recordingFilePath, _waveIn.WaveFormat);
+
+                // データ受信イベントハンドラ
+                _waveIn.DataAvailable += (s, args) =>
+                {
+                    _waveFileWriter.Write(args.Buffer, 0, args.BytesRecorded);
+                };
+
+                // 録音開始
+                _waveIn.StartRecording();
+
+                // UI状態更新
+                btnStartRecording.Enabled = false;
+                btnStopRecording.Enabled = true;
+                btnSelectAudioFile.Enabled = false;
+                btnTranscribe.Enabled = false;
+                labelRecordingStatus.Text = "録音中...";
+                labelRecordingStatus.ForeColor = System.Drawing.Color.Red;
+                UpdateStatus("マイク録音中...", false);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"録音開始に失敗しました。\n\n{ex.Message}",
+                    "エラー",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 録音停止ボタンクリック
+        /// </summary>
+        private void btnStopRecording_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 録音停止
+                if (_waveIn != null)
+                {
+                    _waveIn.StopRecording();
+                    _waveIn.Dispose();
+                    _waveIn = null;
+                }
+
+                // ファイルライターをクローズ
+                if (_waveFileWriter != null)
+                {
+                    _waveFileWriter.Dispose();
+                    _waveFileWriter = null;
+                }
+
+                // 録音ファイルを選択状態にする
+                _selectedAudioFilePath = _recordingFilePath;
+                txtSelectedFile.Text = $"録音ファイル: {Path.GetFileName(_recordingFilePath)}";
+
+                // UI状態更新
+                btnStartRecording.Enabled = true;
+                btnStopRecording.Enabled = false;
+                btnSelectAudioFile.Enabled = true;
+                btnTranscribe.Enabled = true;
+                labelRecordingStatus.Text = "待機中";
+                labelRecordingStatus.ForeColor = System.Drawing.Color.Black;
+                UpdateStatus("録音完了。文字起こしボタンを押してください。", true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"録音停止に失敗しました。\n\n{ex.Message}",
+                    "エラー",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
