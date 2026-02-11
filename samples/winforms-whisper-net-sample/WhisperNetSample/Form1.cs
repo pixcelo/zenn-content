@@ -30,6 +30,9 @@ namespace WhisperNetSample
         // Whisper処理用ファクトリー
         private WhisperFactory whisperFactory;
 
+        // 選択中の音声ファイルパス
+        private string selectedAudioFilePath;
+
         public Form1()
         {
             InitializeComponent();
@@ -179,6 +182,107 @@ namespace WhisperNetSample
             }
 
             UpdateStatus($"モデル ({modelType}) ダウンロード完了", true);
+        }
+
+        /// <summary>
+        /// 音声ファイル選択ボタンクリック
+        /// </summary>
+        private void btnSelectAudioFile_Click(object sender, EventArgs e)
+        {
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "WAV Files (*.wav)|*.wav|All Files (*.*)|*.*";
+                openFileDialog.Title = "音声ファイルを選択";
+                openFileDialog.Multiselect = false;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    selectedAudioFilePath = openFileDialog.FileName;
+                    txtSelectedFile.Text = selectedAudioFilePath;
+                    btnTranscribe.Enabled = true;
+                    UpdateStatus("音声ファイルを選択しました", true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 文字起こし実行ボタンクリック
+        /// </summary>
+        private async void btnTranscribe_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(selectedAudioFilePath))
+            {
+                MessageBox.Show("音声ファイルを選択してください", "エラー",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (whisperFactory == null)
+            {
+                MessageBox.Show("Whisperモデルが初期化されていません", "エラー",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                UpdateStatus("文字起こし中...", true);
+                btnTranscribe.Enabled = false;
+                btnSelectAudioFile.Enabled = false;
+
+                // WhisperProcessorを作成
+                using (var processor = whisperFactory.CreateBuilder()
+                    .WithLanguage("auto")  // 自動言語検出（日本語対応）
+                    .Build())
+                {
+
+                    // DataTableを準備
+                    var dt = new DataTable();
+                    dt.Columns.Add("開始時刻", typeof(string));
+                    dt.Columns.Add("終了時刻", typeof(string));
+                    dt.Columns.Add("テキスト", typeof(string));
+
+                    // 音声ファイルを処理
+                    using (var fileStream = File.OpenRead(selectedAudioFilePath))
+                    {
+                        var enumerator = processor.ProcessAsync(fileStream).GetAsyncEnumerator();
+                        try
+                        {
+                            while (await enumerator.MoveNextAsync())
+                            {
+                                var result = enumerator.Current;
+                                // 時刻をmm:ss.ff形式に変換
+                                var startTime = result.Start.ToString(@"mm\:ss\.ff");
+                                var endTime = result.End.ToString(@"mm\:ss\.ff");
+                                dt.Rows.Add(startTime, endTime, result.Text);
+                            }
+                        }
+                        finally
+                        {
+                            await enumerator.DisposeAsync();
+                        }
+                    }
+
+                    // DataGridViewに表示
+                    dataGridView1.DataSource = dt;
+
+                    UpdateStatus($"文字起こし完了 ({dt.Rows.Count}件)", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"エラー: {ex.Message}", false);
+                MessageBox.Show(
+                    $"文字起こしに失敗しました。\n\n{ex.Message}",
+                    "エラー",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnTranscribe.Enabled = true;
+                btnSelectAudioFile.Enabled = true;
+            }
         }
 
         /// <summary>
