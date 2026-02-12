@@ -11,7 +11,9 @@ namespace WhisperNetSample
 {
     public partial class Form1 : Form
     {
-        // 録音モード
+        /// <summary>
+        /// 録音モード
+        /// </summary>
         private enum RecordingMode
         {
             Microphone,  // マイクのみ
@@ -19,7 +21,9 @@ namespace WhisperNetSample
             Mix          // ミックス（両方）
         }
 
-        // モデル情報のマッピング
+        /// <summary>
+        /// モデル情報のマッピング
+        /// </summary>
         private class ModelInfo
         {
             public GgmlType Type { get; set; }
