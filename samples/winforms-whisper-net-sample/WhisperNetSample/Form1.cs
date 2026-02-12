@@ -522,7 +522,10 @@ namespace WhisperNetSample
                 // 偶数バイトに調整（16bitサンプル = 2bytes）
                 bytesToRead = (bytesToRead / 2) * 2;
 
-                if (bytesToRead == 0) return;
+                if (bytesToRead == 0)
+                {
+                    return;
+                }
 
                 byte[] micBytes = new byte[bytesToRead];
                 byte[] pcBytes = new byte[bytesToRead];
@@ -532,7 +535,10 @@ namespace WhisperNetSample
 
                 // 実際に読み取れたバイト数に合わせる
                 int actualBytes = Math.Min(micRead, pcRead);
-                if (actualBytes == 0) return;
+                if (actualBytes == 0)
+                {
+                    return;
+                }
 
                 // 16bitサンプルとしてミックス
                 byte[] mixed = new byte[actualBytes];
@@ -543,8 +549,14 @@ namespace WhisperNetSample
                     int mixedSample = sample1 + sample2;
 
                     // クリッピング防止
-                    if (mixedSample > short.MaxValue) mixedSample = short.MaxValue;
-                    if (mixedSample < short.MinValue) mixedSample = short.MinValue;
+                    if (mixedSample > short.MaxValue)
+                    {
+                        mixedSample = short.MaxValue;
+                    }
+                    if (mixedSample < short.MinValue)
+                    {
+                        mixedSample = short.MinValue;
+                    }
 
                     byte[] mixedBytes = BitConverter.GetBytes((short)mixedSample);
                     mixed[i] = mixedBytes[0];
@@ -780,7 +792,9 @@ namespace WhisperNetSample
                     form.CancelButton = btnCancel;
 
                     if (form.ShowDialog() != DialogResult.OK)
+                    {
                         return;
+                    }
 
                     // 少なくとも1つの形式が選択されているか確認
                     if (!checkBoxJson.Checked && !checkBoxText.Checked && !checkBoxCsv.Checked && !checkBoxSrt.Checked)
@@ -799,7 +813,9 @@ namespace WhisperNetSample
                         folderDialog.SelectedPath = defaultPath;
 
                         if (folderDialog.ShowDialog() != DialogResult.OK)
+                        {
                             return;
+                        }
 
                         // フォルダを作成
                         if (!Directory.Exists(folderDialog.SelectedPath))
@@ -1146,7 +1162,9 @@ namespace WhisperNetSample
         private void btnVoiceCommand_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left)
+            {
                 return;
+            }
 
             try
             {
@@ -1196,7 +1214,9 @@ namespace WhisperNetSample
         private async void btnVoiceCommand_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left)
+            {
                 return;
+            }
 
             try
             {
