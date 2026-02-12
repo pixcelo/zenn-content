@@ -11,6 +11,14 @@ namespace WhisperNetSample
 {
     public partial class Form1 : Form
     {
+        // 録音モード
+        private enum RecordingMode
+        {
+            Microphone,  // マイクのみ
+            PCAudio,     // PCオーディオのみ
+            Mix          // ミックス（両方）
+        }
+
         // モデル情報のマッピング
         private class ModelInfo
         {
@@ -45,6 +53,9 @@ namespace WhisperNetSample
         private BufferedWaveProvider _micBuffer;  // マイク用バッファ
         private BufferedWaveProvider _pcAudioBuffer;  // PCオーディオ用バッファ
         private object _mixingLock = new object();  // 同期用ロック
+
+        // 現在の録音モード
+        private RecordingMode _currentRecordingMode;
 
         public Form1()
         {
@@ -367,14 +378,17 @@ namespace WhisperNetSample
                 // 録音モードに応じて処理を分岐
                 if (radioMicOnly.Checked)
                 {
+                    _currentRecordingMode = RecordingMode.Microphone;
                     StartMicRecording();
                 }
                 else if (radioPCOnly.Checked)
                 {
+                    _currentRecordingMode = RecordingMode.PCAudio;
                     StartPCAudioRecording();
                 }
                 else if (radioMix.Checked)
                 {
+                    _currentRecordingMode = RecordingMode.Mix;
                     StartMixRecording();
                 }
 
@@ -435,43 +449,15 @@ namespace WhisperNetSample
             // WasapiLoopbackCaptureを初期化
             _wasapiCapture = new WasapiLoopbackCapture();
 
-            // システムオーディオは48kHz Stereoが多いため、16kHz Monoにリサンプリング
-            var targetFormat = new WaveFormat(16000, 16, 1);
-
-            // ファイルライターを初期化
-            _waveFileWriter = new WaveFileWriter(_recordingFilePath, targetFormat);
-
-            // BufferedWaveProviderを使用してデータを受け渡す
-            var bufferedProvider = new BufferedWaveProvider(_wasapiCapture.WaveFormat)
-            {
-                DiscardOnBufferOverflow = true
-            };
-
-            // リサンプラーを作成
-            _resampler = new MediaFoundationResampler(bufferedProvider, targetFormat);
-            _resampler.ResamplerQuality = 60; // 高品質
+            // ファイルライターを初期化（48kHz Stereoのまま録音）
+            // 録音完了後に16kHz Monoにリサンプリングする
+            _waveFileWriter = new WaveFileWriter(_recordingFilePath, _wasapiCapture.WaveFormat);
 
             // データ受信イベントハンドラ
             _wasapiCapture.DataAvailable += (s, args) =>
             {
-                // バッファにデータを追加
-                bufferedProvider.AddSamples(args.Buffer, 0, args.BytesRecorded);
-
-                // バッファに十分なデータがあればリサンプリングして書き込み
-                while (bufferedProvider.BufferedBytes > 0)
-                {
-                    var buffer = new byte[4096];  // 固定サイズバッファ
-                    int bytesRead = _resampler.Read(buffer, 0, buffer.Length);
-
-                    if (bytesRead > 0)
-                    {
-                        _waveFileWriter.Write(buffer, 0, bytesRead);
-                    }
-                    else
-                    {
-                        break;  // これ以上読み取れない
-                    }
-                }
+                // そのまま書き込み（リサンプリングしない）
+                _waveFileWriter.Write(args.Buffer, 0, args.BytesRecorded);
             };
 
             // 録音開始
@@ -662,6 +648,23 @@ namespace WhisperNetSample
                     _waveFileWriter = null;
                 }
 
+                // PCオーディオ録音の場合はリサンプリング
+                if (_currentRecordingMode == RecordingMode.PCAudio || _currentRecordingMode == RecordingMode.Mix)
+                {
+                    var tempPath = _recordingFilePath;
+                    _recordingFilePath = ResampleToWhisperFormat(tempPath);
+
+                    // 元ファイル削除
+                    try
+                    {
+                        File.Delete(tempPath);
+                    }
+                    catch
+                    {
+                        // ファイル削除失敗は無視
+                    }
+                }
+
                 // 録音ファイルを選択状態にする
                 _selectedAudioFilePath = _recordingFilePath;
                 txtSelectedFile.Text = $"録音ファイル: {Path.GetFileName(_recordingFilePath)}";
@@ -683,6 +686,25 @@ namespace WhisperNetSample
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
+        }
+
+        /// <summary>
+        /// 録音後のWAVファイルをWhisper推奨フォーマット(16kHz Mono)にリサンプリング
+        /// </summary>
+        /// <param name="sourceFile">元のWAVファイルパス</param>
+        /// <returns>リサンプリング後のWAVファイルパス</returns>
+        private string ResampleToWhisperFormat(string sourceFile)
+        {
+            var outputPath = Path.Combine(Path.GetTempPath(), $"resampled_{Guid.NewGuid()}.wav");
+            var targetFormat = new WaveFormat(16000, 16, 1);  // 16kHz, 16bit, Mono
+
+            using (var reader = new WaveFileReader(sourceFile))
+            using (var resampler = new MediaFoundationResampler(reader, targetFormat))
+            {
+                WaveFileWriter.CreateWaveFile(outputPath, resampler);
+            }
+
+            return outputPath;
         }
 
         /// <summary>
