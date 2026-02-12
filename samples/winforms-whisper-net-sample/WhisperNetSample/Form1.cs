@@ -509,13 +509,20 @@ namespace WhisperNetSample
                 // バッファにデータを追加
                 bufferedProvider.AddSamples(args.Buffer, 0, args.BytesRecorded);
 
-                // リサンプリングして書き込み
-                var resampledBuffer = new byte[args.BytesRecorded];
-                int bytesRead = _resampler.Read(resampledBuffer, 0, resampledBuffer.Length);
-
-                if (bytesRead > 0)
+                // バッファに十分なデータがあればリサンプリングして書き込み
+                while (bufferedProvider.BufferedBytes > 0)
                 {
-                    _waveFileWriter.Write(resampledBuffer, 0, bytesRead);
+                    var buffer = new byte[4096];  // 固定サイズバッファ
+                    int bytesRead = _resampler.Read(buffer, 0, buffer.Length);
+
+                    if (bytesRead > 0)
+                    {
+                        _waveFileWriter.Write(buffer, 0, bytesRead);
+                    }
+                    else
+                    {
+                        break;  // これ以上読み取れない
+                    }
                 }
             };
 
@@ -641,14 +648,23 @@ namespace WhisperNetSample
                 // ソースバッファに追加
                 pcAudioSourceBuffer.AddSamples(args.Buffer, 0, args.BytesRecorded);
 
-                // リサンプリングして16kHz Monoバッファに追加
-                var resampledBuffer = new byte[args.BytesRecorded];
-                int bytesRead = _resampler.Read(resampledBuffer, 0, resampledBuffer.Length);
-                if (bytesRead > 0)
+                // バッファに十分なデータがあればリサンプリングして16kHz Monoバッファに追加
+                while (pcAudioSourceBuffer.BufferedBytes > 0)
                 {
-                    _pcAudioBuffer.AddSamples(resampledBuffer, 0, bytesRead);
-                    ProcessMixedAudio();  // ミックス処理を実行
+                    var buffer = new byte[4096];  // 固定サイズバッファ
+                    int bytesRead = _resampler.Read(buffer, 0, buffer.Length);
+
+                    if (bytesRead > 0)
+                    {
+                        _pcAudioBuffer.AddSamples(buffer, 0, bytesRead);
+                    }
+                    else
+                    {
+                        break;  // これ以上読み取れない
+                    }
                 }
+
+                ProcessMixedAudio();  // ミックス処理を実行
             };
 
             // 録音開始
