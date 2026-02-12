@@ -295,31 +295,6 @@ namespace WhisperNetSample
 
             try
             {
-                // デバッグ: 録音ファイル情報を表示
-                try
-                {
-                    var fileInfo = new FileInfo(_selectedAudioFilePath);
-
-                    using (var reader = new WaveFileReader(_selectedAudioFilePath))
-                    {
-                        var debugInfo = $"=== 録音ファイル情報 ===\n" +
-                                       $"ファイルサイズ: {fileInfo.Length / 1024.0:F2} KB\n" +
-                                       $"サンプリングレート: {reader.WaveFormat.SampleRate} Hz\n" +
-                                       $"チャンネル数: {reader.WaveFormat.Channels}\n" +
-                                       $"ビット深度: {reader.WaveFormat.BitsPerSample} bit\n" +
-                                       $"長さ: {reader.TotalTime:mm\\:ss\\.ff}\n" +
-                                       $"パス: {_selectedAudioFilePath}";
-
-                        MessageBox.Show(debugInfo, "デバッグ: ファイル情報",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"ファイル情報の読み取りに失敗: {ex.Message}",
-                        "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
                 UpdateStatus("文字起こし中...", true);
                 btnTranscribe.Enabled = false;
                 btnSelectAudioFile.Enabled = false;
@@ -345,15 +320,6 @@ namespace WhisperNetSample
                             while (await enumerator.MoveNextAsync())
                             {
                                 var result = enumerator.Current;
-
-                                // デバッグ: Whisper結果の詳細をコンソールに出力
-                                System.Diagnostics.Debug.WriteLine(
-                                    $"Segment {dt.Rows.Count}: " +
-                                    $"Text='{result.Text}' " +
-                                    $"Length={result.Text?.Length ?? 0} " +
-                                    $"Start={result.Start} " +
-                                    $"End={result.End}");
-
                                 // 時刻をmm:ss.ff形式に変換
                                 var startTime = result.Start.ToString(@"mm\:ss\.ff");
                                 var endTime = result.End.ToString(@"mm\:ss\.ff");
@@ -368,24 +334,6 @@ namespace WhisperNetSample
 
                     // DataGridViewに表示
                     dataGridView1.DataSource = dt;
-
-                    // デバッグ: セグメント一覧を表示
-                    var segmentSummary = new System.Text.StringBuilder();
-                    segmentSummary.AppendLine("=== 文字起こし結果 ===");
-                    segmentSummary.AppendLine($"総セグメント数: {dt.Rows.Count}");
-                    segmentSummary.AppendLine("\n各セグメントのテキスト:");
-                    for (int i = 0; i < Math.Min(5, dt.Rows.Count); i++)  // 最初の5件
-                    {
-                        var text = dt.Rows[i]["テキスト"]?.ToString() ?? "";
-                        segmentSummary.AppendLine($"  [{i}] {text} (Length: {text.Length})");
-                    }
-                    if (dt.Rows.Count > 5)
-                    {
-                        segmentSummary.AppendLine($"  ... 他 {dt.Rows.Count - 5} 件");
-                    }
-
-                    MessageBox.Show(segmentSummary.ToString(), "デバッグ: 文字起こし結果",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     UpdateStatus($"文字起こし完了 ({dt.Rows.Count}件)", true);
                 }
