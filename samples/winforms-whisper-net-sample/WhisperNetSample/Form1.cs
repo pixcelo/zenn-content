@@ -164,23 +164,15 @@ namespace WhisperNetSample
         }
 
         /// <summary>
-        /// モデルファイルパスを取得
-        /// </summary>
-        private string GetModelPath(GgmlType modelType)
-        {
-            return Path.Combine(
-                Application.StartupPath,
-                $"ggml-{modelType.ToString().ToLower()}.bin");
-        }
-
-        /// <summary>
         /// Whisperモデルの初期化
         /// </summary>
         private async Task InitializeWhisperModelAsync(GgmlType modelType)
         {
             try
             {
-                var modelPath = GetModelPath(modelType);
+                var modelPath = Path.Combine(
+                    Application.StartupPath,
+                    $"ggml-{modelType.ToString().ToLower()}.bin");
 
                 // モデルファイルが存在するかチェック
                 if (!File.Exists(modelPath))
@@ -953,11 +945,30 @@ namespace WhisperNetSample
                 {
                     if (InvokeRequired)
                     {
-                        Invoke(new Action(CloseActivePopup));
+                        Invoke(new Action(() =>
+                        {
+                            if (_activePopupForm != null && !_activePopupForm.IsDisposed)
+                            {
+                                _activePopupForm.Close();
+                                _activePopupForm = null;
+                            }
+                            else
+                            {
+                                UpdateVoiceCommandStatus("閉じるポップアップがありません", false);
+                            }
+                        }));
                     }
                     else
                     {
-                        CloseActivePopup();
+                        if (_activePopupForm != null && !_activePopupForm.IsDisposed)
+                        {
+                            _activePopupForm.Close();
+                            _activePopupForm = null;
+                        }
+                        else
+                        {
+                            UpdateVoiceCommandStatus("閉じるポップアップがありません", false);
+                        }
                     }
                 },
                 Description = "開いているポップアップを閉じます",
@@ -1045,11 +1056,18 @@ namespace WhisperNetSample
                 {
                     if (InvokeRequired)
                     {
-                        Invoke(new Action(ShowVoiceCommandHelp));
+                        Invoke(new Action(() =>
+                        {
+                            var helpMessage = _voiceCommandManager.GenerateHelpMessage();
+                            MessageBox.Show(helpMessage, "音声コマンド一覧",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }));
                     }
                     else
                     {
-                        ShowVoiceCommandHelp();
+                        var helpMessage = _voiceCommandManager.GenerateHelpMessage();
+                        MessageBox.Show(helpMessage, "音声コマンド一覧",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 },
                 Description = "利用可能な音声コマンドの一覧を表示します",
@@ -1058,37 +1076,13 @@ namespace WhisperNetSample
         }
 
         /// <summary>
-        /// アクティブなポップアップを閉じる
-        /// </summary>
-        private void CloseActivePopup()
-        {
-            if (_activePopupForm != null && !_activePopupForm.IsDisposed)
-            {
-                _activePopupForm.Close();
-                _activePopupForm = null;
-            }
-            else
-            {
-                UpdateVoiceCommandStatus("閉じるポップアップがありません", false);
-            }
-        }
-
-        /// <summary>
-        /// 音声コマンドヘルプを表示
-        /// </summary>
-        private void ShowVoiceCommandHelp()
-        {
-            var helpMessage = _voiceCommandManager.GenerateHelpMessage();
-            MessageBox.Show(helpMessage, "音声コマンド一覧",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        /// <summary>
         /// ヘルプボタンクリック
         /// </summary>
         private void btnVoiceCommandHelp_Click(object sender, EventArgs e)
         {
-            ShowVoiceCommandHelp();
+            var helpMessage = _voiceCommandManager.GenerateHelpMessage();
+            MessageBox.Show(helpMessage, "音声コマンド一覧",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
