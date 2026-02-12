@@ -44,8 +44,7 @@ namespace WhisperNetSample
         // ミックス録音用
         private BufferedWaveProvider _micBuffer;  // マイク用バッファ
         private BufferedWaveProvider _pcAudioBuffer;  // PCオーディオ用バッファ
-        private MixingSampleProvider _mixer;  // ミキサー
-        private System.Threading.Timer _mixingTimer;  // ミックス処理用タイマー
+        private object _mixingLock = new object();  // 同期用ロック
 
         public Form1()
         {
@@ -474,6 +473,62 @@ namespace WhisperNetSample
         }
 
         /// <summary>
+        /// ミックスされた音声データをファイルに書き込む
+        /// </summary>
+        private void ProcessMixedAudio()
+        {
+            lock (_mixingLock)
+            {
+                // 両方のバッファから読み取れるサイズを確認
+                int availableMic = _micBuffer.BufferedBytes;
+                int availablePC = _pcAudioBuffer.BufferedBytes;
+
+                if (availableMic == 0 || availablePC == 0)
+                {
+                    return;  // どちらかのバッファが空なら何もしない
+                }
+
+                // 小さい方に合わせる（両方から同じバイト数を読み取る）
+                int bytesToRead = Math.Min(availableMic, availablePC);
+
+                // 偶数バイトに調整（16bitサンプル = 2bytes）
+                bytesToRead = (bytesToRead / 2) * 2;
+
+                if (bytesToRead == 0) return;
+
+                byte[] micBytes = new byte[bytesToRead];
+                byte[] pcBytes = new byte[bytesToRead];
+
+                int micRead = _micBuffer.Read(micBytes, 0, bytesToRead);
+                int pcRead = _pcAudioBuffer.Read(pcBytes, 0, bytesToRead);
+
+                // 実際に読み取れたバイト数に合わせる
+                int actualBytes = Math.Min(micRead, pcRead);
+                if (actualBytes == 0) return;
+
+                // 16bitサンプルとしてミックス
+                byte[] mixed = new byte[actualBytes];
+                for (int i = 0; i < actualBytes; i += 2)
+                {
+                    short sample1 = BitConverter.ToInt16(micBytes, i);
+                    short sample2 = BitConverter.ToInt16(pcBytes, i);
+                    int mixedSample = sample1 + sample2;
+
+                    // クリッピング防止
+                    if (mixedSample > short.MaxValue) mixedSample = short.MaxValue;
+                    if (mixedSample < short.MinValue) mixedSample = short.MinValue;
+
+                    byte[] mixedBytes = BitConverter.GetBytes((short)mixedSample);
+                    mixed[i] = mixedBytes[0];
+                    mixed[i + 1] = mixedBytes[1];
+                }
+
+                // ファイルに書き込み
+                _waveFileWriter.Write(mixed, 0, mixed.Length);
+            }
+        }
+
+        /// <summary>
         /// ミックス録音開始（マイク + PCオーディオ）
         /// </summary>
         private void StartMixRecording()
@@ -525,6 +580,7 @@ namespace WhisperNetSample
             _waveIn.DataAvailable += (s, args) =>
             {
                 _micBuffer.AddSamples(args.Buffer, 0, args.BytesRecorded);
+                ProcessMixedAudio();  // ミックス処理を実行
             };
 
             // PCオーディオデータ受信イベント
@@ -539,43 +595,9 @@ namespace WhisperNetSample
                 if (bytesRead > 0)
                 {
                     _pcAudioBuffer.AddSamples(resampledBuffer, 0, bytesRead);
+                    ProcessMixedAudio();  // ミックス処理を実行
                 }
             };
-
-            // ミキサーを作成
-            var micProvider = _micBuffer.ToSampleProvider();
-            var pcAudioProvider = _pcAudioBuffer.ToSampleProvider();
-
-            _mixer = new MixingSampleProvider(new[] { micProvider, pcAudioProvider });
-
-            // タイマーでミックスしたデータをファイルに書き込む（100msごと）
-            _mixingTimer = new System.Threading.Timer(_ =>
-            {
-                try
-                {
-                    // ミキサーから読み取り
-                    var sampleBuffer = new float[targetFormat.SampleRate / 10];  // 100ms分
-                    int samplesRead = _mixer.Read(sampleBuffer, 0, sampleBuffer.Length);
-
-                    if (samplesRead > 0)
-                    {
-                        // float[] → byte[] 変換
-                        var byteBuffer = new byte[samplesRead * 2];  // 16bit = 2bytes
-                        for (int i = 0; i < samplesRead; i++)
-                        {
-                            var sample16 = (short)(sampleBuffer[i] * 32767f);
-                            byteBuffer[i * 2] = (byte)(sample16 & 0xFF);
-                            byteBuffer[i * 2 + 1] = (byte)(sample16 >> 8);
-                        }
-
-                        _waveFileWriter.Write(byteBuffer, 0, byteBuffer.Length);
-                    }
-                }
-                catch
-                {
-                    // タイマー処理中のエラーは無視
-                }
-            }, null, 100, 100);  // 100ms後に開始、100msごとに実行
 
             // 録音開始
             _waveIn.StartRecording();
@@ -606,15 +628,7 @@ namespace WhisperNetSample
                     _wasapiCapture = null;
                 }
 
-                // ミックス録音用タイマー停止
-                if (_mixingTimer != null)
-                {
-                    _mixingTimer.Dispose();
-                    _mixingTimer = null;
-                }
-
-                // ミキサー・バッファのクリーンアップ
-                _mixer = null;
+                // ミックス録音用バッファのクリーンアップ
                 _micBuffer = null;
                 _pcAudioBuffer = null;
 

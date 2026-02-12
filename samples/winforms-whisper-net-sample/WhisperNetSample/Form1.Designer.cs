@@ -21,11 +21,6 @@ namespace WhisperNetSample
                     _wasapiCapture.Dispose();
                 }
 
-                if (_mixingTimer != null)
-                {
-                    _mixingTimer.Dispose();
-                }
-
                 if (_resampler != null)
                 {
                     _resampler.Dispose();
