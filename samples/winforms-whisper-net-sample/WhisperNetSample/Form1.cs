@@ -57,6 +57,9 @@ namespace WhisperNetSample
         // 現在の録音モード
         private RecordingMode _currentRecordingMode;
 
+        // 最後に文字起こししたメタデータ
+        private TranscriptionMetadata _lastTranscriptionMetadata;
+
         public Form1()
         {
             InitializeComponent();
@@ -323,6 +326,7 @@ namespace WhisperNetSample
                     dt.Columns.Add("テキスト", typeof(string));
 
                     // 音声ファイルを処理
+                    TimeSpan totalDuration = TimeSpan.Zero;
                     using (var fileStream = File.OpenRead(_selectedAudioFilePath))
                     {
                         var enumerator = processor.ProcessAsync(fileStream).GetAsyncEnumerator();
@@ -335,6 +339,12 @@ namespace WhisperNetSample
                                 var startTime = result.Start.ToString(@"mm\:ss\.ff");
                                 var endTime = result.End.ToString(@"mm\:ss\.ff");
                                 dt.Rows.Add(startTime, endTime, result.Text);
+
+                                // 総時間を更新
+                                if (result.End > totalDuration)
+                                {
+                                    totalDuration = result.End;
+                                }
                             }
                         }
                         finally
@@ -345,6 +355,20 @@ namespace WhisperNetSample
 
                     // DataGridViewに表示
                     dataGridView1.DataSource = dt;
+
+                    // メタデータを保存
+                    _lastTranscriptionMetadata = new TranscriptionMetadata
+                    {
+                        CreatedAt = DateTime.Now,
+                        ModelName = _selectedModelType.ToString(),
+                        Language = "ja",
+                        AudioFilePath = _selectedAudioFilePath,
+                        TotalDuration = totalDuration,
+                        SegmentCount = dt.Rows.Count
+                    };
+
+                    // エクスポートボタンを有効化
+                    btnExport.Enabled = true;
 
                     UpdateStatus($"文字起こし完了 ({dt.Rows.Count}件)", true);
                 }
@@ -705,6 +729,145 @@ namespace WhisperNetSample
             }
 
             return outputPath;
+        }
+
+        /// <summary>
+        /// エクスポートボタンクリック
+        /// </summary>
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.DataSource == null || _lastTranscriptionMetadata == null)
+            {
+                MessageBox.Show("エクスポートする文字起こし結果がありません", "エラー",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                // 保存形式選択ダイアログ
+                using (var form = new Form())
+                {
+                    form.Text = "エクスポート形式を選択";
+                    form.Size = new System.Drawing.Size(450, 280);
+                    form.StartPosition = FormStartPosition.CenterParent;
+                    form.FormBorderStyle = FormBorderStyle.FixedDialog;
+                    form.MaximizeBox = false;
+                    form.MinimizeBox = false;
+
+                    var checkBoxJson = new CheckBox { Text = "JSON (.json) - 構造化データ", Location = new System.Drawing.Point(20, 20), Width = 400, Checked = true };
+                    var checkBoxText = new CheckBox { Text = "テキスト (.txt) - 読みやすい形式", Location = new System.Drawing.Point(20, 50), Width = 400 };
+                    var checkBoxCsv = new CheckBox { Text = "CSV (.csv) - Excel・データ分析向け", Location = new System.Drawing.Point(20, 80), Width = 400 };
+                    var checkBoxSrt = new CheckBox { Text = "SRT (.srt) - 動画字幕形式", Location = new System.Drawing.Point(20, 110), Width = 400 };
+                    var checkBoxAudio = new CheckBox { Text = "音声ファイルも一緒に保存", Location = new System.Drawing.Point(20, 150), Width = 400, Checked = true };
+
+                    var btnOk = new Button { Text = "保存", Location = new System.Drawing.Point(150, 190), Width = 100, DialogResult = DialogResult.OK };
+                    var btnCancel = new Button { Text = "キャンセル", Location = new System.Drawing.Point(260, 190), Width = 100, DialogResult = DialogResult.Cancel };
+
+                    form.Controls.AddRange(new Control[] { checkBoxJson, checkBoxText, checkBoxCsv, checkBoxSrt, checkBoxAudio, btnOk, btnCancel });
+                    form.AcceptButton = btnOk;
+                    form.CancelButton = btnCancel;
+
+                    if (form.ShowDialog() != DialogResult.OK)
+                        return;
+
+                    // 少なくとも1つの形式が選択されているか確認
+                    if (!checkBoxJson.Checked && !checkBoxText.Checked && !checkBoxCsv.Checked && !checkBoxSrt.Checked)
+                    {
+                        MessageBox.Show("少なくとも1つの形式を選択してください", "エラー",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    // 保存先フォルダ選択
+                    using (var folderDialog = new FolderBrowserDialog())
+                    {
+                        folderDialog.Description = "保存先フォルダを選択してください";
+                        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                        var defaultPath = Path.Combine(documentsPath, "WhisperNetSample", "Transcriptions");
+                        folderDialog.SelectedPath = defaultPath;
+
+                        if (folderDialog.ShowDialog() != DialogResult.OK)
+                            return;
+
+                        // フォルダを作成
+                        if (!Directory.Exists(folderDialog.SelectedPath))
+                        {
+                            Directory.CreateDirectory(folderDialog.SelectedPath);
+                        }
+
+                        // ファイル名のベース（タイムスタンプ）
+                        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                        var baseName = $"{timestamp}_transcript";
+                        var dt = dataGridView1.DataSource as DataTable;
+
+                        var savedFiles = new System.Collections.Generic.List<string>();
+
+                        // 各形式で保存
+                        if (checkBoxJson.Checked)
+                        {
+                            var filePath = Path.Combine(folderDialog.SelectedPath, $"{baseName}.json");
+                            TranscriptionExporter.SaveAsJson(dt, filePath, _lastTranscriptionMetadata);
+                            savedFiles.Add(filePath);
+                        }
+
+                        if (checkBoxText.Checked)
+                        {
+                            var filePath = Path.Combine(folderDialog.SelectedPath, $"{baseName}.txt");
+                            TranscriptionExporter.SaveAsText(dt, filePath, _lastTranscriptionMetadata);
+                            savedFiles.Add(filePath);
+                        }
+
+                        if (checkBoxCsv.Checked)
+                        {
+                            var filePath = Path.Combine(folderDialog.SelectedPath, $"{baseName}.csv");
+                            TranscriptionExporter.SaveAsCsv(dt, filePath);
+                            savedFiles.Add(filePath);
+                        }
+
+                        if (checkBoxSrt.Checked)
+                        {
+                            var filePath = Path.Combine(folderDialog.SelectedPath, $"{baseName}.srt");
+                            TranscriptionExporter.SaveAsSrt(dt, filePath);
+                            savedFiles.Add(filePath);
+                        }
+
+                        // 音声ファイルもコピー
+                        if (checkBoxAudio.Checked && !string.IsNullOrEmpty(_lastTranscriptionMetadata.AudioFilePath))
+                        {
+                            try
+                            {
+                                var audioFileName = $"{timestamp}_recording{Path.GetExtension(_lastTranscriptionMetadata.AudioFilePath)}";
+                                var audioDestPath = Path.Combine(folderDialog.SelectedPath, audioFileName);
+                                File.Copy(_lastTranscriptionMetadata.AudioFilePath, audioDestPath, true);
+                                savedFiles.Add(audioDestPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                // 音声ファイルコピー失敗は警告のみ
+                                MessageBox.Show($"音声ファイルのコピーに失敗しました: {ex.Message}", "警告",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                        }
+
+                        // 完了メッセージ
+                        var message = $"エクスポート完了!\n\n保存先:\n{folderDialog.SelectedPath}\n\n保存ファイル数: {savedFiles.Count}";
+                        MessageBox.Show(message, "エクスポート完了",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        // フォルダを開く
+                        System.Diagnostics.Process.Start("explorer.exe", folderDialog.SelectedPath);
+
+                        UpdateStatus($"エクスポート完了 ({savedFiles.Count}ファイル)", true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"エクスポートに失敗しました。\n\n{ex.Message}", "エラー",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                UpdateStatus($"エクスポートエラー: {ex.Message}", false);
+            }
         }
 
         /// <summary>

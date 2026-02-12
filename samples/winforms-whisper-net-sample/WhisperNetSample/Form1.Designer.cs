@@ -58,6 +58,7 @@ namespace WhisperNetSample
             this.radioMicOnly = new System.Windows.Forms.RadioButton();
             this.radioPCOnly = new System.Windows.Forms.RadioButton();
             this.radioMix = new System.Windows.Forms.RadioButton();
+            this.btnExport = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             //
@@ -90,7 +91,7 @@ namespace WhisperNetSample
             this.dataGridView1.Location = new System.Drawing.Point(12, 130);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 21;
-            this.dataGridView1.Size = new System.Drawing.Size(760, 265);
+            this.dataGridView1.Size = new System.Drawing.Size(760, 235);
             this.dataGridView1.TabIndex = 1;
             //
             // statusLabel
@@ -233,11 +234,23 @@ namespace WhisperNetSample
             this.labelRecordingStatus.TabIndex = 16;
             this.labelRecordingStatus.Text = "待機中";
             //
+            // btnExport
+            //
+            this.btnExport.Enabled = false;
+            this.btnExport.Location = new System.Drawing.Point(12, 375);
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Size = new System.Drawing.Size(150, 25);
+            this.btnExport.TabIndex = 17;
+            this.btnExport.Text = "📁 エクスポート";
+            this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            //
             // Form1
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 450);
+            this.Controls.Add(this.btnExport);
             this.Controls.Add(this.labelRecordingStatus);
             this.Controls.Add(this.btnStopRecording);
             this.Controls.Add(this.btnStartRecording);
@@ -281,5 +294,6 @@ namespace WhisperNetSample
         private System.Windows.Forms.RadioButton radioMicOnly;
         private System.Windows.Forms.RadioButton radioPCOnly;
         private System.Windows.Forms.RadioButton radioMix;
+        private System.Windows.Forms.Button btnExport;
     }
 }
