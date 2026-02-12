@@ -116,6 +116,8 @@
     </Compile>
     <Compile Include="TranscriptionMetadata.cs" />
     <Compile Include="TranscriptionExporter.cs" />
+    <Compile Include="VoiceCommand.cs" />
+    <Compile Include="VoiceCommandManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">

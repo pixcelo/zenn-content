@@ -60,6 +60,17 @@ namespace WhisperNetSample
         // 最後に文字起こししたメタデータ
         private TranscriptionMetadata _lastTranscriptionMetadata;
 
+        // 音声コマンド管理
+        private VoiceCommandManager _voiceCommandManager;
+
+        // 音声コマンド用の録音データ
+        private WaveInEvent _voiceCommandWaveIn;
+        private WaveFileWriter _voiceCommandFileWriter;
+        private string _voiceCommandFilePath;
+
+        // 開いているポップアップフォームの参照
+        private PopupForm _activePopupForm;
+
         public Form1()
         {
             InitializeComponent();
@@ -72,6 +83,9 @@ namespace WhisperNetSample
 
             // ComboBoxの初期化
             InitializeModelTypeComboBox();
+
+            // 音声コマンドの初期化
+            InitializeVoiceCommands();
 
             // モデルの自動ダウンロードと初期化
             await InitializeWhisperModelAsync(_selectedModelType);
@@ -102,11 +116,16 @@ namespace WhisperNetSample
 
         private void btnOpenPopup_Click(object sender, EventArgs e)
         {
-            // ポップアップフォームを作成して表示
-            using (var popupForm = new PopupForm())
+            // 既存のポップアップがあれば閉じる
+            if (_activePopupForm != null && !_activePopupForm.IsDisposed)
             {
-                popupForm.ShowDialog(this);
+                _activePopupForm.Close();
             }
+
+            // ポップアップフォームを作成して表示
+            _activePopupForm = new PopupForm();
+            _activePopupForm.FormClosed += (s, args) => { _activePopupForm = null; };
+            _activePopupForm.Show(this);
         }
 
         /// <summary>
@@ -885,5 +904,423 @@ namespace WhisperNetSample
             statusLabel.Text = message;
             statusLabel.ForeColor = isSuccess ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
+
+        #region 音声コマンド機能
+
+        /// <summary>
+        /// 音声コマンドの初期化
+        /// </summary>
+        private void InitializeVoiceCommands()
+        {
+            _voiceCommandManager = new VoiceCommandManager();
+
+            // イベントハンドラ登録
+            _voiceCommandManager.CommandRecognized += OnCommandRecognized;
+            _voiceCommandManager.CommandNotFound += OnCommandNotFound;
+
+            // コマンドを登録
+            RegisterVoiceCommands();
+        }
+
+        /// <summary>
+        /// 音声コマンドを登録
+        /// </summary>
+        private void RegisterVoiceCommands()
+        {
+            // ダイアログ操作コマンド
+            _voiceCommandManager.RegisterCommand(new VoiceCommand
+            {
+                TriggerPhrases = new[] { "ポップアップを開いて", "ダイアログ表示", "ダイアログを開く", "ポップアップ表示" },
+                Action = () =>
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() => btnOpenPopup.PerformClick()));
+                    }
+                    else
+                    {
+                        btnOpenPopup.PerformClick();
+                    }
+                },
+                Description = "ポップアップダイアログを表示します",
+                Category = "ダイアログ操作"
+            });
+
+            _voiceCommandManager.RegisterCommand(new VoiceCommand
+            {
+                TriggerPhrases = new[] { "ポップアップを閉じて", "ダイアログを閉じる", "閉じて" },
+                Action = () =>
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(CloseActivePopup));
+                    }
+                    else
+                    {
+                        CloseActivePopup();
+                    }
+                },
+                Description = "開いているポップアップを閉じます",
+                Category = "ダイアログ操作"
+            });
+
+            // アプリ内操作コマンド
+            _voiceCommandManager.RegisterCommand(new VoiceCommand
+            {
+                TriggerPhrases = new[] { "録音開始", "録音スタート", "レコーディング開始" },
+                Action = () =>
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() => btnStartRecording.PerformClick()));
+                    }
+                    else
+                    {
+                        btnStartRecording.PerformClick();
+                    }
+                },
+                Description = "音声の録音を開始します",
+                Category = "アプリ操作"
+            });
+
+            _voiceCommandManager.RegisterCommand(new VoiceCommand
+            {
+                TriggerPhrases = new[] { "録音停止", "ストップ", "録音終了" },
+                Action = () =>
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() => btnStopRecording.PerformClick()));
+                    }
+                    else
+                    {
+                        btnStopRecording.PerformClick();
+                    }
+                },
+                Description = "録音を停止します",
+                Category = "アプリ操作"
+            });
+
+            _voiceCommandManager.RegisterCommand(new VoiceCommand
+            {
+                TriggerPhrases = new[] { "文字起こし実行", "文字起こし", "トランスクリプション実行" },
+                Action = () =>
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() => btnTranscribe.PerformClick()));
+                    }
+                    else
+                    {
+                        btnTranscribe.PerformClick();
+                    }
+                },
+                Description = "音声ファイルの文字起こしを実行します",
+                Category = "アプリ操作"
+            });
+
+            _voiceCommandManager.RegisterCommand(new VoiceCommand
+            {
+                TriggerPhrases = new[] { "結果をエクスポート", "エクスポート", "保存" },
+                Action = () =>
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() => btnExport.PerformClick()));
+                    }
+                    else
+                    {
+                        btnExport.PerformClick();
+                    }
+                },
+                Description = "文字起こし結果をエクスポートします",
+                Category = "アプリ操作"
+            });
+
+            // ヘルプコマンド
+            _voiceCommandManager.RegisterCommand(new VoiceCommand
+            {
+                TriggerPhrases = new[] { "ヘルプ", "コマンド一覧", "使い方" },
+                Action = () =>
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(ShowVoiceCommandHelp));
+                    }
+                    else
+                    {
+                        ShowVoiceCommandHelp();
+                    }
+                },
+                Description = "利用可能な音声コマンドの一覧を表示します",
+                Category = "ヘルプ"
+            });
+        }
+
+        /// <summary>
+        /// アクティブなポップアップを閉じる
+        /// </summary>
+        private void CloseActivePopup()
+        {
+            if (_activePopupForm != null && !_activePopupForm.IsDisposed)
+            {
+                _activePopupForm.Close();
+                _activePopupForm = null;
+            }
+            else
+            {
+                UpdateVoiceCommandStatus("閉じるポップアップがありません", false);
+            }
+        }
+
+        /// <summary>
+        /// 音声コマンドヘルプを表示
+        /// </summary>
+        private void ShowVoiceCommandHelp()
+        {
+            var helpMessage = _voiceCommandManager.GenerateHelpMessage();
+            MessageBox.Show(helpMessage, "音声コマンド一覧",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// ヘルプボタンクリック
+        /// </summary>
+        private void btnVoiceCommandHelp_Click(object sender, EventArgs e)
+        {
+            ShowVoiceCommandHelp();
+        }
+
+        /// <summary>
+        /// コマンド認識成功時のイベントハンドラ
+        /// </summary>
+        private void OnCommandRecognized(object sender, VoiceCommandRecognizedEventArgs e)
+        {
+            if (e.IsSuccess)
+            {
+                UpdateVoiceCommandStatus($"✓ {e.Command.Description}", true);
+            }
+            else
+            {
+                UpdateVoiceCommandStatus($"✗ コマンド実行エラー: {e.Error?.Message}", false);
+            }
+        }
+
+        /// <summary>
+        /// コマンドが見つからなかった時のイベントハンドラ
+        /// </summary>
+        private void OnCommandNotFound(object sender, string recognizedText)
+        {
+            UpdateVoiceCommandStatus($"❓ コマンドが見つかりませんでした: 「{recognizedText}」", false);
+        }
+
+        /// <summary>
+        /// 音声コマンドステータス更新
+        /// </summary>
+        private void UpdateVoiceCommandStatus(string message, bool isSuccess, bool isRecording = false, System.Drawing.Color? customColor = null)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => UpdateVoiceCommandStatus(message, isSuccess, isRecording, customColor)));
+                return;
+            }
+
+            labelVoiceCommandStatus.Text = message;
+
+            // 色の設定
+            if (customColor.HasValue)
+            {
+                labelVoiceCommandStatus.ForeColor = customColor.Value;
+            }
+            else if (isRecording)
+            {
+                labelVoiceCommandStatus.ForeColor = System.Drawing.Color.Red;
+            }
+            else if (isSuccess)
+            {
+                labelVoiceCommandStatus.ForeColor = System.Drawing.Color.Green;
+            }
+            else
+            {
+                labelVoiceCommandStatus.ForeColor = System.Drawing.Color.Red;
+            }
+        }
+
+        /// <summary>
+        /// 音声コマンドボタン押下（録音開始）
+        /// </summary>
+        private void btnVoiceCommand_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            try
+            {
+                // マイクデバイスの存在確認
+                if (WaveInEvent.DeviceCount == 0)
+                {
+                    UpdateVoiceCommandStatus("マイクが見つかりません", false);
+                    return;
+                }
+
+                // 録音ファイルパスを生成
+                _voiceCommandFilePath = Path.Combine(Path.GetTempPath(), $"voice_command_{Guid.NewGuid()}.wav");
+
+                // WaveInEventを初期化（16kHz Mono、Whisper推奨設定）
+                _voiceCommandWaveIn = new WaveInEvent();
+                _voiceCommandWaveIn.WaveFormat = new WaveFormat(16000, 16, 1);
+
+                // ファイルライターを初期化
+                _voiceCommandFileWriter = new WaveFileWriter(_voiceCommandFilePath, _voiceCommandWaveIn.WaveFormat);
+
+                // データ受信イベントハンドラ
+                _voiceCommandWaveIn.DataAvailable += (s, args) =>
+                {
+                    _voiceCommandFileWriter.Write(args.Buffer, 0, args.BytesRecorded);
+                };
+
+                // ボタンの外観を録音中に変更
+                btnVoiceCommand.BackColor = System.Drawing.Color.Red;
+                btnVoiceCommand.ForeColor = System.Drawing.Color.White;
+
+                // 録音開始
+                _voiceCommandWaveIn.StartRecording();
+                UpdateVoiceCommandStatus("🔴 録音中... 話してください", false, true);
+            }
+            catch (Exception ex)
+            {
+                // エラー時は外観を元に戻す
+                btnVoiceCommand.BackColor = System.Drawing.SystemColors.Control;
+                btnVoiceCommand.ForeColor = System.Drawing.SystemColors.ControlText;
+                UpdateVoiceCommandStatus($"✗ 録音開始エラー: {ex.Message}", false);
+            }
+        }
+
+        /// <summary>
+        /// 音声コマンドボタン離す（録音停止→認識実行）
+        /// </summary>
+        private async void btnVoiceCommand_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            try
+            {
+                // ボタンの外観を元に戻す
+                btnVoiceCommand.BackColor = System.Drawing.SystemColors.Control;
+                btnVoiceCommand.ForeColor = System.Drawing.SystemColors.ControlText;
+                btnVoiceCommand.UseVisualStyleBackColor = true;
+
+                // 録音停止
+                if (_voiceCommandWaveIn != null)
+                {
+                    _voiceCommandWaveIn.StopRecording();
+                    _voiceCommandWaveIn.Dispose();
+                    _voiceCommandWaveIn = null;
+                }
+
+                if (_voiceCommandFileWriter != null)
+                {
+                    _voiceCommandFileWriter.Dispose();
+                    _voiceCommandFileWriter = null;
+                }
+
+                // ボタンを一時的に無効化（認識中の誤操作防止）
+                btnVoiceCommand.Enabled = false;
+                UpdateVoiceCommandStatus("⏳ 認識中...", false, false, System.Drawing.Color.Blue);
+
+                // 音声認識実行
+                await ProcessVoiceCommandAsync(_voiceCommandFilePath);
+            }
+            catch (Exception ex)
+            {
+                UpdateVoiceCommandStatus($"✗ 認識エラー: {ex.Message}", false);
+            }
+            finally
+            {
+                // ボタンを再度有効化
+                btnVoiceCommand.Enabled = true;
+
+                // 一時ファイル削除
+                try
+                {
+                    if (File.Exists(_voiceCommandFilePath))
+                    {
+                        File.Delete(_voiceCommandFilePath);
+                    }
+                }
+                catch
+                {
+                    // ファイル削除失敗は無視
+                }
+            }
+        }
+
+        /// <summary>
+        /// 音声コマンドの認識処理
+        /// </summary>
+        private async Task ProcessVoiceCommandAsync(string audioFilePath)
+        {
+            if (_whisperFactory == null)
+            {
+                UpdateVoiceCommandStatus("✗ Whisperモデルが初期化されていません", false);
+                return;
+            }
+
+            try
+            {
+                // WhisperProcessorを作成
+                using (var processor = _whisperFactory.CreateBuilder()
+                    .WithLanguage("ja")
+                    .Build())
+                {
+                    var recognizedText = "";
+
+                    // 音声ファイルを処理
+                    using (var fileStream = File.OpenRead(audioFilePath))
+                    {
+                        var enumerator = processor.ProcessAsync(fileStream).GetAsyncEnumerator();
+                        try
+                        {
+                            while (await enumerator.MoveNextAsync())
+                            {
+                                var result = enumerator.Current;
+                                recognizedText += result.Text + " ";
+                            }
+                        }
+                        finally
+                        {
+                            await enumerator.DisposeAsync();
+                        }
+                    }
+
+                    // 認識結果を処理
+                    if (!string.IsNullOrWhiteSpace(recognizedText))
+                    {
+                        var trimmedText = recognizedText.Trim();
+                        UpdateVoiceCommandStatus($"💬 認識: 「{trimmedText}」", false, false, System.Drawing.Color.DarkBlue);
+
+                        // コマンドとして処理
+                        var commandExecuted = _voiceCommandManager.ProcessRecognizedText(trimmedText);
+
+                        if (!commandExecuted)
+                        {
+                            // コマンドが見つからなかった場合のメッセージは
+                            // OnCommandNotFoundイベントハンドラで処理される
+                        }
+                    }
+                    else
+                    {
+                        UpdateVoiceCommandStatus("✗ 音声が認識できませんでした", false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateVoiceCommandStatus($"✗ 認識エラー: {ex.Message}", false);
+            }
+        }
+
+        #endregion
     }
 }

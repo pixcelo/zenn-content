@@ -41,6 +41,7 @@ namespace WhisperNetSample
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.btnTest = new System.Windows.Forms.Button();
             this.btnOpenPopup = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
@@ -59,6 +60,10 @@ namespace WhisperNetSample
             this.radioPCOnly = new System.Windows.Forms.RadioButton();
             this.radioMix = new System.Windows.Forms.RadioButton();
             this.btnExport = new System.Windows.Forms.Button();
+            this.btnVoiceCommand = new System.Windows.Forms.Button();
+            this.labelVoiceCommandStatus = new System.Windows.Forms.Label();
+            this.btnVoiceCommandHelp = new System.Windows.Forms.Button();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             //
@@ -245,11 +250,48 @@ namespace WhisperNetSample
             this.btnExport.UseVisualStyleBackColor = true;
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             //
+            // btnVoiceCommand
+            //
+            this.btnVoiceCommand.Location = new System.Drawing.Point(400, 100);
+            this.btnVoiceCommand.Name = "btnVoiceCommand";
+            this.btnVoiceCommand.Size = new System.Drawing.Size(150, 23);
+            this.btnVoiceCommand.TabIndex = 18;
+            this.btnVoiceCommand.Text = "🎤 長押しで話す";
+            this.toolTip1.SetToolTip(this.btnVoiceCommand, "長押しして話す → 離すと認識\r\n「ヘルプ」と話すとコマンド一覧が表示されます");
+            this.btnVoiceCommand.UseVisualStyleBackColor = true;
+            this.btnVoiceCommand.MouseDown += new System.Windows.Forms.MouseEventHandler(this.btnVoiceCommand_MouseDown);
+            this.btnVoiceCommand.MouseUp += new System.Windows.Forms.MouseEventHandler(this.btnVoiceCommand_MouseUp);
+            //
+            // labelVoiceCommandStatus
+            //
+            this.labelVoiceCommandStatus.AutoSize = true;
+            this.labelVoiceCommandStatus.Font = new System.Drawing.Font("MS UI Gothic", 10F, System.Drawing.FontStyle.Bold);
+            this.labelVoiceCommandStatus.ForeColor = System.Drawing.Color.Gray;
+            this.labelVoiceCommandStatus.Location = new System.Drawing.Point(620, 103);
+            this.labelVoiceCommandStatus.Name = "labelVoiceCommandStatus";
+            this.labelVoiceCommandStatus.Size = new System.Drawing.Size(200, 14);
+            this.labelVoiceCommandStatus.TabIndex = 19;
+            this.labelVoiceCommandStatus.Text = "⬅ 長押しして話してください";
+            //
+            // btnVoiceCommandHelp
+            //
+            this.btnVoiceCommandHelp.Location = new System.Drawing.Point(560, 100);
+            this.btnVoiceCommandHelp.Name = "btnVoiceCommandHelp";
+            this.btnVoiceCommandHelp.Size = new System.Drawing.Size(50, 23);
+            this.btnVoiceCommandHelp.TabIndex = 20;
+            this.btnVoiceCommandHelp.Text = "❓";
+            this.toolTip1.SetToolTip(this.btnVoiceCommandHelp, "音声コマンド一覧を表示");
+            this.btnVoiceCommandHelp.UseVisualStyleBackColor = true;
+            this.btnVoiceCommandHelp.Click += new System.EventHandler(this.btnVoiceCommandHelp_Click);
+            //
             // Form1
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 450);
+            this.Controls.Add(this.btnVoiceCommandHelp);
+            this.Controls.Add(this.labelVoiceCommandStatus);
+            this.Controls.Add(this.btnVoiceCommand);
             this.Controls.Add(this.btnExport);
             this.Controls.Add(this.labelRecordingStatus);
             this.Controls.Add(this.btnStopRecording);
@@ -295,5 +337,9 @@ namespace WhisperNetSample
         private System.Windows.Forms.RadioButton radioPCOnly;
         private System.Windows.Forms.RadioButton radioMix;
         private System.Windows.Forms.Button btnExport;
+        private System.Windows.Forms.Button btnVoiceCommand;
+        private System.Windows.Forms.Label labelVoiceCommandStatus;
+        private System.Windows.Forms.Button btnVoiceCommandHelp;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
