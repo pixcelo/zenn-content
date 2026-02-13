@@ -27,7 +27,8 @@
     <RadzenDataGrid @ref="_grid"
                     Data="@Items"
                     TItem="GridItem"
-                    RowClick="@(args => OnRowClick(args.Data))"
+                    @bind-Value="@SelectedItems"
+                    SelectionMode="@DataGridSelectionMode.Multiple"
                     AllowFiltering="true"
                     AllowSorting="true"
                     AllowColumnResize="true"
@@ -35,16 +36,7 @@
                     Density="Density.Compact"
                     GridLines="DataGridGridLines.Both">
         <Columns>
-            @* チェックボックス列 *@
-            <RadzenDataGridColumn TItem="GridItem" Width="60px" Sortable="false" Filterable="false" Resizable="false">
-                <HeaderTemplate>
-                    <RadzenCheckBox TriState="false" TValue="bool" Value="@(_selectAll)" Change="@OnSelectAllChange" />
-                </HeaderTemplate>
-                <Template Context="item">
-                    <RadzenCheckBox TriState="false" TValue="bool" Value="@(SelectedItems.Contains(item))" Change="@(() => ToggleSelection(item))" />
-                </Template>
-            </RadzenDataGridColumn>
-
+            @* チェックボックス列は SelectionMode="Multiple" により自動で追加される *@
             <RadzenDataGridColumn TItem="GridItem" Property="Id" Title="ID" Width="80px" />
 
             <RadzenDataGridColumn TItem="GridItem" Property="Name" Title="商品名">

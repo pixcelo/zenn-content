@@ -57,9 +57,24 @@ npm run test:debug
 
 ## テスト内容
 
-- `example.spec.ts`: Blazor アプリケーションの基本的な動作確認テスト
-  - ページタイトルの確認
-  - ウェルカムメッセージの表示確認
+### example.spec.ts
+Blazor アプリケーションの基本的な動作確認テスト
+- ページタイトルの確認
+- ウェルカムメッセージの表示確認
+
+### datagrid-status.spec.ts
+DataGrid 状態列のE2Eテスト
+
+#### smoke カテゴリ（基本動作確認）
+- 初期データに3つの異なる状態が表示される
+- 完了状態の行をクリックして選択できる
+- 完了状態の行に正しい表示テキストが含まれる
+- 新規行を追加すると未着手状態になる
+- すべての状態列にdata-status属性が存在する
+
+#### regression カテゴリ（詳細機能テスト）
+- 複数行を順番に選択できる
+- 状態ごとの行数が正しくカウントされる
 
 ## ファイル構成
 
@@ -69,8 +84,11 @@ e2e/
 ├── playwright.config.ts      # Playwright 設定
 ├── .env.example              # 環境変数のテンプレート
 ├── .gitignore               # Git 除外設定
+├── pages/                    # Page Objectクラス
+│   └── DataGridDemoPage.ts  # DataGridDemo ページのPage Object
 ├── tests/
-│   └── example.spec.ts      # テストファイル
+│   ├── example.spec.ts      # 基本動作確認テスト
+│   └── datagrid-status.spec.ts  # DataGrid 状態列テスト
 └── README.md                # このファイル
 ```
 

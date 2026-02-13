@@ -4,7 +4,7 @@ test('has title', async ({ page }) => {
   await page.goto('/');
 
   // Blazor Web Appのデフォルトタイトルを確認
-  await expect(page).toHaveTitle(/BlazorRadzenPlaywrightSample/);
+  await expect(page).toHaveTitle(/Home/);
 });
 
 test('has welcome heading', async ({ page }) => {
