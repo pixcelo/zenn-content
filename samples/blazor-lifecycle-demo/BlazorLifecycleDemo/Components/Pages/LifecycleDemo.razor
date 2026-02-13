@@ -1,0 +1,52 @@
+@page "/lifecycle"
+@implements IDisposable
+@inject ILogger<LifecycleDemo> Logger
+
+<PageTitle>Blazor Lifecycle Demo</PageTitle>
+
+<h1>Blazorライフサイクル検証</h1>
+
+<div class="alert alert-info">
+    <p>このページはBlazorコンポーネントのライフサイクルを検証するためのデモです。</p>
+    <p>ブラウザの開発者ツール（F12）のコンソールでログを確認してください。</p>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3>カウンター</h3>
+    </div>
+    <div class="card-body">
+        <p>現在のカウント: <strong>@currentCount</strong></p>
+        <button class="btn btn-primary" @onclick="IncrementCount">カウントアップ</button>
+        <button class="btn btn-secondary" @onclick="ForceRerender">再レンダリング</button>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3>パラメータ変更テスト</h3>
+    </div>
+    <div class="card-body">
+        <label>
+            メッセージ:
+            <input class="form-control" @bind="message" @bind:after="OnMessageChanged" />
+        </label>
+        <ChildComponent Message="@message" />
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>実行されたライフサイクルメソッド</h3>
+    </div>
+    <div class="card-body">
+        <ol>
+            @foreach (var log in lifecycleLogs)
+            {
+                <li>@log</li>
+            }
+        </ol>
+    </div>
+</div>
+
+
