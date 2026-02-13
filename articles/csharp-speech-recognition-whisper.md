@@ -25,7 +25,7 @@ publication_name: "nexta_"
 
 ![文字起こしアプリのスクリーンショット](/images/csharp-speech-recognition-whisper/transcription-app.png)
 
-フレームワークは Windows Formです。
+フレームワークは Windows Formsです。
 デザインは適当です。
 モデル取得以外は、オフラインで動きます。
 
@@ -46,7 +46,7 @@ NAudioは.NET向けのオープンソースのオーディオ処理ライブラ�
 
 次に、音声認識。
 OpenAIの開発したWhisperのOSS版を使いました。
-Whisper.cppを.Netで扱えるようにしたWhisper.netです。
+Whisper.cppを.NETで扱えるようにしたWhisper.netです。
 
 :::message
 Whisper.netは、OpenAIの音声認識AI「Whisper」をC#/.NETで利用できるライブラリです。以下の特徴があります：
