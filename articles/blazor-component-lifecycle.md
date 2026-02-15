@@ -22,6 +22,9 @@ Blazorでは、画面をコンポーネントという部品の組み合わせ�
 
 この記事では、どのタイミングでどのメソッドが呼ばれるのかを解説します。
 
+:::message
+本記事では、.NET 8以降の「Interactive Server」モード、または従来の「Blazor Server」を想定して解説します。
+:::
 
 ## Blazor Serverで画面が表示される仕組み
 
@@ -72,25 +75,27 @@ sequenceDiagram
     Blazor->>Component: SetParametersAsync()
     Component->>Component: OnInitialized(Async)()
     Component->>Component: OnParametersSet(Async)()
-    Component->>Browser: BuildRenderTree()
-    Browser-->>Blazor: 静的HTML
+    Component->>Component: BuildRenderTree()
+    Note over Component: 静的HTML生成
 
     note right of Blazor: 2. SignalR接続後
     Blazor->>Component: SetParametersAsync() (2回目)
     Component->>Component: OnInitialized(Async)() (2回目)
     Component->>Component: OnParametersSet(Async)() (2回目)
-    Component->>Browser: BuildRenderTree()
-    Browser->>Component: OnAfterRender(Async)(firstRender: true)
-    Browser-->>Blazor: 対話型DOM更新
+    Component->>Component: BuildRenderTree()
+    Note right of Component: 差分算出＆送信
+    Component-->>Browser: DOM更新
+    Blazor->>Component: OnAfterRender(Async)(firstRender: true)
 
     note right of Blazor: 3. ユーザー操作時
     Blazor->>Component: イベントハンドラ実行
     Component->>Component: StateHasChanged()
     Component->>Component: ShouldRender()?
     alt ShouldRender = true
-        Component->>Browser: BuildRenderTree()
-        Browser->>Component: OnAfterRender(Async)(firstRender: false)
-        Browser-->>Blazor: DOM差分更新
+        Component->>Component: BuildRenderTree()
+        Note right of Component: 差分算出＆送信
+        Component-->>Browser: DOM更新
+        Blazor->>Component: OnAfterRender(Async)(firstRender: false)
     end
 ```
 
