@@ -123,14 +123,16 @@ DB接続やAPI呼び出しを1回だけ実行したい場合は、`OnAfterRender
 これらのメソッドの動きやタイミングを理解することが、
 Blazor開発の第一歩となります。
 
-## 実践例
+## サンプル
 
-実際の動作を確認できるサンプルプロジェクトを用意しました。
+サンプルプロジェクトを用意しました。
 
-[GitHubサンプルコード](https://github.com/yourusername/zenn-content/tree/main/samples/blazor-lifecycle-demo)
+[GitHubサンプルコード](https://github.com/pixcelo/zenn-content/tree/main/samples/blazor-lifecycle-demo)
 
 各ライフサイクルメソッドの実行順序をログで確認できます。
 
 
 ## 参考リンク
 - [ASP.NET Core Razor コンポーネントのライフサイクル](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/lifecycle?view=aspnetcore-10.0)
+- [ASP.NET Core Razor コンポーネントのプリレンダリング](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/prerender?view=aspnetcore-10.0)
+- [ASP.NET Core Razor コンポーネント](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/?view=aspnetcore-10.0)
