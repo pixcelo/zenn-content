@@ -58,7 +58,7 @@ sequenceDiagram
 
 Blazor Serverでは、まず静的HTML（プリレンダリング）を表示し、次にSignalRで接続して動的に操作できるようになります。
 
-## コンポーネント内部で起きていること
+## コンポーネントのライフサイクル
 
 上記の各段階で、コンポーネント内では以下のメソッドが呼ばれます：
 
@@ -117,6 +117,11 @@ sequenceDiagram
 DB接続やAPI呼び出しを1回だけ実行したい場合は、`OnAfterRender(firstRender)` で `firstRender == true` の時のみ実行するようにします。
 :::
 
+すべてのrazorコンポーネントは、基本的にComponentBase（基底クラス）を継承しています。
+ライフサイクルの各メソッドは、ComponentBaseの定義から確認が可能です。
+
+これらのメソッドの動きやタイミングを理解することが、
+Blazor開発の第一歩となります。
 
 ## 実践例
 

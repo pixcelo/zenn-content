@@ -7,7 +7,8 @@ Blazorコンポーネントのライフサイクルメソッドの動作を検�
 
 ### 初期化フェーズ
 - `OnInitialized()` / `OnInitializedAsync()`
-  - コンポーネントが初期化される際に1回だけ呼ばれる
+  - コンポーネントが初期化される際に呼ばれる
+  - **プリレンダリング有効時は2回実行される**（プリレンダリング時とSignalR接続後）
   - 非同期版は同期版の後に実行される
 
 ### パラメータ設定フェーズ
@@ -33,7 +34,10 @@ BlazorLifecycleDemo/
 ├── Components/
 │   ├── Pages/
 │   │   ├── LifecycleDemo.razor        # メインの検証ページ
-│   │   └── ChildComponent.razor       # 子コンポーネント
+│   │   ├── ChildComponent.razor       # 子コンポーネント
+│   │   ├── Sync/                       # 同期ライフサイクル検証
+│   │   ├── Async/                      # 非同期ライフサイクル検証
+│   │   └── Mixed/                      # 混合ライフサイクル検証
 │   └── Layout/
 │       └── NavMenu.razor               # ナビゲーションメニュー
 ├── Program.cs                          # エントリーポイント
@@ -66,21 +70,17 @@ dotnet run
 ## 検証シナリオ
 
 ### 1. 初回レンダリング時のライフサイクル
-ページを開いた際の実行順序を確認：
-```
-親: OnInitialized()
-親: OnInitializedAsync()
-親: OnParametersSet()
-親: OnParametersSetAsync()
-子: OnInitialized()
-子: OnInitializedAsync()
-子: OnParametersSet()
-子: OnParametersSetAsync()
-子: OnAfterRender(firstRender=true)
-子: OnAfterRenderAsync(firstRender=true)
-親: OnAfterRender(firstRender=true)
-親: OnAfterRenderAsync(firstRender=true)
-```
+
+プリレンダリング有効時、ライフサイクルメソッドは2回実行されます。
+
+実際のログ出力を確認するには：
+1. アプリケーションを起動
+2. ブラウザで開発者ツール（F12）を開く
+3. コンソールタブでライフサイクルメソッドの実行順序を確認
+
+**重要なポイント**:
+- `OnInitialized` / `OnInitializedAsync` / `OnParametersSet` / `OnParametersSetAsync` は2回実行される
+- `OnAfterRender` / `OnAfterRenderAsync` はプリレンダリング時には実行されず、SignalR接続後のみ実行される
 
 ### 2. 状態変更による再レンダリング
 「カウントアップ」ボタンをクリックして状態を変更：
@@ -123,15 +123,20 @@ dotnet run
 
 ## 注意事項
 
-1. **Server-side Blazorの動作**
+1. **プリレンダリングによる二重実行**
+   - このプロジェクトはプリレンダリングが有効です
+   - `OnInitialized` / `OnInitializedAsync` / `OnParametersSet` / `OnParametersSetAsync` は2回実行されます
+   - DB接続やAPI呼び出しは `OnAfterRender(firstRender == true)` で実行することを推奨
+
+2. **Server-side Blazorの動作**
    - このプロジェクトはBlazor Serverモードで動作します
    - SignalR接続を介してサーバーと通信します
 
-2. **ログの出力場所**
+3. **ログの出力場所**
    - サーバー側のログ: コンソールウィンドウ（`dotnet run` を実行した場所）
    - クライアント側のログ: ブラウザの開発者ツールのコンソール
 
-3. **非同期処理**
+4. **非同期処理**
    - 各非同期メソッド内で `Task.Delay()` を使用して処理時間を可視化
    - 実際の非同期処理（API呼び出しなど）の動作をシミュレート
 
