@@ -1,0 +1,25 @@
+@page "/lifecycle/async"
+@rendermode InteractiveServer
+@inherits ParentAsyncPageBase
+
+<PageTitle>親子ライフサイクル検証 - 非同期版のみ</PageTitle>
+
+<h1>親子コンポーネント - 非同期版のみ</h1>
+
+<div class="alert alert-info">
+    <p>このページでは、親子コンポーネントとも<strong>非同期版ライフサイクルメソッドのみ</strong>を使用します。</p>
+    <p>親に Task.Delay(100ms)、子に Task.Delay(50ms) を入れて非同期処理の影響を確認できます。</p>
+</div>
+
+<ChildAsyncComponent Message="@Message" />
+
+<div class="alert alert-primary mt-4">
+    <h5>💡 ライフサイクルの確認方法</h5>
+    <p class="mb-2">ブラウザの開発者ツールでコンソールを開いて、ライフサイクルメソッドの実行順序を確認してください。</p>
+    <ol class="mb-0">
+        <li><strong>F12キー</strong>を押して開発者ツールを開く</li>
+        <li><strong>Console</strong>タブを選択</li>
+        <li>親と子のライフサイクルメソッドがタイムスタンプ付きで表示されます</li>
+        <li><strong>注目ポイント：</strong>親のOnInitializedAsync待機中に、子のOnInitializedAsyncが並行実行されます</li>
+    </ol>
+</div>
