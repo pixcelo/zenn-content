@@ -68,16 +68,13 @@ sequenceDiagram
     participant Component
     participant Browser
 
-    rect rgb(240, 240, 255)
     note right of Blazor: 1. プリレンダリング時
     Blazor->>Component: SetParametersAsync()
     Component->>Component: OnInitialized(Async)()
     Component->>Component: OnParametersSet(Async)()
     Component->>Browser: BuildRenderTree()
     Browser-->>Blazor: 静的HTML
-    end
 
-    rect rgb(240, 255, 240)
     note right of Blazor: 2. SignalR接続後
     Blazor->>Component: SetParametersAsync() (2回目)
     Component->>Component: OnInitialized(Async)() (2回目)
@@ -85,9 +82,7 @@ sequenceDiagram
     Component->>Browser: BuildRenderTree()
     Browser->>Component: OnAfterRender(Async)(firstRender: true)
     Browser-->>Blazor: 対話型DOM更新
-    end
 
-    rect rgb(255, 250, 240)
     note right of Blazor: 3. ユーザー操作時
     Blazor->>Component: イベントハンドラ実行
     Component->>Component: StateHasChanged()
@@ -96,7 +91,6 @@ sequenceDiagram
         Component->>Browser: BuildRenderTree()
         Browser->>Component: OnAfterRender(Async)(firstRender: false)
         Browser-->>Blazor: DOM差分更新
-    end
     end
 ```
 
@@ -133,6 +127,6 @@ Blazor開発の第一歩となります。
 
 
 ## 参考リンク
-- [ASP.NET Core Razor コンポーネントのライフサイクル](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/lifecycle?view=aspnetcore-10.0)
-- [ASP.NET Core Razor コンポーネントのプリレンダリング](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/prerender?view=aspnetcore-10.0)
-- [ASP.NET Core Razor コンポーネント](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/?view=aspnetcore-10.0)
+- [ASP.NET Core Razor コンポーネントのライフサイクル](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/lifecycle)
+- [ASP.NET Core Razor コンポーネントのプリレンダリング](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/prerender)
+- [ASP.NET Core Razor コンポーネント](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/)
