@@ -1,10 +1,10 @@
 ---
-title: "Blazorで画面が表示される仕組みとコンポーネントのライフサイクル"
+title: "Blazorのレンダリングの仕組みとコンポーネントのライフサイクル"
 emoji: "🔄"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["blazor", "csharp", "dotnet", "web", "web開発"]
 published: false
-publication_name: "nextanext"
+publication_name: "nexta_"
 ---
 
 ネクスタの tetsu.k です。
