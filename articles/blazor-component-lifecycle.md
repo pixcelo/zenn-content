@@ -104,7 +104,7 @@ sequenceDiagram
 よく使うのは以下の4つです。
 - OnInitialized - 初期化
 - OnParametersSet - パラメータ受け取り後の処理
-- OnAfterRender - 画面表示後の処理（動的行へのデータ設定など）
+- OnAfterRender - 画面表示後の処理（グリッドのデータ設定など）
 - StateHasChanged - 画面の再描画
 
 詳しい実行順序は上のシーケンス図を参照してください。
@@ -116,7 +116,7 @@ sequenceDiagram
 DB接続やAPI呼び出しを1回だけ実行したい場合は、`OnAfterRender(firstRender)` で `firstRender == true` の時のみ実行するようにします。
 :::
 
-すべてのrazorコンポーネントは、基本的にComponentBase（基底クラス）を継承しています。
+すべてのRazorコンポーネントは、基本的にComponentBase（基底クラス）を継承しています。
 ライフサイクルの各メソッドは、ComponentBaseの定義から確認が可能です。
 
 これらのメソッドの動きやタイミングを理解することが、
