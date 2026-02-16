@@ -112,8 +112,11 @@ sequenceDiagram
 ※プリレンダリング：初回アクセス時にサーバーが静的HTMLを事前生成する仕組み
 
 :::message alert
-プリレンダリング有効時、`OnInitialized(Async)` は2回実行されます。
-DB接続やAPI呼び出しを1回だけ実行したい場合は、`OnAfterRender(firstRender)` で `firstRender == true` の時のみ実行するようにします。
+プリレンダリング有効時、`OnInitialized(Async)`はプリレンダリング時とSignalR接続後の計2回実行されます。
+
+DB接続やAPI呼び出しなどコストの高い処理を1回だけ実行したい場合は、`OnAfterRenderAsync(firstRender)`で`firstRender == true`の時のみ実行します。
+
+ただし、この方法ではデータ取得前に一度画面がレンダリングされるため、ローディング表示の考慮と`StateHasChanged()`の呼び出しが必要です。
 :::
 
 すべてのRazorコンポーネントは、基本的にComponentBase（基底クラス）を継承しています。
