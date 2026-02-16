@@ -3,7 +3,7 @@ title: "Whisperを使ったC#の音声認識アプリ開発"
 emoji: "🎤"
 type: "tech"
 topics: ["csharp", "naudio", "音声認識", "whisper", "ai"]
-published: false
+published: true
 publication_name: "nexta_"
 ---
 
