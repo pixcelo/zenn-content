@@ -122,6 +122,7 @@ samples/**/*.user
 samples/**/*.suo
 samples/**/*.userosscache
 samples/**/*.sln.docstates
+samples/**/.vs/
 
 # Others
 zenn-content.sln

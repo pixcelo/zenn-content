@@ -1,0 +1,233 @@
+@page "/form-binding"
+@rendermode InteractiveServer
+
+<PageTitle>フォームバインディング</PageTitle>
+
+<h1>フォームバインディング</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>テキスト入力</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">input type="text":</label>
+            <input type="text" class="form-control" @bind="textValue" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">input type="password":</label>
+            <input type="password" class="form-control" @bind="passwordValue" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">input type="email":</label>
+            <input type="email" class="form-control" @bind="emailValue" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">textarea:</label>
+            <textarea class="form-control" rows="3" @bind="textareaValue"></textarea>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>入力された値:</strong><br />
+            テキスト: @textValue<br />
+            パスワード: @passwordValue<br />
+            メール: @emailValue<br />
+            テキストエリア: @textareaValue
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>数値入力</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">整数 (int):</label>
+            <input type="number" class="form-control" @bind="intValue" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">小数 (decimal):</label>
+            <input type="number" step="0.01" class="form-control" @bind="decimalValue" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">範囲 (range):</label>
+            <input type="range" class="form-range" min="0" max="100" @bind="rangeValue" @bind:event="oninput" />
+            <p>現在の値: <strong>@rangeValue</strong></p>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>入力された値:</strong><br />
+            整数: @intValue<br />
+            小数: @decimalValue<br />
+            範囲: @rangeValue
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>日付と時刻入力</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">日付:</label>
+            <input type="date" class="form-control" @bind="dateValue" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">時刻:</label>
+            <input type="time" class="form-control" @bind="timeValue" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">日時:</label>
+            <input type="datetime-local" class="form-control" @bind="datetimeValue" />
+        </div>
+
+        <div class="alert alert-info">
+            <strong>選択された値:</strong><br />
+            日付: @dateValue.ToString("yyyy年MM月dd日")<br />
+            時刻: @timeValue?.ToString("HH:mm")<br />
+            日時: @datetimeValue.ToString("yyyy年MM月dd日 HH:mm")
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>選択系入力</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">チェックボックス:</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="check1" @bind="checkbox1" />
+                <label class="form-check-label" for="check1">オプション1</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="check2" @bind="checkbox2" />
+                <label class="form-check-label" for="check2">オプション2</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="check3" @bind="checkbox3" />
+                <label class="form-check-label" for="check3">オプション3</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">ラジオボタン:</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="radioGroup" id="radio1" value="option1"
+                       @onchange="@(() => radioValue = "option1")" checked="@(radioValue == "option1")" />
+                <label class="form-check-label" for="radio1">選択肢1</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="radioGroup" id="radio2" value="option2"
+                       @onchange="@(() => radioValue = "option2")" checked="@(radioValue == "option2")" />
+                <label class="form-check-label" for="radio2">選択肢2</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="radioGroup" id="radio3" value="option3"
+                       @onchange="@(() => radioValue = "option3")" checked="@(radioValue == "option3")" />
+                <label class="form-check-label" for="radio3">選択肢3</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">セレクトボックス:</label>
+            <select class="form-select" @bind="selectValue">
+                <option value="">-- 選択してください --</option>
+                <option value="red">赤</option>
+                <option value="blue">青</option>
+                <option value="green">緑</option>
+                <option value="yellow">黄色</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">複数選択:</label>
+            <select class="form-select" multiple @bind="multiSelectValue">
+                <option value="apple">りんご</option>
+                <option value="banana">バナナ</option>
+                <option value="orange">オレンジ</option>
+                <option value="grape">ぶどう</option>
+            </select>
+            <small class="form-text text-muted">Ctrlキーを押しながら複数選択できます</small>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>選択された値:</strong><br />
+            チェックボックス: 1=@checkbox1, 2=@checkbox2, 3=@checkbox3<br />
+            ラジオボタン: @radioValue<br />
+            セレクトボックス: @selectValue<br />
+            複数選択: @multiSelectValue
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>その他の入力タイプ</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">カラーピッカー:</label>
+            <input type="color" class="form-control form-control-color" @bind="colorValue" />
+            <p>選択された色: <strong>@colorValue</strong> <span style="display: inline-block; width: 30px; height: 30px; background-color: @colorValue; border: 1px solid #000;"></span></p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">URL入力:</label>
+            <input type="url" class="form-control" @bind="urlValue" placeholder="https://example.com" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">電話番号:</label>
+            <input type="tel" class="form-control" @bind="telValue" placeholder="000-0000-0000" />
+        </div>
+
+        <div class="alert alert-info">
+            <strong>入力された値:</strong><br />
+            色: @colorValue<br />
+            URL: @urlValue<br />
+            電話番号: @telValue
+        </div>
+    </div>
+</div>
+
+@code {
+    // テキスト入力
+    private string textValue = "";
+    private string passwordValue = "";
+    private string emailValue = "";
+    private string textareaValue = "";
+
+    // 数値入力
+    private int intValue = 0;
+    private decimal decimalValue = 0m;
+    private int rangeValue = 50;
+
+    // 日付と時刻
+    private DateTime dateValue = DateTime.Today;
+    private TimeOnly? timeValue = TimeOnly.FromDateTime(DateTime.Now);
+    private DateTime datetimeValue = DateTime.Now;
+
+    // 選択系
+    private bool checkbox1 = false;
+    private bool checkbox2 = false;
+    private bool checkbox3 = false;
+    private string radioValue = "option1";
+    private string selectValue = "";
+    private string multiSelectValue = "";
+
+    // その他
+    private string colorValue = "#0d6efd";
+    private string urlValue = "";
+    private string telValue = "";
+}

@@ -1,0 +1,45 @@
+@* 値型プロパティのテスト用子コンポーネント *@
+
+<div class="border rounded p-3 bg-warning bg-opacity-10">
+    <h5>子コンポーネント（値型テスト）</h5>
+
+    <div class="mb-2">
+        <p>受け取った値: <strong>@Value</strong></p>
+        <p>ハッシュコード: <code>@Value.GetHashCode()</code></p>
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">子コンポーネントで値を変更:</label>
+        <div class="input-group">
+            <input type="number" class="form-control" @bind="localValue" @bind:event="oninput" />
+            <button class="btn btn-primary" @onclick="UpdateValue">親に通知</button>
+        </div>
+        <small class="text-muted">※値型なので、EventCallbackで通知しないと親に反映されません</small>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// 親から受け取る値型の値
+    /// </summary>
+    [Parameter]
+    public int Value { get; set; }
+
+    /// <summary>
+    /// 値変更時のコールバック
+    /// </summary>
+    [Parameter]
+    public EventCallback<int> ValueChanged { get; set; }
+
+    private int localValue;
+
+    protected override void OnParametersSet()
+    {
+        localValue = Value;
+    }
+
+    private async Task UpdateValue()
+    {
+        await ValueChanged.InvokeAsync(localValue);
+    }
+}

@@ -1,0 +1,95 @@
+@page "/basic-binding"
+@rendermode InteractiveServer
+
+<PageTitle>基本的なバインディング</PageTitle>
+
+<h1>基本的なバインディング</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>単方向バインディング（@@変数名）</h3>
+    </div>
+    <div class="card-body">
+        <p>現在の値: <strong>@currentValue</strong></p>
+        <p>現在の時刻: <strong>@currentTime</strong></p>
+        <p>カウント: <strong>@count</strong></p>
+
+        <button class="btn btn-primary" @onclick="UpdateValue">値を更新</button>
+        <button class="btn btn-secondary" @onclick="IncrementCount">カウント増加</button>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>HTML属性へのバインディング</h3>
+    </div>
+    <div class="card-body">
+        <p>disabled属性のバインディング:</p>
+        <button class="btn btn-info" disabled="@isButtonDisabled">
+            @(isButtonDisabled ? "無効なボタン" : "有効なボタン")
+        </button>
+        <button class="btn btn-warning ms-2" @onclick="ToggleDisabled">有効/無効を切り替え</button>
+
+        <div class="mt-3">
+            <p>class属性のバインディング:</p>
+            <div class="@currentClass" style="padding: 10px; border-radius: 5px;">
+                背景色が変わります（現在: @currentClass）
+            </div>
+            <button class="btn btn-success mt-2" @onclick="ChangeClass">背景色変更</button>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>条件付きレンダリング</h3>
+    </div>
+    <div class="card-body">
+        <button class="btn btn-primary" @onclick="ToggleVisibility">表示/非表示を切り替え</button>
+
+        @if (isVisible)
+        {
+            <div class="alert alert-success mt-2">
+                このメッセージは条件付きで表示されています
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string currentValue = "初期値";
+    private string currentTime = DateTime.Now.ToString("HH:mm:ss");
+    private int count = 0;
+    private bool isButtonDisabled = true;
+    private bool isVisible = false;
+    private string currentClass = "bg-primary text-white";
+    private string[] cssClasses = { "bg-primary text-white", "bg-success text-white", "bg-danger text-white", "bg-warning text-dark" };
+    private int classIndex = 0;
+
+    private void UpdateValue()
+    {
+        currentValue = $"更新された値 ({DateTime.Now:HH:mm:ss})";
+        currentTime = DateTime.Now.ToString("HH:mm:ss");
+    }
+
+    private void IncrementCount()
+    {
+        count++;
+    }
+
+    private void ToggleDisabled()
+    {
+        isButtonDisabled = !isButtonDisabled;
+    }
+
+    private void ToggleVisibility()
+    {
+        isVisible = !isVisible;
+    }
+
+    private void ChangeClass()
+    {
+        classIndex = (classIndex + 1) % cssClasses.Length;
+        currentClass = cssClasses[classIndex];
+    }
+}

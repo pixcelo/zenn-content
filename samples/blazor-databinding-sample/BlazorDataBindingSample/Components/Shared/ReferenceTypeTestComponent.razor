@@ -1,0 +1,67 @@
+@using BlazorDataBindingSample.Models
+@* 参照型プロパティのテスト用子コンポーネント *@
+
+<div class="border rounded p-3 bg-info bg-opacity-10">
+    <h5>子コンポーネント（参照型テスト）</h5>
+
+    @if (Model != null)
+    {
+        <div class="mb-2">
+            <p>受け取ったオブジェクト: ID=<strong>@Model.Id</strong>, Name=<strong>@Model.Name</strong></p>
+            <p>オブジェクト識別子: <code>@Model.GetIdentity()</code></p>
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">子コンポーネントでプロパティを変更:</label>
+            <div class="input-group mb-2">
+                <span class="input-group-text">Name</span>
+                <input type="text" class="form-control" @bind="Model.Name" @bind:event="oninput" />
+            </div>
+            <div class="input-group">
+                <span class="input-group-text">Value</span>
+                <input type="number" step="0.01" class="form-control" @bind="Model.Value" @bind:event="oninput" />
+            </div>
+            <small class="text-muted">※参照型なので、プロパティ変更が即座に親にも反映されます（同じオブジェクトを参照）</small>
+        </div>
+
+        <div>
+            <button class="btn btn-warning" @onclick="ReplaceObject">オブジェクトを新規作成</button>
+            <button class="btn btn-secondary ms-2" @onclick="NotifyParent">親に通知</button>
+            <small class="d-block mt-1 text-muted">※オブジェクト自体を置き換える場合は、親に通知が必要です</small>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">モデルがnullです</p>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// 親から受け取る参照型のオブジェクト
+    /// </summary>
+    [Parameter]
+    public ReferenceTypeModel? Model { get; set; }
+
+    /// <summary>
+    /// オブジェクト変更時のコールバック
+    /// </summary>
+    [Parameter]
+    public EventCallback<ReferenceTypeModel?> ModelChanged { get; set; }
+
+    private void ReplaceObject()
+    {
+        // オブジェクト自体を新しいインスタンスに置き換え
+        Model = new ReferenceTypeModel
+        {
+            Id = Model?.Id + 100 ?? 100,
+            Name = "新しいオブジェクト",
+            Value = 999.99m
+        };
+    }
+
+    private async Task NotifyParent()
+    {
+        await ModelChanged.InvokeAsync(Model);
+    }
+}

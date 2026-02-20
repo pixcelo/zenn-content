@@ -1,0 +1,148 @@
+@page "/twoway-binding"
+@rendermode InteractiveServer
+
+<PageTitle>双方向バインディング</PageTitle>
+
+<h1>双方向バインディング</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>基本的な@@bind</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="nameInput" class="form-label">名前:</label>
+            <input id="nameInput" class="form-control" @bind="name" />
+            <p class="mt-2">入力された名前: <strong>@name</strong></p>
+        </div>
+
+        <div class="mb-3">
+            <label for="ageInput" class="form-label">年齢:</label>
+            <input id="ageInput" type="number" class="form-control" @bind="age" />
+            <p class="mt-2">入力された年齢: <strong>@age</strong></p>
+        </div>
+
+        <div class="mb-3">
+            <label for="priceInput" class="form-label">価格:</label>
+            <input id="priceInput" type="number" step="0.01" class="form-control" @bind="price" />
+            <p class="mt-2">入力された価格: <strong>@price.ToString("C")</strong></p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>@@bind:event でイベントを指定</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">onchange イベント（フォーカスが外れたとき）:</label>
+            <input class="form-control" @bind="onChangeText" @bind:event="onchange" />
+            <p class="mt-2">値: <strong>@onChangeText</strong></p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">oninput イベント（入力のたびに更新）:</label>
+            <input class="form-control" @bind="onInputText" @bind:event="oninput" />
+            <p class="mt-2">値: <strong>@onInputText</strong> (文字数: @onInputText.Length)</p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>@@bind:after でコールバック実行</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">入力後に処理を実行:</label>
+            <input class="form-control" @bind="callbackText" @bind:after="OnTextChanged" />
+            <p class="mt-2">入力値: <strong>@callbackText</strong></p>
+            <p>大文字変換: <strong>@upperCaseText</strong></p>
+            <p>変更回数: <strong>@changeCount</strong></p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>チェックボックスとラジオボタン</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="agreeCheckbox" @bind="isAgreed" />
+                <label class="form-check-label" for="agreeCheckbox">
+                    利用規約に同意する
+                </label>
+            </div>
+            <p class="mt-2">同意状態: <strong>@(isAgreed ? "同意済み" : "未同意")</strong></p>
+        </div>
+
+        <div class="mb-3">
+            <p>好きな色を選択:</p>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="colorRadio" id="colorRed" value="red" @onchange="@(() => selectedColor = "red")" checked="@(selectedColor == "red")" />
+                <label class="form-check-label" for="colorRed">赤</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="colorRadio" id="colorBlue" value="blue" @onchange="@(() => selectedColor = "blue")" checked="@(selectedColor == "blue")" />
+                <label class="form-check-label" for="colorBlue">青</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="colorRadio" id="colorGreen" value="green" @onchange="@(() => selectedColor = "green")" checked="@(selectedColor == "green")" />
+                <label class="form-check-label" for="colorGreen">緑</label>
+            </div>
+            <p class="mt-2">選択された色: <strong>@selectedColor</strong></p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>日付と時刻</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="dateInput" class="form-label">日付:</label>
+            <input id="dateInput" type="date" class="form-control" @bind="selectedDate" />
+            <p class="mt-2">選択された日付: <strong>@selectedDate.ToString("yyyy年MM月dd日")</strong></p>
+        </div>
+
+        <div class="mb-3">
+            <label for="timeInput" class="form-label">時刻:</label>
+            <input id="timeInput" type="time" class="form-control" @bind="selectedTime" />
+            <p class="mt-2">選択された時刻: <strong>@selectedTime?.ToString("HH:mm")</strong></p>
+        </div>
+    </div>
+</div>
+
+@code {
+    // 基本的な@bind
+    private string name = "";
+    private int age = 0;
+    private decimal price = 0m;
+
+    // @bind:event
+    private string onChangeText = "";
+    private string onInputText = "";
+
+    // @bind:after
+    private string callbackText = "";
+    private string upperCaseText = "";
+    private int changeCount = 0;
+
+    // チェックボックスとラジオボタン
+    private bool isAgreed = false;
+    private string selectedColor = "red";
+
+    // 日付と時刻
+    private DateTime selectedDate = DateTime.Today;
+    private TimeOnly? selectedTime = TimeOnly.FromDateTime(DateTime.Now);
+
+    private void OnTextChanged()
+    {
+        upperCaseText = callbackText.ToUpper();
+        changeCount++;
+    }
+}

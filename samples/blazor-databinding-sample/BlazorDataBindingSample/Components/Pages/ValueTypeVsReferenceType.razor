@@ -1,0 +1,267 @@
+@page "/valuetype-vs-referencetype"
+@using BlazorDataBindingSample.Models
+@rendermode InteractiveServer
+
+<PageTitle>値型 vs 参照型のバインディング</PageTitle>
+
+<h1>値型 vs 参照型のバインディング</h1>
+
+<div class="alert alert-info">
+    <h5>📚 このページで学ぶこと</h5>
+    <p class="mb-0">
+        Blazorのバインディングにおいて、<strong>値型（int, decimal, DateTime, struct等）</strong>と<strong>参照型（class, List等）</strong>で挙動がどう違うのかを実験します。
+        これはBlazorに限らず、C#の基礎的な概念ですが、データバインディングで重要になります。
+    </p>
+</div>
+
+<div class="card">
+    <div class="card-header bg-warning bg-opacity-25">
+        <h3>実験1: 値型のバインディング（int）</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>親コンポーネント</h5>
+                <p>現在の値: <strong>@valueTypeInt</strong></p>
+                <p>ハッシュコード: <code>@valueTypeInt.GetHashCode()</code></p>
+                <div class="input-group">
+                    <button class="btn btn-primary" @onclick="() => valueTypeInt++">+1</button>
+                    <button class="btn btn-secondary ms-2" @onclick="() => valueTypeInt--">-1</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <ValueTypeTestComponent @bind-Value="valueTypeInt" />
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-3">
+            <strong>⚠️ 重要な挙動:</strong>
+            <ul class="mb-0">
+                <li>値型はコピー渡しされる</li>
+                <li>子コンポーネントで値を変更しても、親の値は自動で変わらない</li>
+                <li><code>EventCallback</code> で明示的に通知する必要がある</li>
+                <li><code>@@bind-Value</code> は <code>Value</code> + <code>ValueChanged</code> の組み合わせ</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header bg-info bg-opacity-25">
+        <h3>実験2: 参照型のバインディング（class）</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>親コンポーネント</h5>
+                @if (referenceTypeModel != null)
+                {
+                    <p>ID: <strong>@referenceTypeModel.Id</strong></p>
+                    <p>Name: <strong>@referenceTypeModel.Name</strong></p>
+                    <p>Value: <strong>@referenceTypeModel.Value</strong></p>
+                    <p>オブジェクト識別子: <code>@referenceTypeModel.GetIdentity()</code></p>
+                }
+                <button class="btn btn-primary" @onclick="ResetReferenceModel">リセット</button>
+            </div>
+            <div class="col-md-6">
+                <ReferenceTypeTestComponent @bind-Model="referenceTypeModel" />
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <strong>✅ 重要な挙動:</strong>
+            <ul class="mb-0">
+                <li>参照型は参照渡しされる（同じオブジェクトを指す）</li>
+                <li>子コンポーネントでプロパティを変更すると、親側も自動で変わる</li>
+                <li>ただし、オブジェクト自体を新しいインスタンスに置き換えた場合は親に通知が必要</li>
+                <li>ハッシュコード（オブジェクト識別子）を見ると、同じオブジェクトであることが確認できる</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header bg-success bg-opacity-25">
+        <h3>実験3: 複雑なケース（参照型の中の値型プロパティ）</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>親コンポーネント</h5>
+                @if (nestedModel != null)
+                {
+                    <p>Counter（値型）: <strong>@nestedModel.Counter</strong></p>
+                    <p>Item.Name（参照型内のプロパティ）: <strong>@nestedModel.Item?.Name</strong></p>
+                    <p>オブジェクト識別子: <code>@nestedModel.GetHashCode():X8</code></p>
+                }
+                <button class="btn btn-primary" @onclick="IncrementNested">Counter +1</button>
+                <button class="btn btn-warning ms-2" @onclick="ChangeNestedItemName">Item.Name変更</button>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-success bg-opacity-10">
+                    <h5>子コンポーネント（シミュレーション）</h5>
+                    @if (nestedModel != null && nestedModel.Item != null)
+                    {
+                        <p>受け取ったオブジェクト:</p>
+                        <p>Counter: @nestedModel.Counter</p>
+                        <p>Item.Name: @nestedModel.Item.Name</p>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">Counter</span>
+                            <input type="number" class="form-control" @bind="nestedModel.Counter" @bind:event="oninput" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text">Item.Name</span>
+                            <input type="text" class="form-control" @bind="nestedModel.Item.Name" @bind:event="oninput" />
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-success mt-3">
+            <strong>🔍 観察ポイント:</strong>
+            <ul class="mb-0">
+                <li><code>nestedModel</code> 自体は参照型なので、子での変更が親にも反映される</li>
+                <li><code>Counter</code> は値型プロパティだが、<code>nestedModel</code> オブジェクトのプロパティなので変更が親にも見える</li>
+                <li><code>Item.Name</code> も同様に、同じオブジェクトのプロパティなので変更が共有される</li>
+                <li>つまり、参照型オブジェクトのプロパティ（値型・参照型問わず）を変更すると、親子で同期される</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>📊 動作ログ</h3>
+    </div>
+    <div class="card-body">
+        @if (logs.Any())
+        {
+            <div style="max-height: 300px; overflow-y: auto;">
+                <ul class="list-group">
+                    @foreach (var log in logs.TakeLast(20).Reverse())
+                    {
+                        <li class="list-group-item list-group-item-sm py-1">
+                            <small><code>[@log.Time]</code> @log.Message</small>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <button class="btn btn-sm btn-secondary mt-2" @onclick="ClearLogs">ログクリア</button>
+        }
+        else
+        {
+            <p class="text-muted">まだログがありません</p>
+        }
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header bg-primary bg-opacity-25">
+        <h3>💡 まとめ：実務での使い分け</h3>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>種類</th>
+                    <th>例</th>
+                    <th>子コンポーネントでの挙動</th>
+                    <th>EventCallback必要性</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>値型</strong></td>
+                    <td>int, decimal, DateTime, bool, struct</td>
+                    <td>コピーされるので、変更は親に影響しない</td>
+                    <td>✅ 必要（@@bind-で自動生成可能）</td>
+                </tr>
+                <tr>
+                    <td><strong>参照型</strong></td>
+                    <td>class, List, Dictionary</td>
+                    <td>同じオブジェクトを参照するので、プロパティ変更は親にも反映</td>
+                    <td>⚠️ プロパティ変更時は不要、オブジェクト置換時は必要</td>
+                </tr>
+                <tr>
+                    <td><strong>参照型内のプロパティ</strong></td>
+                    <td>model.Counter, model.Name</td>
+                    <td>同じオブジェクトのプロパティなので、親にも反映</td>
+                    <td>❌ 不要（自動で同期）</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ よくある間違い:</strong>
+            <ul class="mb-0">
+                <li>値型を <code>@@bind</code> なしで渡すと、子での変更が親に反映されないことに気づかない</li>
+                <li>参照型のプロパティ変更で <code>StateHasChanged()</code> を呼び忘れ、UIが更新されない</li>
+                <li>参照型オブジェクトを新規作成した後、親に通知し忘れる</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    // 値型の例
+    private int valueTypeInt = 10;
+
+    // 参照型の例
+    private ReferenceTypeModel? referenceTypeModel;
+
+    // 複雑な例
+    private NestedModel? nestedModel;
+
+    // ログ
+    private List<(string Time, string Message)> logs = new();
+
+    protected override void OnInitialized()
+    {
+        referenceTypeModel = new ReferenceTypeModel(1, "初期オブジェクト", 100.50m);
+        nestedModel = new NestedModel
+        {
+            Counter = 0,
+            Item = new ReferenceTypeModel(1, "ネストされたアイテム", 50.0m)
+        };
+
+        AddLog("コンポーネント初期化完了");
+    }
+
+    private void ResetReferenceModel()
+    {
+        var oldHash = referenceTypeModel?.GetHashCode().ToString("X8") ?? "null";
+        referenceTypeModel = new ReferenceTypeModel(1, "リセットされたオブジェクト", 100.50m);
+        var newHash = referenceTypeModel.GetHashCode().ToString("X8");
+
+        AddLog($"参照型モデルをリセット: {oldHash} → {newHash}");
+    }
+
+    private void IncrementNested()
+    {
+        if (nestedModel != null)
+        {
+            nestedModel.Counter++;
+            AddLog($"Counter を {nestedModel.Counter} にインクリメント");
+        }
+    }
+
+    private void ChangeNestedItemName()
+    {
+        if (nestedModel?.Item != null)
+        {
+            nestedModel.Item.Name = $"変更_{DateTime.Now:HHmmss}";
+            AddLog($"Item.Name を変更: {nestedModel.Item.Name}");
+        }
+    }
+
+    private void AddLog(string message)
+    {
+        logs.Add((DateTime.Now.ToString("HH:mm:ss.fff"), message));
+    }
+
+    private void ClearLogs()
+    {
+        logs.Clear();
+    }
+}

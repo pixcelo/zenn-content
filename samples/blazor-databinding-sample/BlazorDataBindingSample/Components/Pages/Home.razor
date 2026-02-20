@@ -1,0 +1,129 @@
+﻿@page "/"
+
+<PageTitle>Blazor データバインディング学習</PageTitle>
+
+<h1>Blazorデータバインディング学習プロジェクト</h1>
+
+<p class="lead">
+    このプロジェクトは、Blazorにおけるデータバインディングの仕組みを<strong>動かして学ぶ</strong>ための実験環境です。
+</p>
+
+<div class="alert alert-primary">
+    <h4>🎯 学習目標</h4>
+    <p class="mb-0">
+        Blazorのデータバインディングの仕組みを深く理解し、実務で適切に使い分けられるようになる。
+        特に<strong>値型と参照型の違い</strong>を体感的に理解することで、よくあるバグを事前に防げるようになります。
+    </p>
+</div>
+
+<h2 class="mt-4">📚 推奨学習順序</h2>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5>基礎編（初級）</h5>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li><a href="/basic-binding">基本的なバインディング</a> - 単方向バインディング、属性バインディング</li>
+                    <li><a href="/twoway-binding">双方向バインディング</a> - @@bind, @@bind:event, @@bind:after</li>
+                    <li><a href="/event-binding">イベントバインディング</a> - マウス・キーボードイベント、伝播制御</li>
+                    <li><a href="/form-binding">フォームバインディング</a> - 各種input要素とのバインディング</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h5>応用編（中級）</h5>
+            </div>
+            <div class="card-body">
+                <ol start="5" class="mb-0">
+                    <li><a href="/component-binding">コンポーネント間バインディング</a> - 親子間のデータ受け渡し</li>
+                    <li><a href="/editform-binding">EditFormバインディング</a> - DataAnnotationsによる検証</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-warning text-dark">
+                <h5>重要概念（必修）</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li><a href="/valuetype-vs-referencetype"><strong>値型 vs 参照型</strong></a> ⭐ <span class="badge bg-danger">重要</span></li>
+                    <li><a href="/prerendering-test">プリレンダリング検証</a> - ライフサイクル、JS相互運用の制限</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <h5>💡 特に重要：値型 vs 参照型</h5>
+    </div>
+    <div class="card-body">
+        <p>
+            Blazorのデータバインディングで最も誤解されやすく、バグの原因になりやすいのが<strong>値型と参照型の違い</strong>です。
+        </p>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>種類</th>
+                    <th>例</th>
+                    <th>子コンポーネントでの挙動</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>値型</strong></td>
+                    <td>int, decimal, DateTime, bool, struct</td>
+                    <td>コピー渡し → 子での変更は親に影響しない</td>
+                </tr>
+                <tr>
+                    <td><strong>参照型</strong></td>
+                    <td>class, List, Dictionary</td>
+                    <td>参照渡し → プロパティ変更は親にも反映</td>
+                </tr>
+            </tbody>
+        </table>
+        <a href="/valuetype-vs-referencetype" class="btn btn-primary">実際に動かして確認する →</a>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5>🛠️ 技術スタック</h5>
+    </div>
+    <div class="card-body">
+        <ul>
+            <li><strong>フレームワーク:</strong> Blazor Web App (.NET 8)</li>
+            <li><strong>レンダリングモード:</strong> Interactive Server（プリレンダリング有効）</li>
+            <li><strong>通信:</strong> SignalR</li>
+            <li><strong>バリデーション:</strong> DataAnnotations</li>
+        </ul>
+    </div>
+</div>
+
+<div class="alert alert-success mt-4">
+    <h5>✅ このプロジェクトを終えたら身につくこと</h5>
+    <ul class="mb-0">
+        <li>単方向・双方向バインディングの使い分け</li>
+        <li>イベントハンドリングとイベント伝播の制御</li>
+        <li>親子コンポーネント間でのデータ受け渡しパターン</li>
+        <li><strong>値型と参照型の違いとバインディングへの影響</strong></li>
+        <li>EditFormを使ったバリデーション付きフォーム実装</li>
+        <li>プリレンダリングの仕組みとライフサイクル</li>
+    </ul>
+</div>
+
+<p class="mt-4 text-muted">
+    <small>
+        各ページは独立しているので、興味のあるトピックから始めても問題ありません。<br />
+        ただし、<a href="/valuetype-vs-referencetype">値型 vs 参照型</a>のページは必ず確認することをお勧めします。
+    </small>
+</p>

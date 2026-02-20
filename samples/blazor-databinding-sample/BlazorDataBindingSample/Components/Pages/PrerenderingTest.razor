@@ -1,0 +1,233 @@
+@page "/prerendering-test"
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<PageTitle>プリレンダリング検証</PageTitle>
+
+<h1>プリレンダリング検証</h1>
+
+<div class="alert alert-info">
+    <h5>プリレンダリングとは？</h5>
+    <p>
+        Blazor Server の Interactive Server モードでは、デフォルトでプリレンダリングが有効になっています。
+        これは、初回アクセス時にサーバー側でHTMLを生成してからクライアントに送信し、
+        その後SignalR接続が確立されてインタラクティブになる仕組みです。
+    </p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>ライフサイクルメソッドの呼び出し順序</h3>
+    </div>
+    <div class="card-body">
+        <p>プリレンダリングが有効な場合、ライフサイクルメソッドは以下の順序で呼ばれます：</p>
+        <ol class="list-group list-group-numbered">
+            @foreach (var log in lifecycleLogs)
+            {
+                <li class="list-group-item">@log</li>
+            }
+        </ol>
+
+        <button class="btn btn-primary mt-3" @onclick="AddLog">ボタンクリック</button>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>JavaScript相互運用の制限</h3>
+    </div>
+    <div class="card-body">
+        <p>プリレンダリング時にはJavaScript相互運用は使用できません（ブラウザがまだ存在しないため）。</p>
+
+        <button class="btn btn-success" @onclick="CallJavaScript">JavaScript呼び出し</button>
+
+        @if (!string.IsNullOrEmpty(jsResult))
+        {
+            <div class="alert alert-success mt-2">
+                結果: @jsResult
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(jsError))
+        {
+            <div class="alert alert-danger mt-2">
+                エラー: @jsError
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>StateHasChanged()のタイミング</h3>
+    </div>
+    <div class="card-body">
+        <p>現在のカウント: <strong>@count</strong></p>
+        <p>最終更新: <strong>@lastUpdate</strong></p>
+
+        <button class="btn btn-primary" @onclick="IncrementCount">カウント増加</button>
+        <button class="btn btn-secondary ms-2" @onclick="IncrementWithDelay">遅延付きカウント増加</button>
+
+        <div class="mt-3">
+            <p class="text-muted">
+                StateHasChanged()を呼び出すと、コンポーネントが再レンダリングされます。
+                プリレンダリング時とインタラクティブ時で動作が異なることがあります。
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>データバインディングの動作</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">リアルタイム更新 (oninput):</label>
+            <input class="form-control" @bind="realtimeValue" @bind:event="oninput" />
+            <p class="mt-2">値: <strong>@realtimeValue</strong> (長さ: @realtimeValue.Length)</p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">フォーカス外れ時更新 (onchange):</label>
+            <input class="form-control" @bind="onChangeValue" @bind:event="onchange" />
+            <p class="mt-2">値: <strong>@onChangeValue</strong></p>
+        </div>
+
+        <div class="alert alert-warning">
+            <strong>注意:</strong> プリレンダリング時は入力値が保持されません。
+            SignalR接続確立後に初めてバインディングが機能します。
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>レンダリングモードの確認</h3>
+    </div>
+    <div class="card-body">
+        <p>OnAfterRender実行回数: <strong>@afterRenderCount</strong></p>
+        <p>現在の接続状態: <strong>@connectionState</strong></p>
+        <p>初回レンダリング完了: <strong>@(isFirstRenderComplete ? "はい" : "いいえ")</strong></p>
+
+        <div class="mt-3">
+            <h5>判定方法:</h5>
+            <ul>
+                <li>OnAfterRender(firstRender: true) → プリレンダリング後の初回レンダリング</li>
+                <li>OnAfterRender(firstRender: false) → 2回目以降のレンダリング</li>
+                <li>JavaScript実行可能 → インタラクティブモード</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<string> lifecycleLogs = new();
+    private string jsResult = "";
+    private string jsError = "";
+    private int count = 0;
+    private string lastUpdate = "";
+    private string realtimeValue = "";
+    private string onChangeValue = "";
+    private int afterRenderCount = 0;
+    private string connectionState = "不明";
+    private bool isFirstRenderComplete = false;
+
+    protected override void OnInitialized()
+    {
+        lifecycleLogs.Add($"OnInitialized() - {DateTime.Now:HH:mm:ss.fff}");
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        lifecycleLogs.Add($"OnInitializedAsync() 開始 - {DateTime.Now:HH:mm:ss.fff}");
+        await Task.Delay(10); // 非同期処理をシミュレート
+        lifecycleLogs.Add($"OnInitializedAsync() 終了 - {DateTime.Now:HH:mm:ss.fff}");
+    }
+
+    protected override void OnParametersSet()
+    {
+        lifecycleLogs.Add($"OnParametersSet() - {DateTime.Now:HH:mm:ss.fff}");
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        lifecycleLogs.Add($"OnParametersSetAsync() 開始 - {DateTime.Now:HH:mm:ss.fff}");
+        await Task.Delay(10);
+        lifecycleLogs.Add($"OnParametersSetAsync() 終了 - {DateTime.Now:HH:mm:ss.fff}");
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        afterRenderCount++;
+        lifecycleLogs.Add($"OnAfterRender(firstRender: {firstRender}) - {DateTime.Now:HH:mm:ss.fff}");
+
+        if (firstRender)
+        {
+            isFirstRenderComplete = true;
+            connectionState = "インタラクティブ";
+            StateHasChanged(); // 状態を更新
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        lifecycleLogs.Add($"OnAfterRenderAsync(firstRender: {firstRender}) 開始 - {DateTime.Now:HH:mm:ss.fff}");
+
+        if (firstRender)
+        {
+            // JavaScript が使えるのは OnAfterRender の firstRender 以降のみ
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", "Blazor is now interactive!");
+                lifecycleLogs.Add($"JavaScript実行成功 - {DateTime.Now:HH:mm:ss.fff}");
+            }
+            catch (Exception ex)
+            {
+                lifecycleLogs.Add($"JavaScript実行失敗: {ex.Message}");
+            }
+        }
+
+        await Task.Delay(10);
+        lifecycleLogs.Add($"OnAfterRenderAsync(firstRender: {firstRender}) 終了 - {DateTime.Now:HH:mm:ss.fff}");
+    }
+
+    private void AddLog()
+    {
+        lifecycleLogs.Add($"ボタンがクリックされました - {DateTime.Now:HH:mm:ss.fff}");
+    }
+
+    private async Task CallJavaScript()
+    {
+        jsResult = "";
+        jsError = "";
+
+        try
+        {
+            var userAgent = await JSRuntime.InvokeAsync<string>("eval", "navigator.userAgent");
+            jsResult = userAgent;
+        }
+        catch (Exception ex)
+        {
+            jsError = ex.Message;
+        }
+    }
+
+    private void IncrementCount()
+    {
+        count++;
+        lastUpdate = DateTime.Now.ToString("HH:mm:ss.fff");
+    }
+
+    private async Task IncrementWithDelay()
+    {
+        await Task.Delay(1000);
+        count++;
+        lastUpdate = DateTime.Now.ToString("HH:mm:ss.fff");
+    }
+}

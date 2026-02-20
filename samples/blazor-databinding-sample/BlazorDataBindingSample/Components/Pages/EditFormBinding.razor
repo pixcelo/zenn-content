@@ -1,0 +1,260 @@
+@page "/editform-binding"
+@using BlazorDataBindingSample.Models
+@rendermode InteractiveServer
+
+<PageTitle>EditFormバインディング</PageTitle>
+
+<h1>EditFormバインディング</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>EditFormによるデータ検証</h3>
+    </div>
+    <div class="card-body">
+        <EditForm Model="@person" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="alert alert-danger" />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">名前: <span class="text-danger">*</span></label>
+                    <InputText class="form-control" @bind-Value="person.Name" />
+                    <ValidationMessage For="@(() => person.Name)" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">メールアドレス: <span class="text-danger">*</span></label>
+                    <InputText type="email" class="form-control" @bind-Value="person.Email" />
+                    <ValidationMessage For="@(() => person.Email)" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">年齢: <span class="text-danger">*</span></label>
+                    <InputNumber class="form-control" @bind-Value="person.Age" />
+                    <ValidationMessage For="@(() => person.Age)" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">電話番号:</label>
+                    <InputText type="tel" class="form-control" @bind-Value="person.PhoneNumber" />
+                    <ValidationMessage For="@(() => person.PhoneNumber)" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">誕生日: <span class="text-danger">*</span></label>
+                    <InputDate class="form-control" @bind-Value="person.BirthDate" />
+                    <ValidationMessage For="@(() => person.BirthDate)" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">性別: <span class="text-danger">*</span></label>
+                    <InputSelect class="form-select" @bind-Value="person.Gender">
+                        <option value="">-- 選択してください --</option>
+                        <option value="male">男性</option>
+                        <option value="female">女性</option>
+                        <option value="other">その他</option>
+                    </InputSelect>
+                    <ValidationMessage For="@(() => person.Gender)" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">趣味（複数選択可）:</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="hobbyReading" value="reading"
+                               checked="@person.Hobbies.Contains("reading")"
+                               @onchange="@(e => UpdateHobby("reading", e))" />
+                        <label class="form-check-label" for="hobbyReading">読書</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="hobbySports" value="sports"
+                               checked="@person.Hobbies.Contains("sports")"
+                               @onchange="@(e => UpdateHobby("sports", e))" />
+                        <label class="form-check-label" for="hobbySports">スポーツ</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="hobbyMusic" value="music"
+                               checked="@person.Hobbies.Contains("music")"
+                               @onchange="@(e => UpdateHobby("music", e))" />
+                        <label class="form-check-label" for="hobbyMusic">音楽</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="hobbyTravel" value="travel"
+                               checked="@person.Hobbies.Contains("travel")"
+                               @onchange="@(e => UpdateHobby("travel", e))" />
+                        <label class="form-check-label" for="hobbyTravel">旅行</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Webサイト:</label>
+                <InputText type="url" class="form-control" @bind-Value="person.Website" placeholder="https://example.com" />
+                <ValidationMessage For="@(() => person.Website)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">郵便番号:</label>
+                <InputText class="form-control" @bind-Value="person.PostalCode" placeholder="000-0000" />
+                <ValidationMessage For="@(() => person.PostalCode)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">自己紹介:</label>
+                <InputTextArea class="form-control" rows="4" @bind-Value="person.Bio" />
+                <ValidationMessage For="@(() => person.Bio)" />
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <InputCheckbox class="form-check-input" id="agreeTerms" @bind-Value="person.AgreeToTerms" />
+                    <label class="form-check-label" for="agreeTerms">
+                        利用規約に同意する <span class="text-danger">*</span>
+                    </label>
+                </div>
+                <ValidationMessage For="@(() => person.AgreeToTerms)" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">送信</button>
+                <button type="button" class="btn btn-secondary" @onclick="ResetForm">リセット</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@if (submittedPerson != null)
+{
+    <div class="card mt-3">
+        <div class="card-header bg-success text-white">
+            <h3>送信されたデータ</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">名前:</dt>
+                <dd class="col-sm-9">@submittedPerson.Name</dd>
+
+                <dt class="col-sm-3">メールアドレス:</dt>
+                <dd class="col-sm-9">@submittedPerson.Email</dd>
+
+                <dt class="col-sm-3">年齢:</dt>
+                <dd class="col-sm-9">@submittedPerson.Age</dd>
+
+                <dt class="col-sm-3">電話番号:</dt>
+                <dd class="col-sm-9">@(submittedPerson.PhoneNumber ?? "未入力")</dd>
+
+                <dt class="col-sm-3">誕生日:</dt>
+                <dd class="col-sm-9">@submittedPerson.BirthDate?.ToString("yyyy年MM月dd日")</dd>
+
+                <dt class="col-sm-3">性別:</dt>
+                <dd class="col-sm-9">
+                    @(submittedPerson.Gender switch
+                    {
+                        "male" => "男性",
+                        "female" => "女性",
+                        "other" => "その他",
+                        _ => ""
+                    })
+                </dd>
+
+                <dt class="col-sm-3">趣味:</dt>
+                <dd class="col-sm-9">
+                    @if (submittedPerson.Hobbies.Any())
+                    {
+                        @string.Join(", ", submittedPerson.Hobbies)
+                    }
+                    else
+                    {
+                        <text>なし</text>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Webサイト:</dt>
+                <dd class="col-sm-9">@(submittedPerson.Website ?? "未入力")</dd>
+
+                <dt class="col-sm-3">郵便番号:</dt>
+                <dd class="col-sm-9">@(submittedPerson.PostalCode ?? "未入力")</dd>
+
+                <dt class="col-sm-3">自己紹介:</dt>
+                <dd class="col-sm-9">@(submittedPerson.Bio ?? "未入力")</dd>
+
+                <dt class="col-sm-3">利用規約:</dt>
+                <dd class="col-sm-9">@(submittedPerson.AgreeToTerms ? "同意済み" : "未同意")</dd>
+            </dl>
+
+            <p class="text-muted">送信日時: @submitTime</p>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-warning mt-3">
+        <strong>エラー:</strong> @errorMessage
+    </div>
+}
+
+@code {
+    private PersonModel person = new();
+    private PersonModel? submittedPerson = null;
+    private string errorMessage = "";
+    private string submitTime = "";
+
+    private void HandleValidSubmit()
+    {
+        // フォームが有効な場合の処理
+        submittedPerson = new PersonModel
+        {
+            Name = person.Name,
+            Email = person.Email,
+            Age = person.Age,
+            PhoneNumber = person.PhoneNumber,
+            BirthDate = person.BirthDate,
+            Gender = person.Gender,
+            Hobbies = new List<string>(person.Hobbies),
+            Website = person.Website,
+            PostalCode = person.PostalCode,
+            Bio = person.Bio,
+            AgreeToTerms = person.AgreeToTerms
+        };
+
+        submitTime = DateTime.Now.ToString("yyyy年MM月dd日 HH:mm:ss");
+        errorMessage = "";
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        // フォームが無効な場合の処理
+        errorMessage = "入力内容にエラーがあります。必須項目を確認してください。";
+        submittedPerson = null;
+    }
+
+    private void UpdateHobby(string hobby, ChangeEventArgs e)
+    {
+        bool isChecked = (bool)(e.Value ?? false);
+
+        if (isChecked)
+        {
+            if (!person.Hobbies.Contains(hobby))
+            {
+                person.Hobbies.Add(hobby);
+            }
+        }
+        else
+        {
+            person.Hobbies.Remove(hobby);
+        }
+    }
+
+    private void ResetForm()
+    {
+        person = new PersonModel();
+        submittedPerson = null;
+        errorMessage = "";
+    }
+}
