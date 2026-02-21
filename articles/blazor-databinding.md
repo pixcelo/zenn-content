@@ -132,6 +132,13 @@ graph TD
 
 コンポーネントやHTML要素のインスタンスを変数に保存します。
 
+```mermaid
+graph LR
+    A["親コンポーネント"]
+    B["子コンポーネント<br/>インスタンス"]
+    A -- "@ref" --> B
+```
+
 ```razor
 <MyDialog @ref="myDialog" />
 ```
@@ -144,6 +151,42 @@ graph TD
 **注意**：
 一般的には Parameter + EventCallback による宣言的なアプローチが推奨されます。
 @ref は、フォーカス制御やサードパーティライブラリとの統合など、他に選択肢がない場合に使用します。
+
+## パラメーター（Parameter）
+
+親コンポーネントから子コンポーネントへデータを渡します。
+
+```mermaid
+graph LR
+    A["親コンポーネント"]
+    B["子コンポーネント"]
+    A -- Parameter --> B
+```
+
+**親コンポーネント**:
+```razor
+<ChildComponent Name="@userName" Age="@userAge" />
+
+@code {
+    private string userName = "Alice";
+    private int userAge = 25;
+}
+```
+
+**子コンポーネント（ChildComponent.razor）**:
+```razor
+<p>名前: @Name</p>
+<p>年齢: @Age</p>
+
+@code {
+    [Parameter] public string Name { get; set; }
+    [Parameter] public int Age { get; set; }
+}
+```
+
+プロパティに `[Parameter]` 属性を付けることで、親から値を受け取れます。
+
+**注意**: パラメーターは読み取り専用として扱い、子から親へのデータ送信には EventCallback を使います。
 
 ## 環境
 
