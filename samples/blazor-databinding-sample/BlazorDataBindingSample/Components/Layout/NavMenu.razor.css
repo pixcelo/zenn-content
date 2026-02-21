@@ -64,11 +64,13 @@
         background: none;
         border: none;
         border-radius: 4px;
-        height: 3rem;
+        min-height: 3rem;
         display: flex;
         align-items: center;
-        line-height: 3rem;
+        line-height: 1.5;
         width: 100%;
+        padding: 0.5rem 1rem;
+        white-space: normal;
     }
 
 .nav-item ::deep a.active {
