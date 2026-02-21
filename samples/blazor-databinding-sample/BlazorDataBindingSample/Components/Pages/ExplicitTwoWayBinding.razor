@@ -1,0 +1,68 @@
+@page "/explicit-twoway-binding"
+@rendermode InteractiveServer
+
+<PageTitle>明示的な双方向バインディング</PageTitle>
+
+<h1>明示的な双方向バインディング</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>基本的な value + @@onchange</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="nameInput" class="form-label">名前:</label>
+            <input id="nameInput" class="form-control" value="@name" @onchange="OnNameChanged" />
+            <p class="mt-2">入力された名前: <strong>@name</strong></p>
+            <p class="text-muted small">※フォーカスが外れたときに更新されます</p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>バリデーション付き（@@onchange）</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="emailInput" class="form-label">メールアドレス（5文字以上）:</label>
+            <input id="emailInput" class="form-control" value="@email" @onchange="OnEmailChanged" />
+            <p class="mt-2">入力値: <strong>@email</strong></p>
+            @if (!string.IsNullOrEmpty(emailError))
+            {
+                <p class="text-danger">@emailError</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>ログ出力付き（@@onchange）</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="messageInput" class="form-label">メッセージ:</label>
+            <input id="messageInput" class="form-control" value="@message" @onchange="OnMessageChanged" />
+            <p class="mt-2">入力値: <strong>@message</strong></p>
+            <p>変更回数: <strong>@changeCount</strong></p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>数値入力（条件付き更新・@@onchange）</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="priceInput" class="form-label">価格（0〜10000）:</label>
+            <input id="priceInput" type="number" class="form-control" value="@price" @onchange="OnPriceChanged" />
+            <p class="mt-2">価格: <strong>@price.ToString("C")</strong></p>
+            @if (!string.IsNullOrEmpty(priceError))
+            {
+                <p class="text-danger">@priceError</p>
+            }
+        </div>
+    </div>
+</div>
