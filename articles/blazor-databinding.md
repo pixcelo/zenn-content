@@ -46,6 +46,16 @@ graph LR
     A -- Rendering --> B
 ```
 
+```razor
+<p>@message</p>
+
+@code {
+    private string message = "Hello, Blazor!";
+}
+```
+
+変数 `message` の値が `<p>` タグに表示されます。変数を変更すると自動的にUIが更新されます。
+
 ## 双方向バインディング（Two-way / @bind）
 
 「行き」と「帰り」がセットになった、循環する構造です。
@@ -62,6 +72,17 @@ graph TD
 
     style C fill:#eee,stroke:#333,stroke-dasharray:5 5
 ```
+
+```razor
+<input @bind="name" />
+<p>入力値: @name</p>
+
+@code {
+    private string name = "Alice";
+}
+```
+
+入力欄に文字を入力すると、変数 `name` が自動的に更新され、`<p>` タグにも反映されます。
 
 ## 明示的な双方向バインディング（Two-way）
 
@@ -83,16 +104,62 @@ graph TD
 `@bind`との違い：
 `OnValueChanged`メソッド内で、バリデーション・APIコール・条件付き更新など、変更時の処理を自由にカスタマイズできます。
 
+```razor
+<input value="@name" @onchange="OnNameChanged" />
+<p>入力値: @name</p>
+
+@code {
+    private string name = "Alice";
+
+    private void OnNameChanged(ChangeEventArgs e)
+    {
+        var newValue = e.Value?.ToString() ?? "";
+
+        // バリデーション
+        if (string.IsNullOrWhiteSpace(newValue))
+        {
+            return;
+        }
+
+        name = newValue;
+    }
+}
+```
+
+@bindの代わりに `value` と `@onchange` を使い、OnNameChangedメソッド内でバリデーションなどのカスタム処理を実行できます。
+
+## コンポーネント参照（@ref）
+
+コンポーネントやHTML要素のインスタンスを変数に保存します。
+
+```razor
+<MyDialog @ref="myDialog" />
+```
+
+**特徴**：
+- 親から子コンポーネントのメソッドを直接呼び出せる
+- JavaScript連携でDOM要素を渡せる（ElementReference）
+- OnAfterRender以降でのみ利用可能
+
+**注意**：
+一般的には Parameter + EventCallback による宣言的なアプローチが推奨されます。
+@ref は、フォーカス制御やサードパーティライブラリとの統合など、他に選択肢がない場合に使用します。
+
 ## 環境
 
 - .NET 8
 - Blazor Web App (Interactive Server)
 - プリレンダリング有効
 
----
 
 ## サンプル
 
 サンプルプロジェクトを用意しました。
 
 [GitHubサンプルコード](https://github.com/pixcelo/zenn-content/tree/main/samples/blazor-databinding-sample)
+
+
+## 参考
+- [Blazor を使用して再利用可能な UI コンポーネントを構築する](https://learn.microsoft.com/ja-jp/dotnet/architecture/blazor-for-web-forms-developers/components)
+- [ASP.NET Core Blazor データ バインディング
+](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/data-binding)
