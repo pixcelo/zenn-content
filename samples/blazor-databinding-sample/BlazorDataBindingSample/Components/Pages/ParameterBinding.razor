@@ -1,0 +1,83 @@
+@page "/parameter-binding"
+@rendermode InteractiveServer
+@using BlazorDataBindingSample.Components.Shared
+
+<PageTitle>パラメーター</PageTitle>
+
+<h1>パラメーター（Parameter）</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>基本的なパラメーター</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="nameInput" class="form-label">名前:</label>
+            <input id="nameInput" class="form-control" @bind="userName" />
+        </div>
+        <div class="mb-3">
+            <label for="ageInput" class="form-label">年齢:</label>
+            <input id="ageInput" type="number" class="form-control" @bind="userAge" />
+        </div>
+        <hr />
+        <h5>子コンポーネント（UserCard）</h5>
+        <UserCard Name="@userName" Age="@userAge" />
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>複数のパラメーター</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="emailInput" class="form-label">メールアドレス:</label>
+            <input id="emailInput" type="email" class="form-control" @bind="userEmail" />
+        </div>
+        <hr />
+        <h5>子コンポーネント（UserCard with Email）</h5>
+        <UserCard Name="@userName" Age="@userAge" Email="@userEmail" />
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>条件付きレンダリング</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="timeSelect" class="form-label">時間帯:</label>
+            <select id="timeSelect" class="form-select" @bind="timeOfDay">
+                <option value="Morning">朝</option>
+                <option value="Afternoon">昼</option>
+                <option value="Evening">夜</option>
+            </select>
+        </div>
+        <hr />
+        <h5>子コンポーネント（GreetingMessage）</h5>
+        <GreetingMessage UserName="@userName" TimeOfDay="@timeOfDay" />
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>カスタムクラスのパラメーター</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="userInfoName" class="form-label">名前:</label>
+            <input id="userInfoName" class="form-control" @bind="userInfo.Name" />
+        </div>
+        <div class="mb-3">
+            <label for="userInfoAge" class="form-label">年齢:</label>
+            <input id="userInfoAge" type="number" class="form-control" @bind="userInfo.Age" />
+        </div>
+        <div class="mb-3">
+            <label for="userInfoEmail" class="form-label">メールアドレス:</label>
+            <input id="userInfoEmail" type="email" class="form-control" @bind="userInfo.Email" />
+        </div>
+        <hr />
+        <h5>子コンポーネント（UserCard with Object）</h5>
+        <UserCard Name="@userInfo.Name" Age="@userInfo.Age" Email="@userInfo.Email" />
+    </div>
+</div>
