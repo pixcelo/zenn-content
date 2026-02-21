@@ -188,6 +188,47 @@ graph LR
 
 **注意**: パラメーターは読み取り専用として扱い、子から親へのデータ送信には EventCallback を使います。
 
+## カスケード型パラメーター（CascadingParameter）
+
+先祖コンポーネントから子孫コンポーネントへ、階層を越えてデータを渡します。
+
+```mermaid
+graph TD
+    A["先祖コンポーネント<br/>(CascadingValue)"]
+    B["中間コンポーネント"]
+    C["子孫コンポーネント<br/>(CascadingParameter)"]
+
+    A -->|"自動的に伝播"| B
+    B --> C
+    A -.->|"直接受け取り可能"| C
+
+    style A fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#bfd,stroke:#333,stroke-width:2px
+```
+
+**先祖コンポーネント**:
+```razor
+<CascadingValue Value="@theme">
+    <ChildComponent />
+</CascadingValue>
+
+@code {
+    private string theme = "dark";
+}
+```
+
+**子孫コンポーネント（何階層下でもOK）**:
+```razor
+<p>テーマ: @Theme</p>
+
+@code {
+    [CascadingParameter] public string Theme { get; set; }
+}
+```
+
+通常のパラメーターと異なり、中間のコンポーネントを経由せずに値を受け取れます。
+レイアウト、テーマ、認証情報など、アプリ全体で共有する値に使用します。
+
 ## 環境
 
 - .NET 8
