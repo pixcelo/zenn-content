@@ -11,7 +11,7 @@ public partial class ThemeDisplay : ComponentBase
     /// カスケードされたテーマ
     /// </summary>
     [CascadingParameter]
-    public string Theme { get; set; } = "light";
+    public string Theme { get; set; } = "(未カスケード)";
 
     /// <summary>
     /// アラートクラスを取得

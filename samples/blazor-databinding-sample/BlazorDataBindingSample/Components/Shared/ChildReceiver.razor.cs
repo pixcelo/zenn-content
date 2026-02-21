@@ -11,11 +11,11 @@ public partial class ChildReceiver : ComponentBase
     /// カスケードされたユーザー名
     /// </summary>
     [CascadingParameter(Name = "UserName")]
-    public string UserName { get; set; } = "";
+    public string UserName { get; set; } = "(未カスケード)";
 
     /// <summary>
     /// カスケードされたテーマ
     /// </summary>
     [CascadingParameter(Name = "Theme")]
-    public string Theme { get; set; } = "";
+    public string Theme { get; set; } = "(未カスケード)";
 }

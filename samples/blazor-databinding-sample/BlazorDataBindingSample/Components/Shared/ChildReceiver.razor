@@ -1,5 +1,25 @@
 <div class="border border-success p-2 bg-light">
     <h6>子レシーバー（孫コンポーネント）</h6>
-    <p class="mb-1">ユーザー名: <strong>@UserName</strong></p>
-    <p class="mb-0">テーマ: <strong>@Theme</strong></p>
+    <p class="mb-1">
+        ユーザー名: <strong>@UserName</strong>
+        @if (UserName == "(未カスケード)")
+        {
+            <small class="text-danger">⚠ 未カスケード</small>
+        }
+        else
+        {
+            <small class="text-success">✓</small>
+        }
+    </p>
+    <p class="mb-0">
+        テーマ: <strong>@Theme</strong>
+        @if (Theme == "(未カスケード)")
+        {
+            <small class="text-danger">⚠ 未カスケード</small>
+        }
+        else
+        {
+            <small class="text-success">✓</small>
+        }
+    </p>
 </div>

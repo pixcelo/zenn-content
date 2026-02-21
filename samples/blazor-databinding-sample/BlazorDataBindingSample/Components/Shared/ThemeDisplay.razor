@@ -1,5 +1,13 @@
 <div class="alert @GetAlertClass()">
     <h5>現在のテーマ</h5>
     <p>テーマ: <strong>@Theme</strong></p>
-    <p class="mb-0">このコンポーネントは CascadingParameter でテーマを受け取っています。</p>
+    <p class="mb-1">このコンポーネントは CascadingParameter でテーマを受け取っています。</p>
+    @if (Theme == "(未カスケード)")
+    {
+        <p class="mb-0 text-danger"><small>⚠ カスケードされていません（デフォルト値）</small></p>
+    }
+    else
+    {
+        <p class="mb-0 text-success"><small>✓ カスケード済み</small></p>
+    }
 </div>
