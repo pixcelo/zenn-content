@@ -10,11 +10,11 @@ namespace BlazorDataBindingSample.Components.Pages;
 public partial class Error : ComponentBase
 {
     [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
+    private HttpContext? HttpContextValue { get; set; }
 
     private string? RequestId { get; set; }
     private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
     protected override void OnInitialized() =>
-        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+        RequestId = Activity.Current?.Id ?? HttpContextValue?.TraceIdentifier;
 }
