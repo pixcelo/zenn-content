@@ -497,7 +497,9 @@ graph LR
 </div>
 ```
 
-### 使用例：条件付き属性の適用
+:::details 詳細な使用例
+
+#### 使用例：条件付き属性の適用
 
 ```razor
 <button @attributes="GetButtonAttributes()">
@@ -524,7 +526,7 @@ graph LR
 }
 ```
 
-### 属性の優先順位
+#### 属性の優先順位
 
 `@attributes` の位置によって、属性の優先順位が決まります。
 
@@ -544,7 +546,7 @@ graph LR
 
 **ルール**: 属性は**右から左**（最後から最初）に処理され、**最初に処理された値が優先**されます。
 
-### 任意のパラメーター（Arbitrary Parameters）
+#### 任意のパラメーター（Arbitrary Parameters）
 
 `[Parameter(CaptureUnmatchedValues = true)]` と組み合わせることで、親から渡された未定義の属性をすべてキャプチャできます。
 
@@ -582,8 +584,165 @@ graph LR
 - 再利用可能なコンポーネント作成時に便利
 - HTML標準属性やカスタムデータ属性を柔軟に扱える
 
-参考: [ASP.NET Core Blazor 属性スプラッティングと任意のパラメーター](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/splat-attributes-and-arbitrary-parameters)
+**参考**: [ASP.NET Core Blazor 属性スプラッティングと任意のパラメーター](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/splat-attributes-and-arbitrary-parameters)
 
+:::
+
+### テンプレートコンポーネント（RenderFragment）
+
+マークアップテンプレートを子コンポーネントに渡して、柔軟な表示を実現します。
+
+```mermaid
+graph LR
+    A["親コンポーネント<br/>(マークアップを定義)"]
+    B["RenderFragment"]
+    C["子コンポーネント<br/>(レンダリング位置を指定)"]
+
+    A -- "テンプレート渡し" --> B
+    B -- "適用" --> C
+```
+
+**基本的な例**:
+
+**子コンポーネント（Card.razor）**:
+```razor
+<div class="card">
+    <div class="card-header">
+        @Header
+    </div>
+    <div class="card-body">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
+```
+
+**親コンポーネント**:
+```razor
+<Card>
+    <Header>
+        <h3>カードタイトル</h3>
+    </Header>
+    <ChildContent>
+        <p>これはカードの本文です。</p>
+        <button class="btn btn-primary">クリック</button>
+    </ChildContent>
+</Card>
+```
+
+レンダリング結果：
+```html
+<div class="card">
+    <div class="card-header">
+        <h3>カードタイトル</h3>
+    </div>
+    <div class="card-body">
+        <p>これはカードの本文です。</p>
+        <button class="btn btn-primary">クリック</button>
+    </div>
+</div>
+```
+
+**ポイント**:
+- `RenderFragment` 型のパラメーターで、マークアップを受け取れる
+- `ChildContent` という名前は規約（デフォルトのコンテンツ領域）
+- 複数の `RenderFragment` を定義して、複数の領域にコンテンツを配置可能
+
+:::details 詳細な使用例
+
+#### パラメーター付きテンプレート（RenderFragment<T>）
+
+データを伴ってテンプレートを渡せます。
+
+**子コンポーネント（ItemList.razor）**:
+```razor
+<ul>
+    @foreach (var item in Items)
+    {
+        <li>@ItemTemplate(item)</li>
+    }
+</ul>
+
+@code {
+    [Parameter] public List<string> Items { get; set; } = new();
+    [Parameter] public RenderFragment<string>? ItemTemplate { get; set; }
+}
+```
+
+**親コンポーネント**:
+```razor
+<ItemList Items="@fruits">
+    <ItemTemplate Context="fruit">
+        <strong>@fruit.ToUpper()</strong>
+    </ItemTemplate>
+</ItemList>
+
+@code {
+    private List<string> fruits = new() { "Apple", "Banana", "Orange" };
+}
+```
+
+レンダリング結果：
+```html
+<ul>
+    <li><strong>APPLE</strong></li>
+    <li><strong>BANANA</strong></li>
+    <li><strong>ORANGE</strong></li>
+</ul>
+```
+
+**説明**:
+- `RenderFragment<T>` は型パラメーターを受け取れる
+- `Context` 属性で、テンプレート内で使用する変数名を指定
+- 親が表示ロジックをカスタマイズでき、子が構造を提供する
+
+#### 実用例：汎用的なダイアログコンポーネント
+
+```razor
+<!-- Dialog.razor -->
+<div class="modal" style="display: @(IsVisible ? "block" : "none")">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                @Title
+            </div>
+            <div class="modal-body">
+                @Body
+            </div>
+            <div class="modal-footer">
+                @Footer
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public RenderFragment? Title { get; set; }
+    [Parameter] public RenderFragment? Body { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+}
+```
+
+使用例：
+```razor
+<Dialog IsVisible="@showDialog">
+    <Title><h5>確認</h5></Title>
+    <Body><p>この操作を実行しますか？</p></Body>
+    <Footer>
+        <button @onclick="OnConfirm">はい</button>
+        <button @onclick="OnCancel">いいえ</button>
+    </Footer>
+</Dialog>
+```
+
+**参考**: [ASP.NET Core Blazor テンプレート コンポーネント](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/templated-components)
+
+:::
 
 ## サンプル
 
