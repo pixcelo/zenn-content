@@ -229,6 +229,213 @@ graph TD
 通常のパラメーターと異なり、中間のコンポーネントを経由せずに値を受け取れます。
 レイアウト、テーマ、認証情報など、アプリ全体で共有する値に使用します。
 
+## イベント処理（Event Handling）
+
+UIイベントとメソッドを結びつけます。
+
+```mermaid
+graph LR
+    A["UI要素<br/>(ボタン、入力欄など)"]
+    B["イベント<br/>(click, change, keydown)"]
+    C["メソッド<br/>(C# コード)"]
+
+    A -- "ユーザー操作" --> B
+    B -- "@onclick など" --> C
+```
+
+**基本的な例**:
+```razor
+<button @onclick="OnClick">クリック</button>
+<p>クリック回数: @count</p>
+
+@code {
+    private int count = 0;
+
+    private void OnClick()
+    {
+        count++;
+    }
+}
+```
+
+ボタンをクリックすると `OnClick` メソッドが呼ばれ、カウンターが増加します。
+
+### 主要なイベント種類
+
+| イベント | 用途 | 構文例 |
+|---------|------|--------|
+| `@onclick` | クリック | `<button @onclick="OnClick">` |
+| `@ondblclick` | ダブルクリック | `<button @ondblclick="OnDoubleClick">` |
+| `@onmouseover` | マウスオーバー | `<div @onmouseover="OnMouseOver">` |
+| `@onkeydown` | キーボード押下 | `<input @onkeydown="OnKeyDown">` |
+| `@onchange` | 値変更（フォーカス離脱時） | `<input @onchange="OnChange">` |
+| `@oninput` | 値変更（入力中） | `<input @oninput="OnInput">` |
+| `@onfocus` | フォーカス取得 | `<input @onfocus="OnFocus">` |
+| `@onblur` | フォーカス喪失 | `<input @onblur="OnBlur">` |
+
+### イベント引数の活用
+
+イベントハンドラーでイベント情報を取得できます。
+
+```razor
+<button @onclick="OnClickWithArgs">クリック位置を取得</button>
+<p>クリック位置: X=@clickX, Y=@clickY</p>
+
+@code {
+    private double clickX;
+    private double clickY;
+
+    private void OnClickWithArgs(MouseEventArgs e)
+    {
+        clickX = e.ClientX;
+        clickY = e.ClientY;
+    }
+}
+```
+
+**主要なイベント引数**:
+- `MouseEventArgs`: マウス位置、ボタン情報
+- `KeyboardEventArgs`: キーコード、修飾キー（Ctrl, Shift, Alt）
+- `ChangeEventArgs`: 変更後の値
+
+### イベント制御
+
+**stopPropagation**: イベントの伝播を止める
+
+```razor
+<div @onclick="OnOuterClick">
+    外側
+    <div @onclick="OnInnerClick" @onclick:stopPropagation="true">
+        内側（クリックが外側に伝わらない）
+    </div>
+</div>
+```
+
+**preventDefault**: デフォルト動作を無効化
+
+```razor
+<form @onsubmit="OnSubmit" @onsubmit:preventDefault="true">
+    <input />
+    <button type="submit">送信</button>
+</form>
+```
+
+フォーム送信時のページリロードを防ぎます。
+
+## EventCallback
+
+子コンポーネントから親コンポーネントへイベントを通知します。
+
+```mermaid
+graph LR
+    A["親コンポーネント"]
+    B["子コンポーネント"]
+    C["EventCallback<br/>定義"]
+    D["InvokeAsync<br/>呼び出し"]
+
+    A -- "EventCallback<br/>を渡す" --> B
+    B -- "イベント発生" --> D
+    D -- "通知" --> C
+    C -- "親のメソッド<br/>実行" --> A
+```
+
+**親コンポーネント**:
+```razor
+<ChildComponent OnValueChanged="@HandleValueChanged" />
+<p>子から受け取った値: @receivedValue</p>
+
+@code {
+    private string receivedValue = "";
+
+    private void HandleValueChanged(string value)
+    {
+        receivedValue = value;
+    }
+}
+```
+
+**子コンポーネント**:
+```razor
+<input @oninput="OnInput" />
+
+@code {
+    [Parameter] public EventCallback<string> OnValueChanged { get; set; }
+
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "";
+        await OnValueChanged.InvokeAsync(value);
+    }
+}
+```
+
+子で入力された値が、即座に親に通知されます。
+
+### カスタムコンポーネントでの @bind サポート
+
+`Parameter` と `EventCallback` を組み合わせることで、自作コンポーネントで `@bind-` 構文を使えるようにできます。
+
+**親コンポーネント**:
+```razor
+<CustomInput @bind-Value="name" />
+<p>入力値: @name</p>
+
+@code {
+    private string name = "";
+}
+```
+
+**子コンポーネント（CustomInput.razor）**:
+```razor
+<input value="@Value" @oninput="OnInput" />
+
+@code {
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        await ValueChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    }
+}
+```
+
+**Blazorの命名規則**（公式仕様）:
+- パラメーター名が `Value` の場合、EventCallbackは `ValueChanged` と命名する
+- この規則に従うことで、`@bind-Value` 構文がコンパイル時に以下のように展開されます：
+  ```razor
+  <CustomInput Value="@name" ValueChanged="@((newValue) => name = newValue)" />
+  ```
+
+:::details コンパイル時の展開の詳細
+
+**公式ドキュメントでの説明**:
+
+標準の `<input>` での `@bind` は、以下のように展開されます：
+
+```razor
+<!-- 書くコード -->
+<input @bind="InputValue" />
+
+<!-- 展開後（等価なコード） -->
+<input value="@InputValue"
+       @onchange="@((ChangeEventArgs __e) => InputValue = __e?.Value?.ToString())" />
+```
+
+**Razorコンパイラが生成する実際のコード**:
+
+```csharp
+builder.AddAttribute("value", BindConverter.FormatValue(model.Age));
+builder.AddAttribute("onchange", EventCallback.Factory.CreateBinder<int>(
+    this, __value => model.Age = __value, model.Age));
+```
+
+**参考**:
+- [ASP.NET Core Blazor データ バインディング](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/data-binding)
+- [Blazor Components Source Code (GitHub)](https://github.com/dotnet/aspnetcore/tree/main/src/Components)
+
+:::
+
 ## 環境
 
 - .NET 8
