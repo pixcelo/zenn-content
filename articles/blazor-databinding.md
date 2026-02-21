@@ -1,5 +1,5 @@
 ---
-title: "Blazorのバインディングの仕組み"
+title: "Blazorのデータフローとコンポーネント連携"
 emoji: "🔗"
 type: "tech"
 topics: ["blazor", "csharp", "dotnet", "web", "web開発"]
@@ -10,28 +10,27 @@ publication_name: "nexta_"
 ネクスタの tetsu.k です。
 基幹業務クラウド「SmartF」の開発に携わっています。
 
-この記事では、Blazorにおけるバインディングの仕組みについて、
+この記事では、Blazorにおけるデータフローとコンポーネント連携の仕組みについて、
 調べた結果を共有します。
 
 
 
-## バインディングの種類
+## データフローとコンポーネント連携の全体像
 
-バインディングの全体像です。
-それぞれに使いどころがあります。
+Blazorでデータを扱う仕組みを、機能別に整理しました。
 
-| 種類 | 構文例 | 結びつけるもの | 方向 |
-|---|---|---|---|
-| 単方向データバインディング | `@変数名` | データ → UI | 単方向 |
-| 双方向データバインディング | `@bind`/`@bind-Value`  | データ ↔ UI | 双方向 |
-| 明示的な双方向バインディング | `Value` + `ValueChanged` | データ ↔ UI | 双方向（手動） |
-| コンポーネント参照 | `@ref` | インスタンス ↔ 変数 | 単方向 |
-| パラメーター | `[Parameter]` | 親 → 子 | 単方向 |
-| カスケードパラメーター | `[CascadingParameter]` | 先祖 → 子孫 | 単方向 |
-| イベント処理 (Event Handling) | `@onclick` | イベント → メソッド | 単方向 |
-| EventCallback | `EventCallback<T>` | 子イベント → 親 | 単方向（逆流） |
-| 属性スプラッティング | `@attributes` | 辞書 → 属性 | 単方向 |
-| テンプレートコンポーネント (RenderFragment) | `ChildContent` | マークアップ → デリゲート | 単方向 |
+| カテゴリ | 種類 | 構文例 | 結びつけるもの | 方向 |
+|---------|------|--------|----------------|------|
+| **データバインディング** | 単方向データバインディング | `@変数名` | データ → UI | 単方向 |
+| | 双方向データバインディング | `@bind`/`@bind-Value` | データ ↔ UI | 双方向 |
+| | 明示的な双方向バインディング | `Value` + `ValueChanged` | データ ↔ UI | 双方向（手動） |
+| **コンポーネント連携** | パラメーター | `[Parameter]` | 親 → 子 | 単方向 |
+| | カスケードパラメーター | `[CascadingParameter]` | 先祖 → 子孫 | 単方向 |
+| | EventCallback | `EventCallback<T>` | 子 → 親 | 単方向 |
+| **イベント処理** | イベント処理 | `@onclick` | イベント → メソッド | 単方向 |
+| **高度な機能** | コンポーネント参照 | `@ref` | インスタンス ↔ 変数 | 単方向 |
+| | 属性スプラッティング | `@attributes` | 辞書 → 属性 | 単方向 |
+| | テンプレートコンポーネント | `RenderFragment` | マークアップ → デリゲート | 単方向 |
 
 以下で、個別に概念を紹介します。
 
@@ -437,6 +436,130 @@ builder.AddAttribute("onchange", EventCallback.Factory.CreateBinder<int>(
 - [Blazor Components Source Code (GitHub)](https://github.com/dotnet/aspnetcore/tree/main/src/Components)
 
 :::
+
+## 属性スプラッティング（Attribute Splatting）
+
+辞書に格納した属性を、コンポーネントやHTML要素にまとめて適用します。
+
+```mermaid
+graph LR
+    A["Dictionary<string, object><br/>(属性の辞書)"]
+    B["@attributes"]
+    C["HTML要素<br/>またはコンポーネント"]
+
+    A -- "スプラッティング" --> B
+    B -- "一括適用" --> C
+```
+
+**基本的な例**:
+```razor
+<div @attributes="additionalAttributes">
+    コンテンツ
+</div>
+
+@code {
+    private Dictionary<string, object> additionalAttributes = new()
+    {
+        { "class", "alert alert-info" },
+        { "role", "alert" },
+        { "data-value", "123" }
+    };
+}
+```
+
+レンダリング結果：
+```html
+<div class="alert alert-info" role="alert" data-value="123">
+    コンテンツ
+</div>
+```
+
+### 使用例：条件付き属性の適用
+
+```razor
+<button @attributes="GetButtonAttributes()">
+    クリック
+</button>
+
+@code {
+    private bool isDisabled = true;
+
+    private Dictionary<string, object> GetButtonAttributes()
+    {
+        var attrs = new Dictionary<string, object>
+        {
+            { "class", "btn btn-primary" }
+        };
+
+        if (isDisabled)
+        {
+            attrs.Add("disabled", true);
+        }
+
+        return attrs;
+    }
+}
+```
+
+### 属性の優先順位
+
+`@attributes` の位置によって、属性の優先順位が決まります。
+
+**@attributes が後ろにある場合**（明示的な属性が優先）:
+```razor
+<div class="fixed-class" @attributes="additionalAttributes">
+    <!-- class="fixed-class" が優先される -->
+</div>
+```
+
+**@attributes が前にある場合**（辞書の属性が優先）:
+```razor
+<div @attributes="additionalAttributes" class="fixed-class">
+    <!-- additionalAttributes の class が優先される -->
+</div>
+```
+
+**ルール**: 属性は**右から左**（最後から最初）に処理され、**最初に処理された値が優先**されます。
+
+### 任意のパラメーター（Arbitrary Parameters）
+
+`[Parameter(CaptureUnmatchedValues = true)]` と組み合わせることで、親から渡された未定義の属性をすべてキャプチャできます。
+
+**子コンポーネント**:
+```razor
+<div @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
+```
+
+**親コンポーネント**:
+```razor
+<CustomDiv class="my-custom-class" data-id="123" aria-label="カスタム">
+    コンテンツ
+</CustomDiv>
+```
+
+レンダリング結果：
+```html
+<div class="my-custom-class" data-id="123" aria-label="カスタム">
+    コンテンツ
+</div>
+```
+
+**ポイント**:
+- 定義されていない属性（`class`, `data-id`, `aria-label`）が自動的にキャプチャされる
+- 再利用可能なコンポーネント作成時に便利
+- HTML標準属性やカスタムデータ属性を柔軟に扱える
+
+参考: [ASP.NET Core Blazor 属性スプラッティングと任意のパラメーター](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/splat-attributes-and-arbitrary-parameters)
 
 ## 環境
 
