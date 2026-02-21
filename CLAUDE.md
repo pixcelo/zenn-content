@@ -34,9 +34,9 @@ npx zenn new:book --slug book-name-12chars-min --title "本のタイトル"
 
 ### プレビュー
 ```bash
-npx zenn preview --port 8000
+npx zenn preview --port 8010
 ```
-プレビューURL: http://localhost:8000
+プレビューURL: http://localhost:8010
 
 ### 一覧表示
 ```bash
