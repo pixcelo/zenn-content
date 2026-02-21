@@ -1,0 +1,64 @@
+@page "/cascading-parameter-binding"
+@rendermode InteractiveServer
+@using BlazorDataBindingSample.Components.Shared
+
+<PageTitle>カスケード型パラメーター</PageTitle>
+
+<h1>カスケード型パラメーター（CascadingParameter）</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>基本的なカスケード型パラメーター</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="themeSelect" class="form-label">テーマ:</label>
+            <select id="themeSelect" class="form-select" @bind="currentTheme">
+                <option value="light">ライト</option>
+                <option value="dark">ダーク</option>
+            </select>
+        </div>
+        <hr />
+        <CascadingValue Value="@currentTheme">
+            <ThemeDisplay />
+        </CascadingValue>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>階層を越えたカスケード</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="userNameInput" class="form-label">ユーザー名:</label>
+            <input id="userNameInput" class="form-control" @bind="currentUserName" />
+        </div>
+        <hr />
+        <CascadingValue Value="@currentUserName" Name="UserName">
+            <CascadingValue Value="@currentTheme" Name="Theme">
+                <ParentContainer />
+            </CascadingValue>
+        </CascadingValue>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3>複雑なオブジェクトのカスケード</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="appNameInput" class="form-label">アプリケーション名:</label>
+            <input id="appNameInput" class="form-control" @bind="appSettings.ApplicationName" />
+        </div>
+        <div class="mb-3">
+            <label for="versionInput" class="form-label">バージョン:</label>
+            <input id="versionInput" class="form-control" @bind="appSettings.Version" />
+        </div>
+        <hr />
+        <CascadingValue Value="@appSettings">
+            <AppInfoDisplay />
+        </CascadingValue>
+    </div>
+</div>
