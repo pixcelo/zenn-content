@@ -260,7 +260,7 @@ graph LR
 
 ボタンをクリックすると `OnClick` メソッドが呼ばれ、カウンターが増加します。
 
-### 主要なイベント種類
+:::details 主要なイベント種類
 
 | イベント | 用途 | 構文例 |
 |---------|------|--------|
@@ -272,6 +272,8 @@ graph LR
 | `@oninput` | 値変更（入力中） | `<input @oninput="OnInput">` |
 | `@onfocus` | フォーカス取得 | `<input @onfocus="OnFocus">` |
 | `@onblur` | フォーカス喪失 | `<input @onblur="OnBlur">` |
+
+:::
 
 ### イベント引数の活用
 
