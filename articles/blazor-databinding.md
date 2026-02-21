@@ -15,26 +15,45 @@ publication_name: "nexta_"
 
 
 
-## データフローとコンポーネント連携の全体像
+## 全体像
 
-Blazorでデータを扱う仕組みを、機能別に整理しました。
+Blazorでデータ連携する仕組みを、機能別に整理しました。
 
-| カテゴリ | 種類 | 構文例 | 結びつけるもの | 方向 |
-|---------|------|--------|----------------|------|
-| **データバインディング** | 単方向データバインディング | `@変数名` | データ → UI | 単方向 |
-| | 双方向データバインディング | `@bind`/`@bind-Value` | データ ↔ UI | 双方向 |
-| | 明示的な双方向バインディング | `Value` + `ValueChanged` | データ ↔ UI | 双方向（手動） |
-| **コンポーネント連携** | パラメーター | `[Parameter]` | 親 → 子 | 単方向 |
-| | カスケードパラメーター | `[CascadingParameter]` | 先祖 → 子孫 | 単方向 |
-| | EventCallback | `EventCallback<T>` | 子 → 親 | 単方向 |
-| **イベント処理** | イベント処理 | `@onclick` | イベント → メソッド | 単方向 |
-| **高度な機能** | コンポーネント参照 | `@ref` | インスタンス ↔ 変数 | 単方向 |
-| | 属性スプラッティング | `@attributes` | 辞書 → 属性 | 単方向 |
-| | テンプレートコンポーネント | `RenderFragment` | マークアップ → デリゲート | 単方向 |
+### データバインディング
+
+| 種類 | 構文例 | 結びつけるもの | 方向 |
+|------|--------|----------------|------|
+| 単方向データバインディング | `@変数名` | データ → UI | 単方向 |
+| 双方向データバインディング | `@bind`/`@bind-Value` | データ ↔ UI | 双方向 |
+| 明示的な双方向バインディング | `Value` + `ValueChanged` | データ ↔ UI | 双方向（手動） |
+
+### コンポーネント連携
+
+| 種類 | 構文例 | 結びつけるもの | 方向 |
+|------|--------|----------------|------|
+| パラメーター | `[Parameter]` | 親 → 子 | 単方向 |
+| カスケードパラメーター | `[CascadingParameter]` | 先祖 → 子孫 | 単方向 |
+| EventCallback | `EventCallback<T>` | 子 → 親 | 単方向 |
+
+### イベント処理
+
+| 種類 | 構文例 | 結びつけるもの | 方向 |
+|------|--------|----------------|------|
+| イベント処理 | `@onclick` | イベント → メソッド | 単方向 |
+
+### 高度な機能
+
+| 種類 | 構文例 | 結びつけるもの | 方向 |
+|------|--------|----------------|------|
+| コンポーネント参照 | `@ref` | インスタンス ↔ 変数 | 単方向 |
+| 属性スプラッティング | `@attributes` | 辞書 → 属性 | 単方向 |
+| テンプレートコンポーネント | `RenderFragment` | マークアップ → デリゲート | 単方向 |
 
 以下で、個別に概念を紹介します。
 
-## 単方向データバインディング（One-way）
+## データバインディング
+
+### 単方向データバインディング（One-way）
 
 データがUIに「反映」されるだけの、最も純粋な形です。
 
@@ -55,7 +74,7 @@ graph LR
 
 変数 `message` の値が `<p>` タグに表示されます。変数を変更すると自動的にUIが更新されます。
 
-## 双方向バインディング（Two-way / @bind）
+### 双方向バインディング（Two-way / @bind）
 
 「行き」と「帰り」がセットになった、循環する構造です。
 
@@ -83,7 +102,7 @@ graph TD
 
 入力欄に文字を入力すると、変数 `name` が自動的に更新され、`<p>` タグにも反映されます。
 
-## 明示的な双方向バインディング（Two-way）
+### 明示的な双方向バインディング（Two-way）
 
 `@bind`を使わず、`Value` と `ValueChanged` を個別に指定します。
 
@@ -127,7 +146,9 @@ graph TD
 
 @bindの代わりに `value` と `@onchange` を使い、OnNameChangedメソッド内でバリデーションなどのカスタム処理を実行できます。
 
-## コンポーネント参照（@ref）
+## コンポーネント連携
+
+### コンポーネント参照（@ref）
 
 コンポーネントやHTML要素のインスタンスを変数に保存します。
 
@@ -151,7 +172,7 @@ graph LR
 一般的には Parameter + EventCallback による宣言的なアプローチが推奨されます。
 @ref は、フォーカス制御やサードパーティライブラリとの統合など、他に選択肢がない場合に使用します。
 
-## パラメーター（Parameter）
+### パラメーター（Parameter）
 
 親コンポーネントから子コンポーネントへデータを渡します。
 
@@ -187,7 +208,7 @@ graph LR
 
 **注意**: パラメーターは読み取り専用として扱い、子から親へのデータ送信には EventCallback を使います。
 
-## カスケード型パラメーター（CascadingParameter）
+### カスケード型パラメーター（CascadingParameter）
 
 先祖コンポーネントから子孫コンポーネントへ、階層を越えてデータを渡します。
 
@@ -323,7 +344,7 @@ graph LR
 
 フォーム送信時のページリロードを防ぎます。
 
-## EventCallback
+### EventCallback
 
 子コンポーネントから親コンポーネントへイベントを通知します。
 
@@ -437,7 +458,9 @@ builder.AddAttribute("onchange", EventCallback.Factory.CreateBinder<int>(
 
 :::
 
-## 属性スプラッティング（Attribute Splatting）
+## 高度な機能
+
+### 属性スプラッティング（Attribute Splatting）
 
 辞書に格納した属性を、コンポーネントやHTML要素にまとめて適用します。
 
@@ -561,12 +584,6 @@ graph LR
 
 参考: [ASP.NET Core Blazor 属性スプラッティングと任意のパラメーター](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/splat-attributes-and-arbitrary-parameters)
 
-## 環境
-
-- .NET 8
-- Blazor Web App (Interactive Server)
-- プリレンダリング有効
-
 
 ## サンプル
 
@@ -574,6 +591,10 @@ graph LR
 
 [GitHubサンプルコード](https://github.com/pixcelo/zenn-content/tree/main/samples/blazor-databinding-sample)
 
+環境
+- .NET 8
+- Blazor Web App (Interactive Server)
+- プリレンダリング有効
 
 ## 参考
 - [Blazor を使用して再利用可能な UI コンポーネントを構築する](https://learn.microsoft.com/ja-jp/dotnet/architecture/blazor-for-web-forms-developers/components)
