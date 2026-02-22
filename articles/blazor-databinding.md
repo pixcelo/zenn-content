@@ -10,9 +10,9 @@ publication_name: "nexta_"
 ネクスタの tetsu.k です。
 基幹業務クラウド「SmartF」の開発に携わっています。
 
-この記事では、Blazorにおけるデータフローとコンポーネント連携の仕組みについて、
-調べた結果を共有します。
+Blazor開発において、コンポーネント間のデータの受け渡しやイベント処理の仕組みを正しく理解することは、保守性の高いアプリケーションを開発する上でとても大事になってきます。
 
+この記事では、Blazorにおけるデータフローとコンポーネント連携の仕組みについて、調べた結果を共有します。
 
 
 ## 全体像
@@ -180,7 +180,7 @@ graph LR
 }
 ```
 
-プロパティに `[Parameter]` 属性を付けることで、親から値を受け取れます。
+プロパティに `[Parameter]` 属性を付けることで、親から値を受けとれます。
 
 :::message
 パラメーターは読み取り専用として扱い、子から親へのデータ送信には EventCallback を使います。
@@ -188,7 +188,7 @@ graph LR
 
 ### カスケード型パラメーター（CascadingParameter）
 
-先祖コンポーネントから子孫コンポーネントへ、階層を越えてデータを渡します。
+先祖コンポーネントから子孫コンポーネントへ、階層をこえてデータを渡します。
 
 ```mermaid
 graph TD
@@ -224,7 +224,7 @@ graph TD
 }
 ```
 
-通常のパラメーターと異なり、中間のコンポーネントを経由せずに値を受け取れます。
+通常のパラメーターと異なり、中間のコンポーネントを経由せずに値を受けとれます。
 レイアウト、テーマ、認証情報など、アプリ全体で共有する値に使用します。
 
 ### コンポーネント参照（@ref）
@@ -300,7 +300,9 @@ graph LR
 
 ### イベント引数の活用
 
-イベントハンドラーでイベント情報を取得できます。
+イベントハンドラーでは、マウス位置やキーコードなどの情報を取得できます。
+
+:::details 詳しい使い方とコード例
 
 ```razor
 <button @onclick="OnClickWithArgs">クリック位置を取得</button>
@@ -322,6 +324,8 @@ graph LR
 - `MouseEventArgs`: マウス位置、ボタン情報
 - `KeyboardEventArgs`: キーコード、修飾キー（Ctrl, Shift, Alt）
 - `ChangeEventArgs`: 変更後の値
+
+:::
 
 ### イベント制御
 
@@ -367,7 +371,7 @@ graph LR
 **親コンポーネント**:
 ```razor
 <ChildComponent OnValueChanged="@HandleValueChanged" />
-<p>子から受け取った値: @receivedValue</p>
+<p>子から受けとった値: @receivedValue</p>
 
 @code {
     private string receivedValue = "";
@@ -398,7 +402,7 @@ graph LR
 
 ### カスタムコンポーネントでの @bind サポート
 
-`Parameter` と `EventCallback` を組み合わせることで、自作コンポーネントで `@bind-` 構文を使えるようにできます。
+`Parameter` と `EventCallback` を組みあわせることで、自作コンポーネントで `@bind-` 構文を使えるようにできます。
 
 **親コンポーネント**:
 ```razor
@@ -529,29 +533,9 @@ graph LR
 }
 ```
 
-#### 属性の優先順位
-
-`@attributes` の位置によって、属性の優先順位が決まります。
-
-**@attributes が後ろにある場合**（明示的な属性が優先）:
-```razor
-<div class="fixed-class" @attributes="additionalAttributes">
-    <!-- class="fixed-class" が優先される -->
-</div>
-```
-
-**@attributes が前にある場合**（辞書の属性が優先）:
-```razor
-<div @attributes="additionalAttributes" class="fixed-class">
-    <!-- additionalAttributes の class が優先される -->
-</div>
-```
-
-**ルール**: 属性は**右から左**（最後から最初）に処理され、**最初に処理された値が優先**されます。
-
 #### 任意のパラメーター（Arbitrary Parameters）
 
-`[Parameter(CaptureUnmatchedValues = true)]` と組み合わせることで、親から渡された未定義の属性をすべてキャプチャできます。
+`[Parameter(CaptureUnmatchedValues = true)]` と組みあわせることで、親から渡された定義されていない属性をすべてキャプチャできます。
 
 **子コンポーネント**:
 ```razor
