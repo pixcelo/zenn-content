@@ -1,0 +1,126 @@
+@page "/renderfragment"
+@rendermode InteractiveServer
+
+<PageTitle>RenderFragment サンプル</PageTitle>
+
+<h1>テンプレートコンポーネント（RenderFragment）</h1>
+
+<div class="alert alert-info">
+    <strong>💡 ポイント</strong><br />
+    <code>&lt;Card&gt;</code> という<strong>同じコンポーネント</strong>を使って、<strong>異なる内容</strong>を表示しています。<br />
+    見た目（カードの枠線・レイアウト）は統一されていますが、中身（タイトル・本文・ボタン）は自由に変えられます。
+</div>
+
+<h2 class="mt-4">基本的な例</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <Card>
+            <Header>
+                <h3 class="mb-0">📊 カード1</h3>
+            </Header>
+            <ChildContent>
+                <p>これはカードの本文です。</p>
+                <button class="btn btn-primary" @onclick="OnCard1ButtonClick">クリック</button>
+                @if (card1ClickCount > 0)
+                {
+                    <p class="mt-2 text-success">クリック回数: @card1ClickCount</p>
+                }
+            </ChildContent>
+        </Card>
+    </div>
+
+    <div class="col-md-6">
+        <Card>
+            <Header>
+                <h3 class="mb-0">📝 カード2</h3>
+            </Header>
+            <ChildContent>
+                <p>同じCardコンポーネントを使っていますが、内容は全く異なります。</p>
+                <button class="btn btn-success" @onclick="OnCard2ButtonClick">別のボタン</button>
+                @if (card2ClickCount > 0)
+                {
+                    <p class="mt-2 text-primary">カード2のクリック: @card2ClickCount</p>
+                }
+            </ChildContent>
+        </Card>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <Card>
+            <Header>
+                <h3 class="mb-0">📌 カード3</h3>
+            </Header>
+            <ChildContent>
+                <p>リスト形式のコンテンツも入れられます。</p>
+                <ul>
+                    <li>項目1</li>
+                    <li>項目2</li>
+                    <li>項目3</li>
+                </ul>
+            </ChildContent>
+        </Card>
+    </div>
+
+    <div class="col-md-6">
+        <Card>
+            <Header>
+                <h3 class="mb-0">🎯 カード4</h3>
+            </Header>
+            <ChildContent>
+                <p>入力フォームも配置できます。</p>
+                <input type="text" class="form-control" placeholder="テキストを入力" @bind="inputText" />
+                @if (!string.IsNullOrEmpty(inputText))
+                {
+                    <p class="mt-2">入力値: @inputText</p>
+                }
+            </ChildContent>
+        </Card>
+    </div>
+</div>
+
+<h2 class="mt-4">ChildContent のタグ省略</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <SimplePanel>
+            <ChildContent>
+                <h5>🔵 タグあり</h5>
+                <p><code>&lt;ChildContent&gt;</code> タグで明示的に囲む書き方</p>
+            </ChildContent>
+        </SimplePanel>
+    </div>
+
+    <div class="col-md-6">
+        <SimplePanel>
+            <h5>🟢 タグなし</h5>
+            <p><code>ChildContent</code> という名前を使うと、タグを省略できます</p>
+        </SimplePanel>
+    </div>
+</div>
+
+<p class="mt-3">
+    <strong>💡 ポイント</strong>: <code>ChildContent</code> という名前には特別な規約があり、タグなしで直接コンテンツを書けます。<br />
+    <strong>ただし、複数のRenderFragmentがある場合は、すべてタグが必要です。</strong>
+</p>
+
+<h2 class="mt-4">テンプレートの構造</h2>
+<p>すべてのカードは、以下の<strong>同じテンプレート（Card.razor）</strong>から生成されています：</p>
+<pre><code>&lt;div class="card mb-3"&gt;
+    &lt;div class="card-header"&gt;
+        @@Header  ← ここに各カードのヘッダーが入る
+    &lt;/div&gt;
+    &lt;div class="card-body"&gt;
+        @@ChildContent  ← ここに各カードの本文が入る
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+<h2 class="mt-4">まとめ</h2>
+<ul>
+    <li><code>RenderFragment</code> 型のパラメーターで、マークアップを受けとれる</li>
+    <li><code>ChildContent</code> という名前は規約（デフォルトのコンテンツ領域）</li>
+    <li>複数の <code>RenderFragment</code> を定義して、複数の領域にコンテンツを配置可能</li>
+    <li><strong>見た目は統一、内容は自由</strong> というテンプレートパターンを実現できる</li>
+</ul>

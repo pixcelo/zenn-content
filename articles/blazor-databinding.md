@@ -10,14 +10,14 @@ publication_name: "nexta_"
 ネクスタの tetsu.k です。
 基幹業務クラウド「SmartF」の開発に携わっています。
 
-Blazor開発において、コンポーネント間のデータの受け渡しやイベント処理の仕組みを正しく理解することは、保守性の高いアプリケーションを開発する上でとても大事になってきます。
+Blazor開発において、「コンポーネント間のデータの受け渡し」や「イベント処理の仕組み」を正しく理解することは、保守性の高いアプリケーションを開発する上でとても大事です。
 
 この記事では、Blazorにおけるデータフローとコンポーネント連携の仕組みについて、調べた結果を共有します。
 
 
 ## 全体像
 
-Blazorでデータ連携する仕組みを、機能別に整理しました。
+データ連携する仕組みを機能別に整理しました。
 
 ### データバインディング
 
@@ -49,7 +49,7 @@ Blazorでデータ連携する仕組みを、機能別に整理しました。
 | 属性スプラッティング | `@attributes` | 辞書 → 属性 | 単方向 |
 | テンプレートコンポーネント | `RenderFragment` | マークアップ → デリゲート | 単方向 |
 
-以下で、個別に概念を紹介します。
+以下で、順を追って解説します。
 
 ## データバインディング
 
@@ -102,6 +102,17 @@ graph TD
 
 入力欄に文字を入力すると、変数 `name` が自動的に更新され、`<p>` タグにも反映されます。
 
+:::details @bind と @bind-Value の違い
+
+同じ「双方向データバインディング」を実現するものですが、ターゲットが違います。
+
+| 特徴 | @bind | @bind-Value |
+|------|-------|-------------|
+| 主な対象 | `input`, `select`, `textarea` などのHTML要素 | `InputText`, `InputNumber` などのBlazorコンポーネント |
+| デフォルト属性 | `value` 属性と `onchange` イベントに紐づく | `Value` プロパティと `ValueChanged` イベントに紐づく |
+
+:::
+
 ### 明示的な双方向バインディング（Two-way）
 
 `@bind`を使わず、`Value` と `ValueChanged` を個別に指定します。
@@ -119,7 +130,6 @@ graph TD
     style C fill:#ffd,stroke:#333,stroke-width:2px
 ```
 
-`@bind`との違い：
 `OnValueChanged`メソッド内で、バリデーション・APIコール・条件付き更新など、変更時の処理を自由にカスタマイズできます。
 
 ```razor
@@ -242,14 +252,11 @@ graph LR
 <MyDialog @ref="myDialog" />
 ```
 
-**特徴**：
-- 親から子コンポーネントのメソッドを直接呼び出せる
-- JavaScript連携でDOM要素を渡せる（ElementReference）
-- OnAfterRender以降でのみ利用可能
+親から子コンポーネントのメソッドを直接呼び出せます。
 
 :::message
-一般的には Parameter + EventCallback による宣言的なアプローチが推奨されます。
-@ref は、フォーカス制御やサードパーティライブラリとの統合など、他に選択肢がない場合に使用します。
+一般的には `Parameter` + `EventCallback` による宣言的なアプローチが推奨されます。
+`@ref` は他に選択肢がない場合に使用します。
 :::
 
 ## イベント処理（Event Handling）
@@ -266,7 +273,7 @@ graph LR
     B -- "@onclick など" --> C
 ```
 
-**基本的な例**:
+**クリックイベントの例**:
 ```razor
 <button @onclick="OnClick">クリック</button>
 <p>クリック回数: @count</p>
@@ -429,7 +436,7 @@ graph LR
 }
 ```
 
-**Blazorの命名規則**（公式仕様）:
+**Blazorの命名規則**:
 - パラメーター名が `Value` の場合、EventCallbackは `ValueChanged` と命名する
 - この規則に従うことで、`@bind-Value` 構文がコンパイル時に以下のように展開されます：
   ```razor
@@ -504,80 +511,9 @@ graph LR
 </div>
 ```
 
-:::details 詳細な使用例
-
-#### 使用例：条件付き属性の適用
-
-```razor
-<button @attributes="GetButtonAttributes()">
-    クリック
-</button>
-
-@code {
-    private bool isDisabled = true;
-
-    private Dictionary<string, object> GetButtonAttributes()
-    {
-        var attrs = new Dictionary<string, object>
-        {
-            { "class", "btn btn-primary" }
-        };
-
-        if (isDisabled)
-        {
-            attrs.Add("disabled", true);
-        }
-
-        return attrs;
-    }
-}
-```
-
-#### 任意のパラメーター（Arbitrary Parameters）
-
-`[Parameter(CaptureUnmatchedValues = true)]` と組みあわせることで、親から渡された定義されていない属性をすべてキャプチャできます。
-
-**子コンポーネント**:
-```razor
-<div @attributes="AdditionalAttributes">
-    @ChildContent
-</div>
-
-@code {
-    [Parameter(CaptureUnmatchedValues = true)]
-    public Dictionary<string, object>? AdditionalAttributes { get; set; }
-
-    [Parameter]
-    public RenderFragment? ChildContent { get; set; }
-}
-```
-
-**親コンポーネント**:
-```razor
-<CustomDiv class="my-custom-class" data-id="123" aria-label="カスタム">
-    コンテンツ
-</CustomDiv>
-```
-
-レンダリング結果：
-```html
-<div class="my-custom-class" data-id="123" aria-label="カスタム">
-    コンテンツ
-</div>
-```
-
-**ポイント**:
-- 定義されていない属性（`class`, `data-id`, `aria-label`）が自動的にキャプチャされる
-- 再利用可能なコンポーネント作成時に便利
-- HTML標準属性やカスタムデータ属性を柔軟に扱える
-
-**参考**: [ASP.NET Core Blazor 属性スプラッティングと任意のパラメーター](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/splat-attributes-and-arbitrary-parameters)
-
-:::
-
 ### テンプレートコンポーネント（RenderFragment）
 
-マークアップテンプレートを子コンポーネントに渡して、柔軟な表示を実現します。
+通常のプロパティが`string`や`int`を渡すのに対し、`RenderFragment`は UIそのものを渡します。
 
 ```mermaid
 graph LR
@@ -634,102 +570,47 @@ graph LR
 </div>
 ```
 
-**ポイント**:
-- `RenderFragment` 型のパラメーターで、マークアップを受け取れる
-- `ChildContent` という名前は規約（デフォルトのコンテンツ領域）
-- 複数の `RenderFragment` を定義して、複数の領域にコンテンツを配置可能
+- `RenderFragment` 型のパラメーターで、マークアップを受けとれる
+- `ChildContent` が唯一の`RenderFragment`の場合、タグを省略できる（特別な規約）
+- 任意の名前（`Header`, `Body`, `Footer` など）でも定義可能
+- 複数の `RenderFragment` がある場合は、`ChildContent` を含めてすべてタグで指定が必要
 
-:::details 詳細な使用例
+:::details ChildContent のタグ省略
 
-#### パラメーター付きテンプレート（RenderFragment<T>）
+`ChildContent` という名前には特別な規約があります。
 
-データを伴ってテンプレートを渡せます。
-
-**子コンポーネント（ItemList.razor）**:
+**タグなし（ChildContent が唯一のRenderFragmentの場合のみ）**:
 ```razor
-<ul>
-    @foreach (var item in Items)
-    {
-        <li>@ItemTemplate(item)</li>
-    }
-</ul>
-
-@code {
-    [Parameter] public List<string> Items { get; set; } = new();
-    [Parameter] public RenderFragment<string>? ItemTemplate { get; set; }
-}
+<SimplePanel>
+    これが自動的に ChildContent に渡される
+</SimplePanel>
 ```
 
-**親コンポーネント**:
+**タグあり（明示的に指定）**:
 ```razor
-<ItemList Items="@fruits">
-    <ItemTemplate Context="fruit">
-        <strong>@fruit.ToUpper()</strong>
-    </ItemTemplate>
-</ItemList>
-
-@code {
-    private List<string> fruits = new() { "Apple", "Banana", "Orange" };
-}
+<SimplePanel>
+    <ChildContent>
+        明示的にタグで囲むことも可能
+    </ChildContent>
+</SimplePanel>
 ```
 
-レンダリング結果：
-```html
-<ul>
-    <li><strong>APPLE</strong></li>
-    <li><strong>BANANA</strong></li>
-    <li><strong>ORANGE</strong></li>
-</ul>
-```
-
-**説明**:
-- `RenderFragment<T>` は型パラメーターを受け取れる
-- `Context` 属性で、テンプレート内で使用する変数名を指定
-- 親が表示ロジックをカスタマイズでき、子が構造を提供する
-
-#### 実用例：汎用的なダイアログコンポーネント
-
+**複数のRenderFragment（すべてタグが必要）**:
 ```razor
-<!-- Dialog.razor -->
-<div class="modal" style="display: @(IsVisible ? "block" : "none")">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                @Title
-            </div>
-            <div class="modal-body">
-                @Body
-            </div>
-            <div class="modal-footer">
-                @Footer
-            </div>
-        </div>
-    </div>
-</div>
-
-@code {
-    [Parameter] public bool IsVisible { get; set; }
-    [Parameter] public RenderFragment? Title { get; set; }
-    [Parameter] public RenderFragment? Body { get; set; }
-    [Parameter] public RenderFragment? Footer { get; set; }
-}
+<Card>
+    <Header>
+        <h3>タイトル</h3>
+    </Header>
+    <ChildContent>
+        本文（タグ省略不可）
+    </ChildContent>
+</Card>
 ```
 
-使用例：
-```razor
-<Dialog IsVisible="@showDialog">
-    <Title><h5>確認</h5></Title>
-    <Body><p>この操作を実行しますか？</p></Body>
-    <Footer>
-        <button @onclick="OnConfirm">はい</button>
-        <button @onclick="OnCancel">いいえ</button>
-    </Footer>
-</Dialog>
-```
-
-**参考**: [ASP.NET Core Blazor テンプレート コンポーネント](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/templated-components)
-
+:::message
+複数の`RenderFragment`がある場合は、`ChildContent`を含めてすべてタグが必要です。
 :::
+
 
 ## サンプル
 
