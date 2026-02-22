@@ -102,6 +102,11 @@ graph TD
 
 入力欄に文字を入力すると、変数 `name` が自動的に更新され、`<p>` タグにも反映されます。
 
+:::message
+双方向バインディングやイベント処理を動かすには、対話型レンダリングモード（InteractiveServer、InteractiveWebAssembly、InteractiveAutoなど）の設定が必要です。
+静的SSR（Static Server-side Rendering）では、これらの機能は動作しません。
+:::
+
 :::details @bind と @bind-Value の違い
 
 同じ「双方向データバインディング」を実現するものですが、ターゲットが違います。
@@ -623,11 +628,6 @@ graph LR
 - .NET 8
 - Blazor Web App (Interactive Server)
 - プリレンダリング有効
-
-:::message
-双方向バインディングやイベント処理を動かすには、適切なRenderMode（InteractiveServerなど）の設定が必要です。
-SSR（Static Server-side Rendering）では一部のイベントが動作しません。
-:::
 
 ## 参考
 - [Blazor を使用して再利用可能な UI コンポーネントを構築する](https://learn.microsoft.com/ja-jp/dotnet/architecture/blazor-for-web-forms-developers/components)
