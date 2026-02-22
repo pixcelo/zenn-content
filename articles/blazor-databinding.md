@@ -240,7 +240,7 @@ graph TD
 }
 ```
 
-通常のパラメーターと異なり、中間のコンポーネントを経由せずに値を受けとれます。
+通常のパラメーターと異なり、中間のコンポーネントを経由せずに値を受け取れます。
 レイアウト、テーマ、認証情報など、アプリ全体で共有する値に使用します。
 
 ### コンポーネント参照（@ref）
@@ -391,7 +391,7 @@ graph LR
 **親コンポーネント**:
 ```razor
 <ChildComponent OnValueChanged="@HandleValueChanged" />
-<p>子から受けとった値: @receivedValue</p>
+<p>子から受け取った値: @receivedValue</p>
 
 @code {
     private string receivedValue = "";
@@ -583,7 +583,7 @@ graph LR
 </div>
 ```
 
-- `RenderFragment` 型のパラメーターで、マークアップを受けとれる
+- `RenderFragment` 型のパラメーターで、マークアップを受け取れる
 - `ChildContent` が唯一の`RenderFragment`の場合、タグを省略できる（特別な規約）
 - 任意の名前（`Header`, `Body`, `Footer` など）でも定義可能
 - 複数の `RenderFragment` がある場合は、`ChildContent` を含めてすべてタグで指定が必要
