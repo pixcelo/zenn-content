@@ -114,7 +114,7 @@ graph TD
 | 特徴 | @bind | @bind-Value |
 |------|-------|-------------|
 | 主な対象 | `input`, `select`, `textarea` などのHTML要素 | `InputText`, `InputNumber` などのBlazorコンポーネント |
-| デフォルト属性 | `value` 属性と `onchange` イベントに紐づく | `Value` プロパティと `ValueChanged` イベントに紐づく |
+| デフォルト属性 | `value` 属性と `onchange` イベントに紐づく | `Value` パラメーターと `ValueChanged` イベントに紐づく |
 
 :::
 
@@ -526,7 +526,7 @@ graph LR
 
 ### テンプレートコンポーネント（RenderFragment）
 
-通常のプロパティが`string`や`int`を渡すのに対し、`RenderFragment`は UIそのものを渡します。
+通常のパラメーターが`string`や`int`を渡すのに対し、`RenderFragment`は UIそのものを渡します。
 
 ```mermaid
 graph LR
