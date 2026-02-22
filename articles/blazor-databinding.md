@@ -194,6 +194,7 @@ graph LR
 
 :::message
 パラメーターは読み取り専用として扱い、子から親へのデータ送信には EventCallback を使います。
+子コンポーネント内でパラメーターに直接代入すると、親の再レンダリング時に値が上書きされます。
 :::
 
 ### カスケード型パラメーター（CascadingParameter）
@@ -330,7 +331,7 @@ graph LR
 **主要なイベント引数**:
 - `MouseEventArgs`: マウス位置、ボタン情報
 - `KeyboardEventArgs`: キーコード、修飾キー（Ctrl, Shift, Alt）
-- `ChangeEventArgs`: 変更後の値
+- `ChangeEventArgs`: 変更後の値（`e.Value` は `object` 型なのでキャストが必要）
 
 :::
 
@@ -622,6 +623,11 @@ graph LR
 - .NET 8
 - Blazor Web App (Interactive Server)
 - プリレンダリング有効
+
+:::message
+双方向バインディングやイベント処理を動かすには、適切なRenderMode（InteractiveServerなど）の設定が必要です。
+SSR（Static Server-side Rendering）では一部のイベントが動作しません。
+:::
 
 ## 参考
 - [Blazor を使用して再利用可能な UI コンポーネントを構築する](https://learn.microsoft.com/ja-jp/dotnet/architecture/blazor-for-web-forms-developers/components)
