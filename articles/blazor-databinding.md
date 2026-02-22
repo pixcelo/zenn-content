@@ -638,5 +638,4 @@ graph LR
 
 ## 参考
 - [Blazor を使用して再利用可能な UI コンポーネントを構築する](https://learn.microsoft.com/ja-jp/dotnet/architecture/blazor-for-web-forms-developers/components)
-- [ASP.NET Core Blazor データ バインディング
-](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/data-binding)
+- [ASP.NET Core Blazor データ バインディング](https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/data-binding)
