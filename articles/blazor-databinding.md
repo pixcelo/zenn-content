@@ -340,29 +340,36 @@ graph LR
 
 :::
 
-### イベント制御
+### イベントディスパッチとUI更新
 
-**stopPropagation**: イベントの伝播を止める
+Blazorでは、イベントハンドラが実行されると、自動的にUIが再レンダリングされます。
 
-```razor
-<div @onclick="OnOuterClick">
-    外側
-    <div @onclick="OnInnerClick" @onclick:stopPropagation="true">
-        内側（クリックが外側に伝わらない）
-    </div>
-</div>
+```mermaid
+flowchart LR
+    A["ユーザー操作<br/>(クリックなど)"] --> B["イベントハンドラ<br/>実行"]
+    B --> C["状態変更<br/>(count++など)"]
+    C --> D["Blazorが自動で<br/>UI再レンダリング"]
+    D --> E["画面更新"]
 ```
 
-**preventDefault**: デフォルト動作を無効化
+**具体例**:
 
 ```razor
-<form @onsubmit="OnSubmit" @onsubmit:preventDefault="true">
-    <input />
-    <button type="submit">送信</button>
-</form>
+<button @onclick="IncrementCount">カウント: @count</button>
+
+@code {
+    private int count = 0;
+
+    private void IncrementCount()
+    {
+        count++;  // 状態を変更するだけで、自動的にUIが更新される
+    }
+}
 ```
 
-フォーム送信時のページリロードを防ぎます。
+- `@onclick` などBlazorのイベント属性で登録したハンドラ内で状態を変更すると、Blazorが自動的にUIを再レンダリング
+- この場合、`StateHasChanged()` を手動で呼ぶ必要はない
+- 非同期処理やタイマーなど、Blazorのイベント経由でない状態変更では `StateHasChanged()` が必要
 
 ### EventCallback
 
