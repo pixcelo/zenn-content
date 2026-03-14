@@ -1,5 +1,5 @@
 ---
-title: "Blazorはいつ再描画されるのか?レンダリングのトリガー"
+title: "Blazorはいつ再描画されるのか？"
 emoji: "🔄"
 type: "tech"
 topics: ["blazor", "csharp", "dotnet", "web", "web開発"]
