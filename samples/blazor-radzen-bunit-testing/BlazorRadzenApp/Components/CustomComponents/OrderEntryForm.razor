@@ -1,0 +1,248 @@
+@* 受注入力フォーム - 単方向バインディング、値の連動、バリデーションの実践例 *@
+
+<div class="order-form">
+    <h3>受注入力デモ</h3>
+
+    @* 基本情報セクション *@
+    <div class="form-row">
+        @* 商品名入力 *@
+        <div class="form-field">
+            <label>商品名: <span class="required">*</span></label>
+            <RadzenTextBox Value="@_productName"
+                           ValueChanged="@OnProductNameChanged"
+                           Placeholder="商品名を入力"
+                           MaxLength="50"
+                           class="form-control" />
+            @if (_showValidation && string.IsNullOrWhiteSpace(_productName))
+            {
+                <span class="validation-error text-danger">商品名は必須です</span>
+            }
+        </div>
+
+        @* 数量入力 *@
+        <div class="form-field">
+            <label>数量: <span class="required">*</span></label>
+            <RadzenNumeric TValue="int?"
+                           Value="@_quantity"
+                           ValueChanged="@OnQuantityChanged"
+                           Min="1"
+                           ShowUpDown="true"
+                           Format="n0"
+                           class="form-control" />
+            @if (_showValidation && (!_quantity.HasValue || _quantity < 1))
+            {
+                <span class="validation-error text-danger">数量は1以上を入力してください</span>
+            }
+        </div>
+    </div>
+
+    <div class="form-row">
+        @* 単価入力 *@
+        <div class="form-field">
+            <label>単価: <span class="required">*</span></label>
+            <RadzenNumeric TValue="decimal?"
+                           Value="@_unitPrice"
+                           ValueChanged="@OnUnitPriceChanged"
+                           Min="0"
+                           Format="c0"
+                           class="form-control" />
+            @if (_showValidation && (!_unitPrice.HasValue || _unitPrice < 0))
+            {
+                <span class="validation-error text-danger">単価は0以上を入力してください</span>
+            }
+        </div>
+
+        @* 注文日入力 *@
+        <div class="form-field">
+            <label>注文日: <span class="required">*</span></label>
+            <RadzenDatePicker TValue="DateTime?"
+                              Value="@_orderDate"
+                              ValueChanged="@OnOrderDateChanged"
+                              DateFormat="yyyy/MM/dd"
+                              class="form-control" />
+            @if (_showValidation && !_orderDate.HasValue)
+            {
+                <span class="validation-error text-danger">注文日は必須です</span>
+            }
+        </div>
+    </div>
+
+    @* 納期入力 *@
+    <div class="form-field">
+        <label>納期: <span class="required">*</span></label>
+        <RadzenDatePicker TValue="DateTime?"
+                          Value="@_deliveryDate"
+                          ValueChanged="@OnDeliveryDateChanged"
+                          DateFormat="yyyy/MM/dd"
+                          class="form-control" />
+        @if (_showValidation && !_deliveryDate.HasValue)
+        {
+            <span class="validation-error text-danger">納期は必須です</span>
+        }
+        @if (_showValidation && _deliveryDate.HasValue && _orderDate.HasValue && _deliveryDate <= _orderDate)
+        {
+            <span class="validation-error text-danger">納期は注文日より後の日付を指定してください</span>
+        }
+        @if (IsDeliveryDateWarning)
+        {
+            <span class="validation-warning text-warning">納期が3ヶ月以上先です</span>
+        }
+    </div>
+
+    @* 計算結果セクション *@
+    <div class="calculation-section">
+        <h4>金額詳細</h4>
+
+        <div class="form-field">
+            <label>金額:</label>
+            <div class="calculated-value">¥@_amount.ToString("N0")</div>
+        </div>
+
+        <div class="form-field">
+            <label>消費税額 (10%):</label>
+            <div class="calculated-value">¥@_taxAmount.ToString("N0")</div>
+        </div>
+
+        <div class="form-field total">
+            <label>合計金額:</label>
+            <div class="calculated-value">¥@_totalAmount.ToString("N0")</div>
+        </div>
+    </div>
+
+    @* 登録ボタン *@
+    <RadzenButton Text="登録"
+                  Click="@OnRegister"
+                  Disabled="@(!IsValid)"
+                  ButtonStyle="ButtonStyle.Success" />
+
+    @* 登録完了メッセージ *@
+    @if (_isRegistered)
+    {
+        <div class="alert alert-success mt-3 success-message">
+            <p><strong>受注を登録しました</strong></p>
+            <p>商品: @_productName</p>
+            <p>数量: @_quantity 個</p>
+            <p>合計金額: ¥@_totalAmount.ToString("N0")</p>
+        </div>
+    }
+</div>
+
+@code {
+    // 入力値（単方向バインディング用のフィールド）
+    private string _productName = string.Empty;
+    private int? _quantity;
+    private decimal? _unitPrice;
+    private DateTime? _orderDate;
+    private DateTime? _deliveryDate;
+
+    // 計算値（値の連動）
+    private decimal _amount;
+    private decimal _taxAmount;
+    private decimal _totalAmount;
+    private const decimal TaxRate = 0.10m;
+
+    // 状態管理
+    private bool _showValidation;
+    private bool _isRegistered;
+
+    /// <summary>
+    /// バリデーション: すべての必須項目が入力され、値が有効か
+    /// </summary>
+    private bool IsValid =>
+        !string.IsNullOrWhiteSpace(_productName) &&
+        _productName.Length <= 50 &&
+        _quantity.HasValue &&
+        _quantity >= 1 &&
+        _unitPrice.HasValue &&
+        _unitPrice >= 0 &&
+        _orderDate.HasValue &&
+        _deliveryDate.HasValue &&
+        _deliveryDate.Value > _orderDate.Value; // 組み合わせバリデーション: 納期 > 注文日
+
+    /// <summary>
+    /// 警告チェック: 納期が3ヶ月以上先かどうか
+    /// </summary>
+    private bool IsDeliveryDateWarning =>
+        _orderDate.HasValue && _deliveryDate.HasValue &&
+        (_deliveryDate.Value - _orderDate.Value).TotalDays > 90;
+
+    /// <summary>
+    /// 商品名変更イベント（単方向バインディング）
+    /// </summary>
+    private void OnProductNameChanged(string value)
+    {
+        _productName = value;
+        _isRegistered = false; // 入力変更時は登録状態をリセット
+    }
+
+    /// <summary>
+    /// 数量変更イベント（単方向バインディング + 値の連動）
+    /// </summary>
+    private void OnQuantityChanged(int? value)
+    {
+        _quantity = value;
+        CalculateAmounts(); // 金額を再計算
+        _isRegistered = false;
+    }
+
+    /// <summary>
+    /// 単価変更イベント（単方向バインディング + 値の連動）
+    /// </summary>
+    private void OnUnitPriceChanged(decimal? value)
+    {
+        _unitPrice = value;
+        CalculateAmounts(); // 金額を再計算
+        _isRegistered = false;
+    }
+
+    /// <summary>
+    /// 注文日変更イベント（単方向バインディング）
+    /// </summary>
+    private void OnOrderDateChanged(DateTime? value)
+    {
+        _orderDate = value;
+        _isRegistered = false;
+    }
+
+    /// <summary>
+    /// 納期変更イベント（単方向バインディング）
+    /// </summary>
+    private void OnDeliveryDateChanged(DateTime? value)
+    {
+        _deliveryDate = value;
+        _isRegistered = false;
+    }
+
+    /// <summary>
+    /// 金額の自動計算（値の連動）
+    /// </summary>
+    private void CalculateAmounts()
+    {
+        if (_quantity.HasValue && _unitPrice.HasValue)
+        {
+            _amount = _quantity.Value * _unitPrice.Value;
+            _taxAmount = _amount * TaxRate;
+            _totalAmount = _amount + _taxAmount;
+        }
+        else
+        {
+            _amount = 0;
+            _taxAmount = 0;
+            _totalAmount = 0;
+        }
+    }
+
+    /// <summary>
+    /// 登録ボタンクリックイベント
+    /// </summary>
+    private void OnRegister()
+    {
+        _showValidation = true;
+
+        if (IsValid)
+        {
+            _isRegistered = true;
+            // 実際はAPIコール等の登録処理を行う
+        }
+    }
+}

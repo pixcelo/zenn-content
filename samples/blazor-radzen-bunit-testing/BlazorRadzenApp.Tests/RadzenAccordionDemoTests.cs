@@ -14,6 +14,9 @@ public class RadzenAccordionDemoTests : TestContext
     {
         // Radzenサービスの登録
         Services.AddRadzenComponents();
+
+        // Radzenコンポーネントが使用するJSInteropをモック
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     [Fact]

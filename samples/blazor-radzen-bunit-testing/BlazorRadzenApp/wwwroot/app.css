@@ -58,3 +58,119 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* 受注入力フォームのスタイル */
+.order-form {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.order-form h3 {
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: 3px solid #3b82f6;
+    padding-bottom: 0.75rem;
+}
+
+.order-form .form-field {
+    margin-bottom: 1.25rem;
+}
+
+.order-form .form-field label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.order-form .form-field .required {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.order-form .rz-textbox,
+.order-form .rz-numeric,
+.order-form .rz-datepicker {
+    width: 100%;
+}
+
+.order-form .validation-error {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+}
+
+.order-form .validation-warning {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+}
+
+/* 計算結果エリア */
+.order-form .calculation-section {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border: 1px solid #e2e8f0;
+}
+
+.order-form .calculation-section h4 {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.order-form .calculated-value {
+    font-size: 1.125rem;
+    color: #1e293b;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.order-form .total .calculated-value {
+    font-size: 1.5rem;
+    color: #059669;
+    border: 2px solid #10b981;
+    background: #ecfdf5;
+}
+
+.order-form .rz-button {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.order-form .rz-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.order-form .success-message {
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+}
+
+/* 2カラムレイアウト（タブレット以上） */
+@media (min-width: 768px) {
+    .order-form .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+}
