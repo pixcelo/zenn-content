@@ -1,0 +1,93 @@
+@page "/infinite-loop"
+@rendermode InteractiveServer
+
+<PageTitle>無限ループデモ</PageTitle>
+
+<h1>無限ループデモ</h1>
+
+<p>記事内「無限ループの罠」の検証</p>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>⚠️ 無限ループになるコード（安全版）</h2>
+    <p style="color: red;">
+        <strong>注意:</strong> OnAfterRender内で無条件にStateHasChanged()を呼ぶと無限ループになります。<br/>
+        このデモでは、安全のため最大3回までループを許可しています。
+    </p>
+
+    <p><strong>OnAfterRender呼び出し回数:</strong> @afterRenderCount</p>
+    <p><strong>状態:</strong> @status</p>
+
+    <button @onclick="TriggerRerender" disabled="@isLooping">再レンダリングをトリガー</button>
+    <button @onclick="Reset">リセット</button>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>なぜ無限ループになるか?</h2>
+    <ol>
+        <li>OnAfterRenderAsync が呼ばれる</li>
+        <li>StateHasChanged() を呼ぶ</li>
+        <li>再レンダリングが発生</li>
+        <li>再レンダリング後、再び OnAfterRenderAsync が呼ばれる</li>
+        <li>1に戻る（無限ループ）</li>
+    </ol>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>✅ 正しいコード</h2>
+    <p>firstRenderフラグや独自のフラグで、1回だけ実行されるようにガードします。</p>
+
+    <pre><code>protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender && !isInitialized)
+    {
+        isInitialized = true;
+        // 初回のみ実行したい処理
+        StateHasChanged();
+    }
+}</code></pre>
+</div>
+
+<a href="/">← ホームに戻る</a>
+
+@code {
+    private int afterRenderCount = 0;
+    private string status = "待機中";
+    private bool isLooping = false;
+    private const int MaxLoopCount = 3; // 安全のため3回まで
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (isLooping && afterRenderCount < MaxLoopCount)
+        {
+            afterRenderCount++;
+            status = $"ループ中... ({afterRenderCount}/{MaxLoopCount})";
+
+            // 本来はここで無条件にStateHasChanged()を呼ぶと無限ループになる
+            // このデモでは安全のため回数制限をかけている
+            StateHasChanged();
+
+            if (afterRenderCount >= MaxLoopCount)
+            {
+                status = "最大ループ回数に達しました（実際は無限ループになる）";
+                isLooping = false;
+            }
+        }
+    }
+
+    private void TriggerRerender()
+    {
+        afterRenderCount = 0;
+        isLooping = true;
+        status = "ループ開始";
+        StateHasChanged(); // これがOnAfterRenderAsyncを呼び出す
+    }
+
+    private void Reset()
+    {
+        afterRenderCount = 0;
+        status = "待機中";
+        isLooping = false;
+    }
+}

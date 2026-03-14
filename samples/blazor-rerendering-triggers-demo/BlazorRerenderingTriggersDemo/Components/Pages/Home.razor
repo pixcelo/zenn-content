@@ -1,0 +1,35 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Blazor再描画トリガー検証デモ</PageTitle>
+
+<h1>Blazor再描画トリガー検証デモ</h1>
+
+<p>
+    このプロジェクトは、Zenn記事「Blazorはいつ再描画されるのか?」のサンプルコードです。<br/>
+    各デモページでBlazorの再描画タイミングを実際に確認できます。
+</p>
+
+<h2>自動再描画の検証</h2>
+<ul>
+    <li><a href="/auto-rerender">自動再描画デモ</a> - イベントハンドラー、パラメーター更新、ライフサイクルメソッド</li>
+</ul>
+
+<h2>手動StateHasChangedが必要なケース</h2>
+<ul>
+    <li><a href="/async-progress">非同期処理の進捗表示デモ</a> - ループ内での手動StateHasChanged()</li>
+    <li><a href="/timer">タイマーデモ</a> - System.Timers.TimerとInvokeAsync</li>
+    <li><a href="/state-container">StateContainerデモ</a> - DIサービスからの通知</li>
+    <li><a href="/invoke-async-comparison">InvokeAsync比較デモ</a> - 引数なし vs ラムダ式</li>
+</ul>
+
+<h2>最適化技術</h2>
+<ul>
+    <li><a href="/should-render">ShouldRenderデモ</a> - 再描画の制御</li>
+    <li><a href="/key-directive">@@key ディレクティブデモ</a> - リスト要素の最適化</li>
+</ul>
+
+<h2>アンチパターン</h2>
+<ul>
+    <li><a href="/infinite-loop">無限ループデモ</a> - OnAfterRenderでの注意点</li>
+</ul>

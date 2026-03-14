@@ -1,0 +1,76 @@
+@page "/should-render"
+@rendermode InteractiveServer
+
+<PageTitle>ShouldRenderデモ</PageTitle>
+
+<h1>ShouldRenderデモ</h1>
+
+<p>記事内「逆に再描画を防ぐ技術 > ShouldRender のオーバーライド」の検証</p>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>ShouldRenderによる再描画の制御</h2>
+    <p>ShouldRender()メソッドをオーバーライドすることで、再描画を制御できます。</p>
+
+    <p><strong>カウント:</strong> @count</p>
+    <p><strong>最終更新時刻:</strong> @lastUpdate.ToString("HH:mm:ss")</p>
+    <p><strong>BuildRenderTree呼び出し回数:</strong> @renderCount</p>
+
+    <button @onclick="IncrementCount">カウント+1（再描画する）</button>
+    <button @onclick="UpdateTime">時刻更新（再描画しない）</button>
+
+    <p style="color: blue; margin-top: 1rem;">
+        「カウント+1」ボタンを押すとBuildRenderTreeが呼ばれて画面が更新されます。<br/>
+        「時刻更新」ボタンを押してもShouldRender()がfalseを返すため、BuildRenderTreeが呼ばれず画面は更新されません。
+    </p>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>内部の動作</h2>
+    <p><strong>shouldRenderフラグ:</strong> @shouldRender</p>
+    <p><strong>ShouldRender()の戻り値:</strong> @shouldRenderReturnValue</p>
+</div>
+
+<a href="/">← ホームに戻る</a>
+
+@code {
+    private int count = 0;
+    private DateTime lastUpdate = DateTime.Now;
+    private bool shouldRender = true;
+    private bool shouldRenderReturnValue = true;
+    private int renderCount = 0;
+
+    protected override bool ShouldRender()
+    {
+        shouldRenderReturnValue = shouldRender;
+        return shouldRender;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        renderCount++;
+    }
+
+    /// <summary>
+    /// カウント+1 → 再描画を許可
+    /// </summary>
+    private void IncrementCount()
+    {
+        count++;
+        shouldRender = true; // 再描画を許可
+        // イベントハンドラー完了後、StateHasChanged()が自動で呼ばれる
+        // → ShouldRender()がtrueを返す
+        // → BuildRenderTree()が呼ばれて画面が更新される
+    }
+
+    /// <summary>
+    /// 時刻更新 → 再描画をブロック
+    /// </summary>
+    private void UpdateTime()
+    {
+        lastUpdate = DateTime.Now;
+        shouldRender = false; // 再描画をブロック
+        // イベントハンドラー完了後、StateHasChanged()が自動で呼ばれる
+        // → ShouldRender()がfalseを返す
+        // → BuildRenderTree()が呼ばれず画面は更新されない
+    }
+}

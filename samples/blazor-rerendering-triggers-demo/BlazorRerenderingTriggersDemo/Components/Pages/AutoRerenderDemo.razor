@@ -1,0 +1,77 @@
+@page "/auto-rerender"
+@rendermode InteractiveServer
+
+<PageTitle>自動再描画デモ</PageTitle>
+
+<h1>自動再描画デモ</h1>
+
+<p>記事内「自動で再描画される3つのタイミング」の検証</p>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>1. イベントハンドラーの実行後</h2>
+    <p>@@onclick や @@onchange などのBlazorイベント属性は、実行が完了すると自動的にStateHasChanged()が呼ばれます。</p>
+
+    <button @onclick="IncrementCount">カウント: @count</button>
+    <p>BuildRenderTree呼び出し回数: @renderCount</p>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>2. パラメーターが更新された時</h2>
+    <p>親コンポーネントが再レンダリングされると、子コンポーネントも自動的に再描画されます。</p>
+
+    <button @onclick="UpdateMessage">メッセージ変更</button>
+    <ChildComponent Message="@currentMessage" />
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>3. ライフサイクルメソッドの実行後</h2>
+    <p>OnInitializedAsync や OnParametersSetAsync が完了すると自動的に再描画されます。</p>
+
+    <p>読み込み中: @isLoading</p>
+    <p>データ: @data</p>
+</div>
+
+<a href="/">← ホームに戻る</a>
+
+@code {
+    // イベントハンドラーのデモ用
+    private int count = 0;
+    private int renderCount = 0;
+
+    // パラメーター更新のデモ用
+    private string currentMessage = "初期メッセージ";
+
+    // ライフサイクルメソッドのデモ用
+    private bool isLoading = true;
+    private string data = "";
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        renderCount++;
+    }
+
+    private void IncrementCount()
+    {
+        count++;
+        // StateHasChanged() を呼ぶ必要はない（自動で呼ばれる）
+    }
+
+    private void UpdateMessage()
+    {
+        currentMessage = "更新されたメッセージ（" + DateTime.Now.ToString("HH:mm:ss") + "）";
+        // 親が再レンダリング → 子も自動的に再レンダリング
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        data = await FetchDataAsync();
+        isLoading = false;
+        // メソッド完了後、自動的に StateHasChanged() が呼ばれる
+    }
+
+    private async Task<string> FetchDataAsync()
+    {
+        await Task.Delay(1000);
+        return "取得完了";
+    }
+}

@@ -1,0 +1,150 @@
+@page "/invoke-async-comparison"
+@rendermode InteractiveServer
+@implements IDisposable
+
+<PageTitle>InvokeAsync比較デモ</PageTitle>
+
+<h1>InvokeAsync比較デモ</h1>
+
+<p>記事内で解説されている「InvokeAsync(StateHasChanged) vs InvokeAsync(() => StateHasChanged())」の違いを検証します。</p>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>結論</h2>
+    <p style="background-color: #e7f3ff; padding: 1rem; border-radius: 5px;">
+        <strong>どちらも正常に動作します。</strong><br/>
+        <code>await InvokeAsync(StateHasChanged)</code> と <code>await InvokeAsync(() => StateHasChanged())</code> は、
+        機能的に同じです。InvokeAsyncは引数なしのActionデリゲートを受け取るため、メソッドグループ構文でも
+        ラムダ式でも同じように動作します。
+    </p>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>パターン1: InvokeAsync(StateHasChanged)</h2>
+    <p>メソッドグループ構文（引数なし）</p>
+    <p>経過時間: @elapsedSeconds1 秒</p>
+    <button @onclick="StartTimer1" disabled="@isTimer1Running">開始</button>
+    <button @onclick="StopTimer1" disabled="@(!isTimer1Running)">停止</button>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>パターン2: InvokeAsync(() => StateHasChanged())</h2>
+    <p>ラムダ式</p>
+    <p>経過時間: @elapsedSeconds2 秒</p>
+    <button @onclick="StartTimer2" disabled="@isTimer2Running">開始</button>
+    <button @onclick="StopTimer2" disabled="@(!isTimer2Running)">停止</button>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>詳細説明</h2>
+    <h3>メソッドグループ構文</h3>
+    <pre><code>await InvokeAsync(StateHasChanged);</code></pre>
+    <p>
+        StateHasChangedメソッド自体をデリゲートとして渡しています。<br/>
+        C#のメソッドグループ変換により、StateHasChangedが<code>Action</code>デリゲートに自動変換されます。<br/>
+        より簡潔で読みやすいコードになります。
+    </p>
+
+    <h3>ラムダ式</h3>
+    <pre><code>await InvokeAsync(() => StateHasChanged());</code></pre>
+    <p>
+        ラムダ式で<code>Action</code>デリゲートを明示的に作成しています。<br/>
+        StateHasChanged()の呼び出しを明示的にラップしているため、より冗長ですが動作は同じです。<br/>
+        複数のステートメントを実行したい場合は、この形式が便利です：
+    </p>
+    <pre><code>await InvokeAsync(() =>
+{
+    counter++;
+    StateHasChanged();
+});</code></pre>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>両方を同時に動かして比較</h2>
+    <button @onclick="StartBoth" disabled="@(isTimer1Running || isTimer2Running)">両方開始</button>
+    <button @onclick="StopBoth" disabled="@(!isTimer1Running && !isTimer2Running)">両方停止</button>
+    <p style="color: green;">@comparisonMessage</p>
+</div>
+
+<a href="/">← ホームに戻る</a>
+
+@code {
+    private int elapsedSeconds1 = 0;
+    private int elapsedSeconds2 = 0;
+    private System.Timers.Timer? timer1;
+    private System.Timers.Timer? timer2;
+    private bool isTimer1Running = false;
+    private bool isTimer2Running = false;
+    private string comparisonMessage = "";
+
+    /// <summary>
+    /// パターン1: InvokeAsync(StateHasChanged)
+    /// メソッドグループ構文
+    /// </summary>
+    private void StartTimer1()
+    {
+        elapsedSeconds1 = 0;
+        isTimer1Running = true;
+
+        timer1 = new System.Timers.Timer(1000);
+        timer1.Elapsed += async (sender, e) =>
+        {
+            elapsedSeconds1++;
+            // メソッドグループ構文でStateHasChangedを渡す
+            await InvokeAsync(StateHasChanged);
+        };
+        timer1.Start();
+    }
+
+    private void StopTimer1()
+    {
+        timer1?.Stop();
+        timer1?.Dispose();
+        isTimer1Running = false;
+    }
+
+    /// <summary>
+    /// パターン2: InvokeAsync(() => StateHasChanged())
+    /// ラムダ式
+    /// </summary>
+    private void StartTimer2()
+    {
+        elapsedSeconds2 = 0;
+        isTimer2Running = true;
+
+        timer2 = new System.Timers.Timer(1000);
+        timer2.Elapsed += async (sender, e) =>
+        {
+            elapsedSeconds2++;
+            // ラムダ式でStateHasChanged()を呼び出す
+            await InvokeAsync(() => StateHasChanged());
+        };
+        timer2.Start();
+    }
+
+    private void StopTimer2()
+    {
+        timer2?.Stop();
+        timer2?.Dispose();
+        isTimer2Running = false;
+    }
+
+    private void StartBoth()
+    {
+        comparisonMessage = "両方のタイマーが同じように動作していることを確認してください";
+        StartTimer1();
+        StartTimer2();
+    }
+
+    private void StopBoth()
+    {
+        StopTimer1();
+        StopTimer2();
+        comparisonMessage = "両方停止しました。カウンターの動きは同じだったはずです";
+    }
+
+    public void Dispose()
+    {
+        timer1?.Dispose();
+        timer2?.Dispose();
+    }
+}

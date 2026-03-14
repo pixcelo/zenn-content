@@ -1,0 +1,21 @@
+@inject BlazorRerenderingTriggersDemo.Services.AppState AppState
+@implements IDisposable
+
+<div style="background-color: #f0f0f0; padding: 0.5rem; margin-top: 0.5rem;">
+    <p><strong>子コンポーネント:</strong></p>
+    <p>現在のユーザー（子コンポーネント側）: @AppState.CurrentUser</p>
+    <p>この子コンポーネントも同じAppStateを注入しているため、親で変更すると自動的に更新されます。</p>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // 子コンポーネントも同様にイベントを購読
+        AppState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+}

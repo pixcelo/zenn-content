@@ -1,0 +1,99 @@
+@page "/timer"
+@rendermode InteractiveServer
+@implements IDisposable
+
+<PageTitle>タイマーデモ</PageTitle>
+
+<h1>タイマーデモ</h1>
+
+<p>記事内「手動でStateHasChangedが必要なケース > 2. タイマーによる定期更新」の検証</p>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>❌ 動かないコード（InvokeAsync なし）</h2>
+    <p>経過時間: @elapsedSecondsWithoutInvoke 秒</p>
+    <button @onclick="StartTimerWithoutInvoke" disabled="@isTimer1Running">開始（動かない）</button>
+    <button @onclick="StopTimerWithoutInvoke" disabled="@(!isTimer1Running)">停止</button>
+    <p style="color: red;">@message1</p>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>✅ 正しいコード（InvokeAsync あり）</h2>
+    <p>経過時間: @elapsedSecondsWithInvoke 秒</p>
+    <button @onclick="StartTimerWithInvoke" disabled="@isTimer2Running">開始（正常動作）</button>
+    <button @onclick="StopTimerWithInvoke" disabled="@(!isTimer2Running)">停止</button>
+    <p style="color: green;">@message2</p>
+</div>
+
+<a href="/">← ホームに戻る</a>
+
+@code {
+    private int elapsedSecondsWithoutInvoke = 0;
+    private int elapsedSecondsWithInvoke = 0;
+    private System.Timers.Timer? timer1;
+    private System.Timers.Timer? timer2;
+    private bool isTimer1Running = false;
+    private bool isTimer2Running = false;
+    private string message1 = "";
+    private string message2 = "";
+
+    /// <summary>
+    /// ❌ InvokeAsync を使わない場合（動かない）
+    /// 別スレッドからStateHasChanged()を呼ぶとスレッドセーフでないためエラーになる
+    /// </summary>
+    private void StartTimerWithoutInvoke()
+    {
+        elapsedSecondsWithoutInvoke = 0;
+        message1 = "タイマー起動中...（画面は更新されない）";
+        isTimer1Running = true;
+
+        timer1 = new System.Timers.Timer(1000);
+        timer1.Elapsed += (sender, e) =>
+        {
+            elapsedSecondsWithoutInvoke++;
+            // InvokeAsync なしで StateHasChanged() を呼んでも画面は更新されない
+            // 実際には別スレッドからの呼び出しはエラーになる可能性がある
+        };
+        timer1.Start();
+    }
+
+    private void StopTimerWithoutInvoke()
+    {
+        timer1?.Stop();
+        timer1?.Dispose();
+        isTimer1Running = false;
+        message1 = "停止しました（最後だけ更新）";
+    }
+
+    /// <summary>
+    /// ✅ InvokeAsync を使う場合（正常動作）
+    /// UIスレッドで安全にStateHasChanged()を呼ぶことができる
+    /// </summary>
+    private void StartTimerWithInvoke()
+    {
+        elapsedSecondsWithInvoke = 0;
+        message2 = "タイマー起動中...（画面が更新される）";
+        isTimer2Running = true;
+
+        timer2 = new System.Timers.Timer(1000);
+        timer2.Elapsed += async (sender, e) =>
+        {
+            elapsedSecondsWithInvoke++;
+            await InvokeAsync(StateHasChanged); // UIスレッドで実行
+        };
+        timer2.Start();
+    }
+
+    private void StopTimerWithInvoke()
+    {
+        timer2?.Stop();
+        timer2?.Dispose();
+        isTimer2Running = false;
+        message2 = "停止しました";
+    }
+
+    public void Dispose()
+    {
+        timer1?.Dispose();
+        timer2?.Dispose();
+    }
+}

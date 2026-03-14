@@ -1,0 +1,25 @@
+@* パラメーター更新検証用の子コンポーネント *@
+
+<div style="background-color: #f0f0f0; padding: 0.5rem; margin-top: 0.5rem;">
+    <p><strong>子コンポーネント:</strong></p>
+    <p>受け取ったメッセージ: @Message</p>
+    <p>子コンポーネントのBuildRenderTree呼び出し回数: @renderCount</p>
+</div>
+
+@code {
+    [Parameter] public string Message { get; set; } = "";
+
+    private int renderCount = 0;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        renderCount++;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // 親の再レンダリングで自動的に OnParametersSetAsync が呼ばれる
+        // このメソッドの完了後、自動的に再描画される
+        await base.OnParametersSetAsync();
+    }
+}

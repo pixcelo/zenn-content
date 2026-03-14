@@ -1,0 +1,112 @@
+@page "/key-directive"
+@rendermode InteractiveServer
+
+<PageTitle>@@key ディレクティブデモ</PageTitle>
+
+<h1>@@key ディレクティブデモ</h1>
+
+<p>記事内「逆に再描画を防ぐ技術 > @@key ディレクティブ」の検証</p>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>@@key なし（非効率）</h2>
+    <p>@@key を指定しないと、リストの順序が変わると全ての要素が再レンダリングされます。</p>
+
+    @foreach (var item in itemsWithoutKey)
+    {
+        <div style="background-color: #f0f0f0; padding: 0.5rem; margin: 0.5rem 0;">
+            ID: @item.Id - 名前: @item.Name
+        </div>
+    }
+
+    <button @onclick="SortWithoutKey">並び替え</button>
+    <button @onclick="AddItemWithoutKey">アイテム追加</button>
+    <button @onclick="RemoveFirstWithoutKey">先頭を削除</button>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>@@key あり（効率的）</h2>
+    <p>@@key を指定すると、Blazorは要素の同一性をIDで判断し、順序が変わっただけの場合は再レンダリングをスキップします。</p>
+
+    @foreach (var item in itemsWithKey)
+    {
+        <div @key="item.Id" style="background-color: #e7f3ff; padding: 0.5rem; margin: 0.5rem 0;">
+            ID: @item.Id - 名前: @item.Name
+        </div>
+    }
+
+    <button @onclick="SortWithKey">並び替え</button>
+    <button @onclick="AddItemWithKey">アイテム追加</button>
+    <button @onclick="RemoveFirstWithKey">先頭を削除</button>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>説明</h2>
+    <p>
+        <strong>@@key なし:</strong><br/>
+        リストの順序が変わると、Blazorは「位置」で要素を識別するため、全ての要素を再レンダリングします。<br/>
+        例: [A, B, C] → [C, B, A] に並び替えると、すべての要素が再描画される
+    </p>
+    <p>
+        <strong>@@key あり:</strong><br/>
+        Blazorは「ID」で要素を識別するため、同じIDの要素は再利用され、順序が変わっただけでは再レンダリングされません。<br/>
+        例: [A, B, C] → [C, B, A] に並び替えると、要素の順序だけが変わり、再描画は不要
+    </p>
+</div>
+
+<a href="/">← ホームに戻る</a>
+
+@code {
+    private List<Item> itemsWithoutKey = new()
+    {
+        new Item { Id = 1, Name = "アイテム1" },
+        new Item { Id = 2, Name = "アイテム2" },
+        new Item { Id = 3, Name = "アイテム3" },
+    };
+
+    private List<Item> itemsWithKey = new()
+    {
+        new Item { Id = 1, Name = "アイテム1" },
+        new Item { Id = 2, Name = "アイテム2" },
+        new Item { Id = 3, Name = "アイテム3" },
+    };
+
+    private int nextId = 4;
+
+    private void SortWithoutKey()
+    {
+        itemsWithoutKey = itemsWithoutKey.OrderByDescending(x => x.Name).ToList();
+    }
+
+    private void AddItemWithoutKey()
+    {
+        itemsWithoutKey.Add(new Item { Id = nextId++, Name = $"アイテム{nextId - 1}" });
+    }
+
+    private void RemoveFirstWithoutKey()
+    {
+        if (itemsWithoutKey.Count > 0)
+            itemsWithoutKey.RemoveAt(0);
+    }
+
+    private void SortWithKey()
+    {
+        itemsWithKey = itemsWithKey.OrderByDescending(x => x.Name).ToList();
+    }
+
+    private void AddItemWithKey()
+    {
+        itemsWithKey.Add(new Item { Id = nextId++, Name = $"アイテム{nextId - 1}" });
+    }
+
+    private void RemoveFirstWithKey()
+    {
+        if (itemsWithKey.Count > 0)
+            itemsWithKey.RemoveAt(0);
+    }
+
+    public class Item
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+    }
+}

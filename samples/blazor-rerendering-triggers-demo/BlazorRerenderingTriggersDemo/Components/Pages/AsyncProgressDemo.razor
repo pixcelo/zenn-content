@@ -1,0 +1,75 @@
+@page "/async-progress"
+@rendermode InteractiveServer
+
+<PageTitle>非同期処理の進捗表示デモ</PageTitle>
+
+<h1>非同期処理の進捗表示デモ</h1>
+
+<p>記事内「手動でStateHasChangedが必要なケース > 1. 非同期処理の途中で画面を更新したい時」の検証</p>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>❌ 動かないコード（StateHasChanged なし）</h2>
+    <p>進捗: @progressWithoutStateChanged%</p>
+    <button @onclick="ProcessDataWithoutStateChanged" disabled="@isProcessing1">処理開始（動かない）</button>
+    <p style="color: red;">@statusMessage1</p>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>✅ 正しいコード（StateHasChanged あり）</h2>
+    <p>進捗: @progressWithStateChanged%</p>
+    <button @onclick="ProcessDataWithStateChanged" disabled="@isProcessing2">処理開始（正常動作）</button>
+    <p style="color: green;">@statusMessage2</p>
+</div>
+
+<a href="/">← ホームに戻る</a>
+
+@code {
+    private int progressWithoutStateChanged = 0;
+    private int progressWithStateChanged = 0;
+    private bool isProcessing1 = false;
+    private bool isProcessing2 = false;
+    private string statusMessage1 = "";
+    private string statusMessage2 = "";
+
+    /// <summary>
+    /// ❌ StateHasChanged() を呼ばない場合
+    /// 非同期処理の途中では画面が更新されない
+    /// </summary>
+    private async Task ProcessDataWithoutStateChanged()
+    {
+        isProcessing1 = true;
+        statusMessage1 = "処理中...（画面は更新されない）";
+        progressWithoutStateChanged = 0;
+
+        for (int i = 0; i <= 100; i += 10)
+        {
+            await Task.Delay(200);
+            progressWithoutStateChanged = i;
+            // StateHasChanged() を呼ばないため、画面は更新されない
+        }
+
+        statusMessage1 = "処理完了（最後だけ更新される）";
+        isProcessing1 = false;
+    }
+
+    /// <summary>
+    /// ✅ StateHasChanged() を呼ぶ場合
+    /// 非同期処理の途中でも画面が更新される
+    /// </summary>
+    private async Task ProcessDataWithStateChanged()
+    {
+        isProcessing2 = true;
+        statusMessage2 = "処理中...（画面が更新される）";
+        progressWithStateChanged = 0;
+
+        for (int i = 0; i <= 100; i += 10)
+        {
+            await Task.Delay(200);
+            progressWithStateChanged = i;
+            StateHasChanged(); // 手動で再描画を指示
+        }
+
+        statusMessage2 = "処理完了！";
+        isProcessing2 = false;
+    }
+}

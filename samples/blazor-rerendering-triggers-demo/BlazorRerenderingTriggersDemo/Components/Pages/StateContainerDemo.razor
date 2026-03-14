@@ -1,0 +1,54 @@
+@page "/state-container"
+@rendermode InteractiveServer
+@inject BlazorRerenderingTriggersDemo.Services.AppState AppState
+@implements IDisposable
+
+<PageTitle>StateContainerデモ</PageTitle>
+
+<h1>StateContainerデモ</h1>
+
+<p>記事内「手動でStateHasChangedが必要なケース > 3. DIサービスからの通知」の検証</p>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>StateContainerパターン</h2>
+    <p>サービス側でデータが変更されても、コンポーネントは自動では感知できません。</p>
+    <p>イベントを購読してStateHasChanged()を呼ぶ必要があります。</p>
+
+    <p><strong>現在のユーザー:</strong> @AppState.CurrentUser</p>
+
+    <button @onclick='() => ChangeUser("太郎")'>太郎に変更</button>
+    <button @onclick='() => ChangeUser("花子")'>花子に変更</button>
+    <button @onclick='() => ChangeUser("次郎")'>次郎に変更</button>
+    <button @onclick='() => ChangeUser("ゲスト")'>ゲストに戻す</button>
+</div>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+    <h2>別のコンポーネントでも同じ状態が共有される</h2>
+    <p>複数のコンポーネントが同じAppStateサービスを注入している場合、一つのコンポーネントで変更すると他のコンポーネントにも通知されます。</p>
+
+    <StateContainerChildComponent />
+</div>
+
+<a href="/">← ホームに戻る</a>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // サービスの変更を購読
+        // OnChangeイベントが発火されたらStateHasChanged()を呼ぶ
+        AppState.OnChange += StateHasChanged;
+    }
+
+    private void ChangeUser(string newUser)
+    {
+        // AppStateのCurrentUserプロパティを変更すると
+        // 内部でOnChangeイベントが発火される
+        AppState.CurrentUser = newUser;
+    }
+
+    public void Dispose()
+    {
+        // メモリリーク防止のためイベントを解除
+        AppState.OnChange -= StateHasChanged;
+    }
+}
