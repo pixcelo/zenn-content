@@ -3,7 +3,7 @@ title: "BlazorコンポーネントをbUnitでテストする"
 emoji: "🔄"
 type: "tech"
 topics: ["blazor", "csharp", "dotnet", "bunit", "web開発"]
-published: false
+published: true
 publication_name: "nexta_"
 ---
 
