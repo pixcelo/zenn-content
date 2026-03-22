@@ -219,6 +219,11 @@ VSCodeの拡張メニュー「PLAYWRIGHT」→「Record new」をクリックす
 
 ![Playwright Record モード](/images/blazor-radzen-playwright-e2e/vscode-playwright-record-mode.gif)
 
+CLIから直接実行する場合は、以下のコマンドでも同様の操作が可能です：
+```powershell
+npx playwright codegen --browser=chromium http://localhost:8001
+```
+
 2. AIによるテストコード生成
 
 AIに直接テストコードの出力を依頼します。
