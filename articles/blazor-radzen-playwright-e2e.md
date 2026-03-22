@@ -1,5 +1,5 @@
 ---
-title: "E2E（Playwright）のプロジェクトへの導入と課題"
+title: "PlaywrightでBlazorアプリのE2Eテストを始めました"
 emoji: "🤖"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["blazor", "csharp", "dotnet", "playwright", "web開発"]
