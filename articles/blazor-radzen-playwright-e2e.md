@@ -3,7 +3,7 @@ title: "PlaywrightでBlazorアプリのE2Eテストを始めました"
 emoji: "🤖"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["blazor", "csharp", "dotnet", "playwright", "web開発"]
-published: false
+published: true
 publication_name: "nexta_" # 企業のPublication名を指定
 ---
 
