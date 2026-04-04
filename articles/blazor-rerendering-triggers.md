@@ -1,5 +1,5 @@
 ---
-title: "StateHasChangedの本当の役割と、適切な呼び出しタイミングとは？"
+title: "StateHasChangedの本当の役割と、適切な呼び出しタイミングとは?"
 emoji: "🔄"
 type: "tech"
 topics: ["blazor", "csharp", "dotnet", "web", "web開発"]
@@ -296,7 +296,9 @@ https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/lifecycle?view=a
 
 「タイマーによる定期更新」のコードで、`InvokeAsync(StateHasChanged)` を使用していることに注目してください。
 
-Blazorコンポーネントは特定のスレッド（同期コンテキスト）に紐付いています。別スレッドから直接`StateHasChanged()`を呼ぶと、Blazor Serverで`InvalidOperationException`が発生します。
+Blazorコンポーネントは特定のスレッド(同期コンテキスト)に紐付いています。別スレッドから直接`StateHasChanged()`を呼ぶと、Blazor Serverで`InvalidOperationException`が発生します。
+
+![InvalidOperationExceptionエラー](/images/blazor-rerendering-triggers/invalid-operation-exception-error.png)
 
 使い分けの判断基準:
 
