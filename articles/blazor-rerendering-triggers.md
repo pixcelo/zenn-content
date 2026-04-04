@@ -95,7 +95,7 @@ flowchart TD
 
 この場合、ボタンをクリックすると自動的に画面が更新されます。
 
-対象となるイベント: `@onclick`, `@ondblclick`, `@onchange`, `@oninput`, `@onkeydown`, `@onkeyup`, `@onfocus`, `@onblur` など、すべてのBlazorイベント属性。
+対象となるイベント: `@onclick`, `@ondblclick`, `@onchange`, `@oninput` など、すべてのBlazorイベント属性。
 
 :::details 実装の詳細
 
@@ -294,7 +294,7 @@ https://learn.microsoft.com/ja-jp/aspnet/core/blazor/components/lifecycle?view=a
 
 ### InvokeAsyncを使う理由
 
-「タイマーによる定期更新」のコードで、`InvokeAsync(StateHasChanged)` を使用していることに注目してください。
+「タイマーによる定期更新」のコードでは、`InvokeAsync(StateHasChanged)` を使用する必要があります。
 
 Blazorコンポーネントは特定のスレッド(同期コンテキスト)に紐付いています。別スレッドから直接`StateHasChanged()`を呼ぶと、Blazor Serverで`InvalidOperationException`が発生します。
 
@@ -305,7 +305,6 @@ Blazorコンポーネントは特定のスレッド(同期コンテキスト)に
 - `StateHasChanged()`: Blazorイベント（`@onclick`など）やライフサイクルメソッド内で呼ぶ場合
 - `InvokeAsync(StateHasChanged)`: タイマー、`Task.Run()`、外部イベント（SignalRなど）から呼ぶ場合
 
-迷ったら`InvokeAsync`を使う:
 すでにUIスレッドにいる場合でも`InvokeAsync`は正常に動作します。どちらを使うべきか確信が持てない場合は、`InvokeAsync`を使っておけば安全です。
 
 ```csharp
