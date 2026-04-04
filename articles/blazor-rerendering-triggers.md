@@ -1,5 +1,5 @@
 ---
-title: "StateHasChangedの本当の役割と、適切な呼び出しタイミングとは?"
+title: "BlazorのStateHasChangedの役割と、適切な呼び出しタイミングとは?"
 emoji: "🔄"
 type: "tech"
 topics: ["blazor", "csharp", "dotnet", "web", "web開発"]
