@@ -28,6 +28,16 @@ npx zenn new:book
 npx zenn preview
 ```
 
+または
+```bash
+npx zenn-cli preview
+```
+
+ポート指定するには
+```bash
+npx zenn-cli preview --port 3000
+```
+
 ## リンク
 
 - [Zenn](https://zenn.dev/)
