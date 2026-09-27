@@ -3,7 +3,8 @@ title: "納期を断れないエンジニアがDESC法で仕様変更と向き�
 emoji: "🤝"
 type: "idea" # tech: 技術記事 / idea: アイデア
 topics: ["チーム開発", "コミュニケーション", "マネジメント", "組織", "キャリア"]
-published: false
+published: true
+published_at: 2026-10-05 11:30
 publication_name: "nexta_"
 ---
 
