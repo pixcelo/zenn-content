@@ -43,7 +43,7 @@
     </text>
     <line x1="700" y1="660" x2="860" y2="660" stroke="#9FB3CC" stroke-width="2"/>
     <text x="780" y="720" text-anchor="middle" font-size="28" fill="#4B5563">
-      <tspan x="780" dy="0">誤検知を</tspan><tspan x="780" dy="40">出さない</tspan>
+      <tspan x="780" dy="0">誤報を</tspan><tspan x="780" dy="40">出さない</tspan>
     </text>
 
     <!-- 柱3 -->
