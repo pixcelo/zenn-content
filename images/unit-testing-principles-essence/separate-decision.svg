@@ -85,6 +85,8 @@
   <path d="M850,470 L850,515 A50,12 0 0 0 950,515 L950,470" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
   <ellipse cx="900" cy="470" rx="50" ry="12" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
   <text x="900" y="505" font-size="17" fill="#334155" text-anchor="middle">DB</text>
-  <text x="900" y="572" font-size="20" font-weight="bold" fill="#1e3a8a" text-anchor="middle">統合テスト：要所だけ、少なく</text>
+  <!-- 統合テストは判断も含めた全体を通す -->
+  <rect x="655" y="150" width="495" height="392" rx="12" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="900" y="575" font-size="20" font-weight="bold" fill="#1e3a8a" text-anchor="middle">統合テスト：全体を通して要所だけ</text>
 
 </svg>
