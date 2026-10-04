@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="'Yu Gothic UI','Yu Gothic','Meiryo','Hiragino Sans','Noto Sans JP',sans-serif">
+  <defs>
+    <linearGradient id="pillar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#E8EEF6"/>
+      <stop offset="0.5" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#DCE4EF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="1920" height="1080" fill="#FFFFFF"/>
+
+  <!-- 屋根（品質） -->
+  <polygon points="960,70 1640,250 280,250" fill="#1F4E79"/>
+  <text x="960" y="200" text-anchor="middle" font-size="64" font-weight="700" fill="#FFFFFF">品質</text>
+  <rect x="250" y="250" width="1420" height="70" fill="#2E6DA4"/>
+  <text x="960" y="298" text-anchor="middle" font-size="34" font-weight="600" fill="#FFFFFF">プロジェクトの持続的な成長</text>
+
+  <!-- 柱 4本：幅300 / 間隔60 / 左端330 -->
+  <g>
+    <!-- 柱1 -->
+    <rect x="260" y="320" width="320" height="30" fill="#C9D6E6"/>
+    <rect x="280" y="350" width="280" height="500" fill="url(#pillar)" stroke="#9FB3CC" stroke-width="3"/>
+    <rect x="260" y="850" width="320" height="30" fill="#C9D6E6"/>
+    <circle cx="420" cy="440" r="44" fill="#1F4E79"/>
+    <text x="420" y="457" text-anchor="middle" font-size="48" font-weight="700" fill="#FFFFFF">1</text>
+    <text x="420" y="570" text-anchor="middle" font-size="40" font-weight="700" fill="#1F2A37">
+      <tspan x="420" dy="0">退行に</tspan><tspan x="420" dy="54">対する保護</tspan>
+    </text>
+    <line x1="340" y1="660" x2="500" y2="660" stroke="#9FB3CC" stroke-width="2"/>
+    <text x="420" y="720" text-anchor="middle" font-size="28" fill="#4B5563">
+      <tspan x="420" dy="0">バグを</tspan><tspan x="420" dy="40">見逃さない</tspan>
+    </text>
+
+    <!-- 柱2 -->
+    <rect x="620" y="320" width="320" height="30" fill="#C9D6E6"/>
+    <rect x="640" y="350" width="280" height="500" fill="url(#pillar)" stroke="#9FB3CC" stroke-width="3"/>
+    <rect x="620" y="850" width="320" height="30" fill="#C9D6E6"/>
+    <circle cx="780" cy="440" r="44" fill="#1F4E79"/>
+    <text x="780" y="457" text-anchor="middle" font-size="48" font-weight="700" fill="#FFFFFF">2</text>
+    <text x="780" y="570" text-anchor="middle" font-size="40" font-weight="700" fill="#1F2A37">
+      <tspan x="780" dy="0">リファクタリング</tspan><tspan x="780" dy="54">への耐性</tspan>
+    </text>
+    <line x1="700" y1="660" x2="860" y2="660" stroke="#9FB3CC" stroke-width="2"/>
+    <text x="780" y="720" text-anchor="middle" font-size="28" fill="#4B5563">
+      <tspan x="780" dy="0">誤報を</tspan><tspan x="780" dy="40">出さない</tspan>
+    </text>
+
+    <!-- 柱3 -->
+    <rect x="980" y="320" width="320" height="30" fill="#C9D6E6"/>
+    <rect x="1000" y="350" width="280" height="500" fill="url(#pillar)" stroke="#9FB3CC" stroke-width="3"/>
+    <rect x="980" y="850" width="320" height="30" fill="#C9D6E6"/>
+    <circle cx="1140" cy="440" r="44" fill="#1F4E79"/>
+    <text x="1140" y="457" text-anchor="middle" font-size="48" font-weight="700" fill="#FFFFFF">3</text>
+    <text x="1140" y="570" text-anchor="middle" font-size="40" font-weight="700" fill="#1F2A37">
+      <tspan x="1140" dy="0">迅速な</tspan><tspan x="1140" dy="54">フィードバック</tspan>
+    </text>
+    <line x1="1060" y1="660" x2="1220" y2="660" stroke="#9FB3CC" stroke-width="2"/>
+    <text x="1140" y="720" text-anchor="middle" font-size="28" fill="#4B5563">
+      <tspan x="1140" dy="0">すぐに</tspan><tspan x="1140" dy="40">結果が返る</tspan>
+    </text>
+
+    <!-- 柱4 -->
+    <rect x="1340" y="320" width="320" height="30" fill="#C9D6E6"/>
+    <rect x="1360" y="350" width="280" height="500" fill="url(#pillar)" stroke="#9FB3CC" stroke-width="3"/>
+    <rect x="1340" y="850" width="320" height="30" fill="#C9D6E6"/>
+    <circle cx="1500" cy="440" r="44" fill="#1F4E79"/>
+    <text x="1500" y="457" text-anchor="middle" font-size="48" font-weight="700" fill="#FFFFFF">4</text>
+    <text x="1500" y="570" text-anchor="middle" font-size="40" font-weight="700" fill="#1F2A37">
+      <tspan x="1500" dy="0">保守の</tspan><tspan x="1500" dy="54">しやすさ</tspan>
+    </text>
+    <line x1="1420" y1="660" x2="1580" y2="660" stroke="#9FB3CC" stroke-width="2"/>
+    <text x="1500" y="720" text-anchor="middle" font-size="28" fill="#4B5563">
+      <tspan x="1500" dy="0">読みやすく</tspan><tspan x="1500" dy="40">動かしやすい</tspan>
+    </text>
+  </g>
+
+  <!-- 土台 -->
+  <rect x="250" y="880" width="1420" height="40" fill="#9FB3CC"/>
+  <rect x="200" y="920" width="1520" height="90" fill="#5B7A99"/>
+  <text x="960" y="980" text-anchor="middle" font-size="38" font-weight="700" fill="#FFFFFF">良い単体テストの4つの柱</text>
+</svg>
