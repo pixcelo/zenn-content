@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 40 1200 520" width="1200" height="520" font-family="'Yu Gothic','Meiryo','Noto Sans JP',sans-serif">
+  <rect x="0" y="40" width="1200" height="520" fill="#ffffff"/>
+  <defs>
+    <marker id="arrow" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
+      <path d="M0,0 L14,7 L0,14 z" fill="#334155"/>
+    </marker>
+    <!-- 足場（縦の支柱と横の板） -->
+    <pattern id="scaffold" width="40" height="40" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="40" stroke="#f59e0b" stroke-width="3"/>
+      <line x1="0" y1="20" x2="40" y2="20" stroke="#f59e0b" stroke-width="3"/>
+    </pattern>
+  </defs>
+
+
+  <!-- ① 足場を組む -->
+  <text x="200" y="105" font-size="24" font-weight="bold" fill="#334155" text-anchor="middle">① 足場を組む</text>
+  <rect x="50" y="135" width="300" height="250" rx="10" fill="url(#scaffold)" opacity="0.35"/>
+  <rect x="50" y="135" width="300" height="250" rx="10" fill="none" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="90" y="190" width="220" height="140" rx="10" fill="#fff1f0" stroke="#e5484d" stroke-width="3"/>
+  <text x="200" y="250" font-size="21" fill="#c62828" text-anchor="middle">判断と読み書きが</text>
+  <text x="200" y="282" font-size="21" fill="#c62828" text-anchor="middle">混ざった処理</text>
+  <text x="200" y="425" font-size="20" font-weight="bold" fill="#b45309" text-anchor="middle">統合テストで</text>
+  <text x="200" y="455" font-size="20" font-weight="bold" fill="#b45309" text-anchor="middle">今の振る舞いを守る</text>
+
+  <path d="M368,260 L428,260" stroke="#334155" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <!-- ② 中を作り直す -->
+  <text x="600" y="105" font-size="24" font-weight="bold" fill="#334155" text-anchor="middle">② 中を作り直す</text>
+  <rect x="450" y="135" width="300" height="250" rx="10" fill="url(#scaffold)" opacity="0.35"/>
+  <rect x="450" y="135" width="300" height="250" rx="10" fill="none" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="480" y="190" width="130" height="140" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+  <text x="545" y="267" font-size="22" font-weight="bold" fill="#1e3a8a" text-anchor="middle">判断</text>
+  <rect x="625" y="190" width="95" height="140" rx="10" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+  <text x="672" y="255" font-size="19" fill="#334155" text-anchor="middle">読み</text>
+  <text x="672" y="282" font-size="19" fill="#334155" text-anchor="middle">書き</text>
+  <text x="600" y="425" font-size="20" font-weight="bold" fill="#1e3a8a" text-anchor="middle">安全網の上で</text>
+  <text x="600" y="455" font-size="20" font-weight="bold" fill="#1e3a8a" text-anchor="middle">判断を切り出す</text>
+
+  <path d="M768,260 L828,260" stroke="#334155" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <!-- ③ 足場を要所だけに：全体を囲んだまま、判断の細かい確認は単体テストへ -->
+  <text x="1000" y="105" font-size="24" font-weight="bold" fill="#334155" text-anchor="middle">③ 足場を要所だけに</text>
+  <rect x="850" y="135" width="300" height="250" rx="10" fill="url(#scaffold)" opacity="0.35"/>
+  <rect x="850" y="135" width="300" height="250" rx="10" fill="none" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="880" y="180" width="130" height="140" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+  <text x="945" y="257" font-size="22" font-weight="bold" fill="#1e3a8a" text-anchor="middle">判断</text>
+  <rect x="1025" y="180" width="95" height="140" rx="10" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+  <text x="1072" y="245" font-size="19" fill="#334155" text-anchor="middle">読み</text>
+  <text x="1072" y="272" font-size="19" fill="#334155" text-anchor="middle">書き</text>
+  <!-- 単体テストの小さな印 -->
+  <rect x="890" y="326" width="110" height="26" rx="6" fill="#f0f7ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="945" y="345" font-size="15" font-weight="bold" fill="#1e3a8a" text-anchor="middle">単体テスト</text>
+  <text x="1000" y="425" font-size="20" font-weight="bold" fill="#1e3a8a" text-anchor="middle">細かい確認は単体テストへ</text>
+  <text x="1000" y="455" font-size="20" font-weight="bold" fill="#b45309" text-anchor="middle">統合テストは全体を通して要所だけ</text>
+  <!-- 凡例 -->
+  <g stroke="#f59e0b" stroke-width="3" opacity="0.35"><line x1="413" y1="500" x2="413" y2="524"/><line x1="427" y1="500" x2="427" y2="524"/><line x1="400" y1="512" x2="440" y2="512"/></g>
+  <rect x="400" y="500" width="40" height="24" fill="none" stroke="#f59e0b" stroke-width="2"/>
+  <text x="452" y="519" font-size="18" fill="#475569">＝ 統合テスト（足場）</text>
+  <text x="700" y="519" font-size="18" fill="#475569">主役は中の設計、テストはそれを支える足場</text>
+</svg>
