@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" font-family="'Yu Gothic','Meiryo','Noto Sans JP',sans-serif">
+  <rect width="1200" height="760" fill="#ffffff"/>
+
+  <defs>
+    <!-- 火災報知器（鳴っている）：中心(0,0) -->
+    <g id="alarm-on">
+      <path d="M58,-34 A62,62 0 0 1 58,34" fill="none" stroke="#e5484d" stroke-width="5" stroke-linecap="round"/>
+      <path d="M76,-52 A88,88 0 0 1 76,52" fill="none" stroke="#e5484d" stroke-width="5" stroke-linecap="round"/>
+      <path d="M-58,-34 A62,62 0 0 0 -58,34" fill="none" stroke="#e5484d" stroke-width="5" stroke-linecap="round"/>
+      <path d="M-76,-52 A88,88 0 0 0 -76,52" fill="none" stroke="#e5484d" stroke-width="5" stroke-linecap="round"/>
+      <circle r="46" fill="#f8fafc" stroke="#334155" stroke-width="4"/>
+      <circle r="30" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+      <circle r="11" fill="#e5484d"/>
+    </g>
+    <!-- 火災報知器（鳴っていない） -->
+    <g id="alarm-off">
+      <circle r="46" fill="#f8fafc" stroke="#334155" stroke-width="4"/>
+      <circle r="30" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+      <circle r="11" fill="#94a3b8"/>
+    </g>
+    <!-- 炎：中心(0,0) -->
+    <g id="flame">
+      <path d="M0,52 C-40,48 -48,10 -26,-18 C-18,-30 -10,-40 -6,-60 C10,-44 14,-30 12,-18 C20,-24 26,-34 28,-44 C46,-18 50,18 34,38 C24,48 12,52 0,52 Z" fill="#f97316"/>
+      <path d="M0,48 C-18,46 -24,26 -14,10 C-8,0 -2,-8 0,-22 C10,-10 14,2 12,12 C18,8 22,2 22,-4 C32,14 28,40 0,48 Z" fill="#facc15"/>
+    </g>
+  </defs>
+
+  <!-- 列見出し -->
+  <text x="440" y="48" font-size="27" font-weight="bold" fill="#334155" text-anchor="middle">火事が起きている</text>
+  <text x="440" y="80" font-size="21" fill="#64748b" text-anchor="middle">＝コードが壊れている</text>
+  <text x="940" y="48" font-size="27" font-weight="bold" fill="#334155" text-anchor="middle">火事は起きていない</text>
+  <text x="940" y="80" font-size="21" fill="#64748b" text-anchor="middle">＝コードは壊れていない</text>
+
+  <!-- 行見出し -->
+  <text x="100" y="250" font-size="27" font-weight="bold" fill="#334155" text-anchor="middle">鳴った</text>
+  <text x="100" y="284" font-size="21" fill="#64748b" text-anchor="middle">＝テストが赤</text>
+  <text x="100" y="580" font-size="27" font-weight="bold" fill="#334155" text-anchor="middle">鳴らない</text>
+  <text x="100" y="614" font-size="21" fill="#64748b" text-anchor="middle">＝テストが緑</text>
+
+  <!-- 左上：正しく知らせた -->
+  <rect x="200" y="100" width="480" height="310" rx="16" fill="#f0f7ff" stroke="#93c5fd" stroke-width="2"/>
+  <use href="#alarm-on" x="370" y="200"/>
+  <use href="#flame" x="530" y="200"/>
+  <text x="440" y="330" font-size="32" font-weight="bold" fill="#1e3a8a" text-anchor="middle">正しく知らせた</text>
+  <text x="440" y="372" font-size="21" fill="#475569" text-anchor="middle">壊れていて、テストが赤になった</text>
+
+  <!-- 右上：誤報（偽陽性） -->
+  <rect x="700" y="100" width="480" height="310" rx="16" fill="#fff1f0" stroke="#e5484d" stroke-width="3"/>
+  <use href="#alarm-on" x="940" y="200"/>
+  <text x="940" y="330" font-size="32" font-weight="bold" fill="#c62828" text-anchor="middle">誤報（偽陽性）</text>
+  <text x="940" y="372" font-size="21" fill="#475569" text-anchor="middle">壊れていないのに、テストが赤になった</text>
+
+  <!-- 左下：見逃し（偽陰性） -->
+  <rect x="200" y="430" width="480" height="310" rx="16" fill="#fff1f0" stroke="#e5484d" stroke-width="3"/>
+  <use href="#alarm-off" x="370" y="530"/>
+  <use href="#flame" x="530" y="530"/>
+  <text x="440" y="660" font-size="32" font-weight="bold" fill="#c62828" text-anchor="middle">見逃し（偽陰性）</text>
+  <text x="440" y="702" font-size="21" fill="#475569" text-anchor="middle">壊れているのに、テストが緑のまま</text>
+
+  <!-- 右下：正しく黙っていた -->
+  <rect x="700" y="430" width="480" height="310" rx="16" fill="#f0f7ff" stroke="#93c5fd" stroke-width="2"/>
+  <use href="#alarm-off" x="940" y="530"/>
+  <text x="940" y="660" font-size="32" font-weight="bold" fill="#1e3a8a" text-anchor="middle">正しく黙っていた</text>
+  <text x="940" y="702" font-size="21" fill="#475569" text-anchor="middle">壊れていなくて、テストが緑のまま</text>
+</svg>
