@@ -74,7 +74,7 @@
   <path d="M820,388 L820,296" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
   <text x="808" y="348" font-size="17" fill="#1e3a8a" text-anchor="end">入力（読んだ値）</text>
   <path d="M980,292 L980,384" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
-  <text x="992" y="348" font-size="17" fill="#1e3a8a" text-anchor="start">出力（書く内容）</text>
+  <text x="992" y="348" font-size="17" fill="#1e3a8a" text-anchor="start">出力（判断の結果）</text>
 
   <!-- 薄い読み書きの部分 -->
   <rect x="700" y="390" width="400" height="44" rx="10" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
