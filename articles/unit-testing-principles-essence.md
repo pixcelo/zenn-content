@@ -288,8 +288,6 @@ var result = validator.Validate(quantity: 18m, minLot: 18m, lotSize: 6m);
 Assert.True(result); // ちょうど最小ロットなら通る
 ```
 
-最小ロット未満の場合や、ロットの倍数でない場合も、同じ形で1本ずつ確かめられます。
-
 元の `Register` には、読み書きと、判断の結果に従う分岐だけが残ります。
 
 ```csharp
