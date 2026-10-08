@@ -3,7 +3,8 @@ title: "良いテストを書き、良いテストを見分ける ─『単体�
 emoji: "🧪"
 type: "tech"
 topics: ["テスト", "単体テスト", "品質", "設計", "csharp"]
-published: false
+published: true
+published_at: 2026-10-13 11:30
 publication_name: "nexta_"
 ---
 
