@@ -253,16 +253,17 @@ Assert.Equal(9000m, amount);
 こうしておけば、入力を渡して、返ってきた値だけを確かめるテストが書けます。
 本書が最も質が高いとする、出力値ベース・テストです。
 
-たとえば、注文の数量が最小ロットに満たないときは登録させない処理が、次のように書かれているとします。
+たとえば、注文の数量が最小ロットに満たないとき、またはロットの倍数でないときは登録させない処理が、次のように書かれているとします。
 
 ```csharp
 // NG：判断とデータベースの読み書きが、1か所に混ざっている
 public void Register(OrderRequest request)
 {
     var item = _itemRepository.Get(request.ItemId);   // 読む
-    if (request.Quantity < item.MinLot)                // 判断
+    if (request.Quantity < item.MinLot
+        || request.Quantity % item.LotSize != 0)       // 判断
     {
-        throw new ValidationException("最小ロット未満です");
+        throw new ValidationException("数量がロット条件を満たしていません");
     }
 
     _orderRepository.Insert(new Order(request));       // 書く
@@ -274,15 +275,17 @@ public void Register(OrderRequest request)
 
 ```csharp
 // OK：判断を切り出す（受け取った値だけで答えを返す）
-public bool Validate(decimal quantity, decimal minLot)
+public bool Validate(decimal quantity, decimal minLot, decimal lotSize)
 {
-    return quantity >= minLot;
+    return quantity >= minLot && quantity % lotSize == 0;
 }
 
 // 判断は、入力と結果だけで確かめられる
 var validator = new OrderValidator();
 
-Assert.False(validator.Validate(quantity: 10m, minLot: 18m));
+Assert.False(validator.Validate(quantity: 10m, minLot: 18m, lotSize: 6m)); // 最小ロット未満
+Assert.False(validator.Validate(quantity: 20m, minLot: 18m, lotSize: 6m)); // ロットの倍数でない
+Assert.True(validator.Validate(quantity: 18m, minLot: 18m, lotSize: 6m));  // ちょうど最小ロット
 ```
 
 元の `Register` には、読み書きと、判断の結果に従う分岐だけが残ります。
@@ -292,9 +295,9 @@ Assert.False(validator.Validate(quantity: 10m, minLot: 18m));
 public void Register(OrderRequest request)
 {
     var item = _itemRepository.Get(request.ItemId);
-    if (!_validator.Validate(request.Quantity, item.MinLot))
+    if (!_validator.Validate(request.Quantity, item.MinLot, item.LotSize))
     {
-        throw new ValidationException("最小ロット未満です");
+        throw new ValidationException("数量がロット条件を満たしていません");
     }
 
     _orderRepository.Insert(new Order(request));
