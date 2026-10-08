@@ -283,9 +283,9 @@ public bool Validate(decimal quantity, decimal minLot, decimal lotSize)
 // 判断は、入力と結果だけで確かめられる
 var validator = new OrderValidator();
 
-var result = validator.Validate(quantity: 18m, minLot: 18m, lotSize: 6m);
-
-Assert.True(result); // ちょうど最小ロットなら通る
+Assert.False(validator.Validate(quantity: 12m, minLot: 18m, lotSize: 6m)); // ロットの倍数だが、最小ロット未満
+Assert.False(validator.Validate(quantity: 20m, minLot: 18m, lotSize: 6m)); // 最小ロット以上だが、ロットの倍数でない
+Assert.True(validator.Validate(quantity: 18m, minLot: 18m, lotSize: 6m));  // ちょうど最小ロット
 ```
 
 元の `Register` には、読み書きと、判断の結果に従う分岐だけが残ります。
